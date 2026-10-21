@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
+import Providers from "@/components/Providers";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -42,7 +43,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-[#F9F9FF] text-[#181C23] antialiased selection:bg-[#FFDDB0] selection:text-[#281800]">
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

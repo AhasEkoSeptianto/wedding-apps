@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 interface DashboardHeaderProps {
   onToggleSidebar?: () => void;
@@ -9,6 +10,7 @@ interface DashboardHeaderProps {
 
 export default function DashboardHeader({ onToggleSidebar }: DashboardHeaderProps) {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
   const isEditor = pathname === "/editor" || pathname === "/live-demo-editor";
 
   return (
@@ -53,6 +55,17 @@ export default function DashboardHeader({ onToggleSidebar }: DashboardHeaderProp
 
       {/* Right Controls */}
       <div className="flex items-center gap-3 sm:gap-4">
+        {user ? (
+          <div className="hidden sm:flex flex-col text-right">
+            <span className="text-xs font-semibold text-on-surface leading-tight">
+              {user.name}
+            </span>
+            <span className="text-[10px] text-on-surface-variant">
+              {user.email}
+            </span>
+          </div>
+        ) : null}
+
         <button
           className="relative p-2 rounded-full text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors cursor-pointer"
           type="button"
@@ -67,8 +80,25 @@ export default function DashboardHeader({ onToggleSidebar }: DashboardHeaderProp
           className="inline-flex items-center justify-center bg-primary hover:bg-primary-container text-on-primary text-xs sm:text-sm font-semibold px-4 sm:px-5 py-2 rounded-full transition-all shadow-[0_4px_16px_-2px_rgba(179,135,66,0.2)] hover:scale-105 active:scale-95"
         >
           <span className="material-symbols-outlined text-[18px] mr-1">add</span>
-          <span>Buat Undangan</span>
+          <span>Editor Undangan</span>
         </Link>
+
+        {user ? (
+          <button
+            onClick={logout}
+            title="Keluar / Logout"
+            className="p-1.5 text-on-surface-variant hover:text-error transition-colors rounded-lg hover:bg-surface-container cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[20px]">logout</span>
+          </button>
+        ) : (
+          <Link
+            href="/login"
+            className="text-xs font-semibold text-primary hover:underline px-2"
+          >
+            Masuk
+          </Link>
+        )}
 
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img

@@ -6,6 +6,7 @@ import { connectDB } from "./config/db.js";
 import wishRoutes from "./routes/wishRoutes.js";
 import guestRoutes from "./routes/guestRoutes.js";
 import weddingRoutes from "./routes/weddingRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 
 dotenv.config();
@@ -37,6 +38,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 // Resource Routes
+app.use("/api/auth", authRoutes);
 app.use("/api/wishes", wishRoutes);
 app.use("/api/guests", guestRoutes);
 app.use("/api/wedding", weddingRoutes);

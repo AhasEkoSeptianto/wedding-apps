@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function HeaderNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
   const isHome = pathname === "/";
   const isEditor = pathname === "/editor" || pathname === "/live-demo-editor";
@@ -75,7 +77,7 @@ export default function HeaderNav() {
         </div>
 
         {/* Right CTA & Profile */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <button
             className="relative p-2 rounded-full text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors cursor-pointer"
             type="button"
@@ -85,12 +87,38 @@ export default function HeaderNav() {
             <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary"></span>
           </button>
 
-          <Link
-            href="/demo"
-            className="hidden sm:inline-flex items-center justify-center bg-primary hover:bg-primary-container text-on-primary font-semibold text-sm px-6 py-2.5 rounded-full transition-all shadow-[0_4px_20px_-2px_rgba(179,135,66,0.25)] hover:scale-105 active:scale-95"
-          >
-            Buat Undangan Gratis
-          </Link>
+          {user ? (
+            <div className="hidden sm:flex items-center gap-3">
+              <Link
+                href="/dashboard"
+                className="text-xs sm:text-sm font-semibold text-primary hover:text-primary-container transition-colors"
+              >
+                {user.name}
+              </Link>
+              <button
+                onClick={logout}
+                title="Keluar"
+                className="text-xs text-on-surface-variant hover:text-error transition-colors px-2 py-1 rounded-md hover:bg-surface-container cursor-pointer"
+              >
+                Keluar
+              </button>
+            </div>
+          ) : (
+            <div className="hidden sm:flex items-center gap-2">
+              <Link
+                href="/login"
+                className="text-xs sm:text-sm font-medium text-on-surface-variant hover:text-primary px-3 py-1.5 transition-colors"
+              >
+                Masuk
+              </Link>
+              <Link
+                href="/register"
+                className="inline-flex items-center justify-center bg-primary hover:bg-primary-container text-on-primary font-semibold text-xs sm:text-sm px-5 py-2.5 rounded-full transition-all shadow-[0_4px_20px_-2px_rgba(179,135,66,0.25)] hover:scale-105 active:scale-95"
+              >
+                Buat Undangan Gratis
+              </Link>
+            </div>
+          )}
 
           <div className="flex items-center gap-2 pl-1 border-l border-outline-variant/40">
             {/* eslint-disable-next-line @next/next/no-img-element */}

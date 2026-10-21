@@ -16,7 +16,62 @@ export interface GuestPayload {
   table?: string;
 }
 
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  weddingSlug: string;
+  role: "client" | "admin";
+  createdAt: string;
+}
+
+export interface RegisterPayload {
+  name: string;
+  email: string;
+  password: string;
+  phone?: string;
+  weddingSlug?: string;
+}
+
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
+
 export const api = {
+  // Auth
+  register: async (payload: RegisterPayload) => {
+    const res = await fetch(`${API_BASE}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Pendaftaran gagal");
+    return data;
+  },
+
+  login: async (payload: LoginPayload) => {
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Login gagal");
+    return data;
+  },
+
+  getMe: async (token: string) => {
+    const res = await fetch(`${API_BASE}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Gagal mengambil profil");
+    return data;
+  },
   // Health
   checkHealth: async () => {
     try {
