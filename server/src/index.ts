@@ -15,10 +15,26 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:3000";
 
+// Allowed CORS origins (can be comma-separated list in production)
+const allowedOrigins = CLIENT_ORIGIN.split(",").map((s) => s.trim());
+
 // Middlewares
 app.use(
   cors({
-    origin: [CLIENT_ORIGIN, "http://localhost:3000", "http://127.0.0.1:3000"],
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (
+        allowedOrigins.includes(origin) ||
+        allowedOrigins.includes("*") ||
+        origin.includes("localhost") ||
+        origin.includes("127.0.0.1") ||
+        origin.includes("vercel.app") ||
+        origin.includes("onrender.com")
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
     credentials: true,
   })
 );
