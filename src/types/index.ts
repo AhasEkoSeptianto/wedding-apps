@@ -12,3 +12,4 @@ export interface BankAccount {
   accountNumber: string;
   holderName: string;
 }
+

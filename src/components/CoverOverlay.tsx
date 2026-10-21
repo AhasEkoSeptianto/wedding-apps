@@ -69,3 +69,4 @@ export default function CoverOverlay({ isOpen, onOpen }: CoverOverlayProps) {
     </section>
   );
 }
+

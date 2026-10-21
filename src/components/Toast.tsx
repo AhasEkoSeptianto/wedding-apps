@@ -16,3 +16,4 @@ export default function Toast({ message }: ToastProps) {
     </div>
   );
 }
+
