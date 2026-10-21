@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@theme {
+  --color-wedding-gold: #c5a880;
+  --color-wedding-gold-dark: #a98960;
+  --color-wedding-gold-light: #f5eee6;
+  --color-wedding-bg: #faf7f2;
+  --color-wedding-card: #ffffff;
+  --font-serif: var(--font-cormorant), Georgia, serif;
+  --font-heading: var(--font-playfair), serif;
+  --font-sans: var(--font-montserrat), sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-wedding-bg);
+  color: #333333;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 4s linear infinite;
+}
+
+@keyframes bounce-slow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 2s infinite ease-in-out;
+}
