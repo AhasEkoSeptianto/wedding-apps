@@ -40,3 +40,4 @@ wedding-apps/
 2. Go to **Settings** > **Pages** in your GitHub repository.
 3. Under **Branch**, select `main` (or `master`) and folder `/ (root)`, then click **Save**.
 4. Your wedding invitation will be live at `https://<your-username>.github.io/<repo-name>/`.
+
