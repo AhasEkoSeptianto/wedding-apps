@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Wish } from "@/types";
+import { api } from "@/lib/api";
 
 interface RsvpSectionProps {
   onShowToast: (message: string) => void;
@@ -35,23 +36,33 @@ export default function RsvpSection({ onShowToast }: RsvpSectionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("wedding_wishes_next");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        queueMicrotask(() => {
-          setWishes(parsed);
-        });
-      }
-    } catch (e) {
-      console.error(e);
-    }
+    // Attempt fetching from Express backend with MongoDB
+    api.getWishes()
+      .then((res) => {
+        if (res.data && res.data.length > 0) {
+          setWishes(res.data);
+        }
+      })
+      .catch(() => {
+        // Fallback to localStorage
+        try {
+          const saved = localStorage.getItem("wedding_wishes_next");
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            queueMicrotask(() => {
+              setWishes(parsed);
+            });
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      });
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !message.trim()) {
-      onShowToast("Please fill in your name and message.");
+      onShowToast("Mohon lengkapi nama dan pesan ucapan Anda.");
       return;
     }
 
@@ -62,7 +73,7 @@ export default function RsvpSection({ onShowToast }: RsvpSectionProps) {
       attendance,
       guests,
       message: message.trim(),
-      createdAt: "Just now",
+      createdAt: "Baru saja",
     };
 
     const updated = [newWish, ...wishes];
@@ -73,10 +84,20 @@ export default function RsvpSection({ onShowToast }: RsvpSectionProps) {
       console.error(err);
     }
 
+    // Persist to Express / MongoDB backend
+    api.createWish({
+      name: name.trim(),
+      attendance,
+      guests,
+      message: message.trim(),
+    }).catch((err) => {
+      console.warn("Backend belum aktif, ucapan tersimpan di lokal:", err);
+    });
+
     setName("");
     setMessage("");
     setIsSubmitting(false);
-    onShowToast("Thank you! Your RSVP and wishes have been sent.");
+    onShowToast("Terima kasih! Konfirmasi kehadiran dan doa restu Anda berhasil dikirim.");
   };
 
   return (
