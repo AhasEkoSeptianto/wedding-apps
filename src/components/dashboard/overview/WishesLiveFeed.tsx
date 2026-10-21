@@ -133,3 +133,4 @@ export default function WishesLiveFeed({ onShowToast }: WishesLiveFeedProps) {
     </div>
   );
 }
+

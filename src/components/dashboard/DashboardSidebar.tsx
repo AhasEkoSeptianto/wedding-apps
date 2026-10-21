@@ -20,7 +20,7 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
     { label: "Katalog Template", icon: "auto_awesome_motion", href: "/" },
     { label: "Daftar Tamu", icon: "groups", href: "/dashboard#buku-tamu" },
     { label: "Amplop & Ucapan", icon: "card_giftcard", href: "/dashboard#amplop-ucapan" },
-    { label: "Paket Langganan", icon: "loyalty", href: "/#paket" },
+    { label: "Paket Langganan", icon: "loyalty", href: "/paket-harga" },
   ];
 
   return (

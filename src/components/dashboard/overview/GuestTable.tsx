@@ -65,7 +65,7 @@ interface GuestTableProps {
 }
 
 export default function GuestTable({ onShowToast }: GuestTableProps) {
-  const [guests, setGuests] = useState<GuestItem[]>(INITIAL_GUESTS);
+  const [guests] = useState<GuestItem[]>(INITIAL_GUESTS);
   const [filterCategory, setFilterCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -271,3 +271,4 @@ export default function GuestTable({ onShowToast }: GuestTableProps) {
     </div>
   );
 }
+

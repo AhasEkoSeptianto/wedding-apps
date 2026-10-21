@@ -62,3 +62,4 @@ export default function ReceptionQRWidget({ onShowToast }: ReceptionQRWidgetProp
     </div>
   );
 }
+

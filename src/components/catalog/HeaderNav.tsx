@@ -1,10 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 export default function HeaderNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  const isHome = pathname === "/";
+  const isEditor = pathname === "/editor" || pathname === "/live-demo-editor";
+  const isDashboard = pathname.startsWith("/dashboard");
+  const isPricing = pathname === "/paket-harga";
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#F9F9FF]/90 backdrop-blur-md shadow-[0_1px_8px_rgba(179,135,66,0.06)] border-b border-outline-variant/30">
@@ -26,28 +33,44 @@ export default function HeaderNav() {
           <nav className="hidden lg:flex items-center gap-6">
             <Link
               href="/"
-              className="transition-colors py-1 text-primary font-semibold border-b-2 border-primary text-sm"
+              className={`transition-colors py-1 text-sm ${
+                isHome
+                  ? "text-primary font-semibold border-b-2 border-primary"
+                  : "font-medium text-on-surface-variant hover:text-primary"
+              }`}
             >
               Katalog Template
             </Link>
             <Link
               href="/editor"
-              className="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors py-1"
+              className={`transition-colors py-1 text-sm ${
+                isEditor
+                  ? "text-primary font-semibold border-b-2 border-primary"
+                  : "font-medium text-on-surface-variant hover:text-primary"
+              }`}
             >
               Live Demo &amp; Editor
             </Link>
             <Link
               href="/dashboard"
-              className="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors py-1"
+              className={`transition-colors py-1 text-sm ${
+                isDashboard
+                  ? "text-primary font-semibold border-b-2 border-primary"
+                  : "font-medium text-on-surface-variant hover:text-primary"
+              }`}
             >
               Dashboard Pengantin
             </Link>
-            <a
-              href="#paket"
-              className="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors py-1"
+            <Link
+              href="/paket-harga"
+              className={`transition-colors py-1 text-sm ${
+                isPricing
+                  ? "text-primary font-semibold border-b-2 border-primary"
+                  : "font-medium text-on-surface-variant hover:text-primary"
+              }`}
             >
               Paket &amp; Harga
-            </a>
+            </Link>
           </nav>
         </div>
 
@@ -94,31 +117,31 @@ export default function HeaderNav() {
           <Link
             href="/"
             onClick={() => setMobileMenuOpen(false)}
-            className="text-primary font-semibold py-1.5"
+            className={`py-1.5 font-medium ${isHome ? "text-primary font-semibold" : "text-on-surface-variant hover:text-primary"}`}
           >
             Katalog Template
           </Link>
           <Link
             href="/editor"
             onClick={() => setMobileMenuOpen(false)}
-            className="text-on-surface-variant hover:text-primary py-1.5"
+            className={`py-1.5 font-medium ${isEditor ? "text-primary font-semibold" : "text-on-surface-variant hover:text-primary"}`}
           >
             Live Demo &amp; Editor
           </Link>
           <Link
             href="/dashboard"
             onClick={() => setMobileMenuOpen(false)}
-            className="text-on-surface-variant hover:text-primary py-1.5"
+            className={`py-1.5 font-medium ${isDashboard ? "text-primary font-semibold" : "text-on-surface-variant hover:text-primary"}`}
           >
             Dashboard Pengantin
           </Link>
-          <a
-            href="#paket"
+          <Link
+            href="/paket-harga"
             onClick={() => setMobileMenuOpen(false)}
-            className="text-on-surface-variant hover:text-primary py-1.5"
+            className={`py-1.5 font-medium ${isPricing ? "text-primary font-semibold" : "text-on-surface-variant hover:text-primary"}`}
           >
             Paket &amp; Harga
-          </a>
+          </Link>
           <Link
             href="/demo"
             onClick={() => setMobileMenuOpen(false)}

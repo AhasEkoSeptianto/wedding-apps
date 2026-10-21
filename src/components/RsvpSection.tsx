@@ -38,7 +38,10 @@ export default function RsvpSection({ onShowToast }: RsvpSectionProps) {
     try {
       const saved = localStorage.getItem("wedding_wishes_next");
       if (saved) {
-        setWishes(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        queueMicrotask(() => {
+          setWishes(parsed);
+        });
       }
     } catch (e) {
       console.error(e);

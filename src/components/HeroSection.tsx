@@ -1,11 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 const TARGET_DATE = new Date("2026-10-24T09:00:00").getTime();
 
 export default function HeroSection() {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -14,8 +18,6 @@ export default function HeroSection() {
   });
 
   useEffect(() => {
-    setMounted(true);
-
     const calculateTime = () => {
       const now = new Date().getTime();
       const distance = TARGET_DATE - now;
@@ -28,7 +30,7 @@ export default function HeroSection() {
       setTimeLeft({
         days: Math.floor(distance / (1000 * 60 * 60 * 24)),
         hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+        minutes: Math.floor((distance % (1000 * 60)) / (1000 * 60)),
         seconds: Math.floor((distance % (1000 * 60)) / 1000),
       });
     };
@@ -101,4 +103,3 @@ export default function HeroSection() {
     </header>
   );
 }
-
