@@ -96,3 +96,4 @@ export default function FooterCatalog() {
     </footer>
   );
 }
+

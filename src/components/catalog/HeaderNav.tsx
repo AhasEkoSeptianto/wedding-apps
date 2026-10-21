@@ -31,17 +31,17 @@ export default function HeaderNav() {
               Katalog Template
             </Link>
             <Link
-              href="/demo"
+              href="/dashboard"
               className="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors py-1"
             >
               Live Demo &amp; Editor
             </Link>
-            <a
-              href="#fitur"
+            <Link
+              href="/dashboard"
               className="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors py-1"
             >
               Dashboard Pengantin
-            </a>
+            </Link>
             <a
               href="#paket"
               className="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors py-1"
@@ -105,13 +105,13 @@ export default function HeaderNav() {
           >
             Live Demo &amp; Editor
           </Link>
-          <a
-            href="#fitur"
+          <Link
+            href="/dashboard"
             onClick={() => setMobileMenuOpen(false)}
             className="text-on-surface-variant hover:text-primary py-1.5"
           >
             Dashboard Pengantin
-          </a>
+          </Link>
           <a
             href="#paket"
             onClick={() => setMobileMenuOpen(false)}
@@ -131,3 +131,4 @@ export default function HeaderNav() {
     </header>
   );
 }
+
