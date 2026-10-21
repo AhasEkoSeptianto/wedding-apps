@@ -11,13 +11,16 @@ interface DashboardSidebarProps {
 export default function DashboardSidebar({ isOpen = false, onClose }: DashboardSidebarProps) {
   const pathname = usePathname();
 
+  const isOverview = pathname === "/dashboard";
+  const isEditor = pathname === "/editor" || pathname === "/live-demo-editor";
+
   const navItems = [
-    { label: "Ikhtisar & RSVP", icon: "grid_view", href: "/dashboard", active: true },
-    { label: "Live Demo & Editor", icon: "edit_note", href: "/dashboard", active: true },
+    { label: "Ikhtisar & RSVP", icon: "grid_view", href: "/dashboard", active: isOverview },
+    { label: "Live Demo & Editor", icon: "edit_note", href: "/editor", active: isEditor },
     { label: "Katalog Template", icon: "auto_awesome_motion", href: "/" },
-    { label: "Daftar Tamu", icon: "groups", href: "#" },
-    { label: "Amplop & Ucapan", icon: "card_giftcard", href: "#" },
-    { label: "Paket Langganan", icon: "loyalty", href: "#" },
+    { label: "Daftar Tamu", icon: "groups", href: "/dashboard#buku-tamu" },
+    { label: "Amplop & Ucapan", icon: "card_giftcard", href: "/dashboard#amplop-ucapan" },
+    { label: "Paket Langganan", icon: "loyalty", href: "/#paket" },
   ];
 
   return (
@@ -49,7 +52,6 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
             </span>
           </Link>
 
-          {/* Mobile close button */}
           <button
             onClick={onClose}
             className="lg:hidden p-1 text-on-surface-variant hover:text-on-surface cursor-pointer"

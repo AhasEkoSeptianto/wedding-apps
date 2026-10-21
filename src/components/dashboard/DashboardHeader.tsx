@@ -1,12 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface DashboardHeaderProps {
   onToggleSidebar?: () => void;
 }
 
 export default function DashboardHeader({ onToggleSidebar }: DashboardHeaderProps) {
+  const pathname = usePathname();
+  const isEditor = pathname === "/editor" || pathname === "/live-demo-editor";
+
   return (
     <header className="fixed top-0 left-0 lg:left-64 right-0 h-20 bg-surface/90 backdrop-blur-md border-b border-outline-variant/30 shadow-[0_1px_8px_rgba(179,135,66,0.06)] z-40 flex items-center justify-between px-4 sm:px-6">
       {/* Left Breadcrumbs & Mobile Menu */}
@@ -22,12 +26,21 @@ export default function DashboardHeader({ onToggleSidebar }: DashboardHeaderProp
         <nav className="flex items-center gap-2 text-xs sm:text-sm font-medium">
           <Link
             href="/dashboard"
-            className="text-on-surface-variant hover:text-primary transition-colors"
+            className={`transition-colors ${
+              !isEditor ? "text-primary font-semibold" : "text-on-surface-variant hover:text-primary"
+            }`}
           >
             Dashboard
           </Link>
           <span className="text-outline-variant">/</span>
-          <span className="text-primary font-semibold">Editor Studio</span>
+          <Link
+            href="/editor"
+            className={`transition-colors ${
+              isEditor ? "text-primary font-semibold" : "text-on-surface-variant hover:text-primary"
+            }`}
+          >
+            Editor Studio
+          </Link>
           <span className="text-outline-variant">/</span>
           <Link
             href="/"
@@ -50,7 +63,7 @@ export default function DashboardHeader({ onToggleSidebar }: DashboardHeaderProp
         </button>
 
         <Link
-          href="/dashboard"
+          href="/editor"
           className="inline-flex items-center justify-center bg-primary hover:bg-primary-container text-on-primary text-xs sm:text-sm font-semibold px-4 sm:px-5 py-2 rounded-full transition-all shadow-[0_4px_16px_-2px_rgba(179,135,66,0.2)] hover:scale-105 active:scale-95"
         >
           <span className="material-symbols-outlined text-[18px] mr-1">add</span>

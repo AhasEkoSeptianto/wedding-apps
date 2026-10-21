@@ -31,7 +31,7 @@ export default function HeaderNav() {
               Katalog Template
             </Link>
             <Link
-              href="/dashboard"
+              href="/editor"
               className="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors py-1"
             >
               Live Demo &amp; Editor
@@ -99,7 +99,7 @@ export default function HeaderNav() {
             Katalog Template
           </Link>
           <Link
-            href="/demo"
+            href="/editor"
             onClick={() => setMobileMenuOpen(false)}
             className="text-on-surface-variant hover:text-primary py-1.5"
           >
