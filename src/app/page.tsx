@@ -1,55 +1,40 @@
 "use client";
 
 import { useState } from "react";
-import CoverOverlay from "@/components/CoverOverlay";
-import MusicPlayer from "@/components/MusicPlayer";
-import HeroSection from "@/components/HeroSection";
-import QuoteSection from "@/components/QuoteSection";
-import CoupleSection from "@/components/CoupleSection";
-import EventSection from "@/components/EventSection";
-import GallerySection from "@/components/GallerySection";
-import RsvpSection from "@/components/RsvpSection";
-import GiftSection from "@/components/GiftSection";
-import Footer from "@/components/Footer";
-import Toast from "@/components/Toast";
+import HeaderNav from "@/components/catalog/HeaderNav";
+import HeroCatalog from "@/components/catalog/HeroCatalog";
+import TemplateCatalog from "@/components/catalog/TemplateCatalog";
+import DeviceExperienceSection from "@/components/catalog/DeviceExperienceSection";
+import NewsletterSection from "@/components/catalog/NewsletterSection";
+import StickyPromoBanner from "@/components/catalog/StickyPromoBanner";
+import FooterCatalog from "@/components/catalog/FooterCatalog";
 
 export default function Home() {
-  const [isOpened, setIsOpened] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const handleOpen = () => {
-    setIsOpened(true);
-  };
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 3200);
-  };
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <div className="relative min-h-screen">
-      {/* Welcome Screen Cover */}
-      <CoverOverlay isOpen={isOpened} onOpen={handleOpen} />
+    <div className="flex flex-col min-h-screen bg-surface">
+      {/* Fixed Navigation Header */}
+      <HeaderNav />
 
-      {/* Floating Audio Controller */}
-      <MusicPlayer autoPlayTrigger={isOpened} />
-
-      {/* Main Invitation Page */}
-      <main className={`transition-opacity duration-700 ${isOpened ? "opacity-100" : "opacity-90"}`}>
-        <HeroSection />
-        <QuoteSection />
-        <CoupleSection />
-        <EventSection />
-        <GallerySection />
-        <RsvpSection onShowToast={showToast} />
-        <GiftSection onShowToast={showToast} />
-        <Footer />
+      {/* Main Content Area */}
+      <main className="w-full pt-20 flex-grow">
+        <HeroCatalog
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
+        <div id="katalog">
+          <TemplateCatalog searchQuery={searchQuery} />
+        </div>
+        <DeviceExperienceSection />
+        <NewsletterSection />
       </main>
 
-      {/* Toast Feedback */}
-      <Toast message={toastMessage} />
+      {/* Footer */}
+      <FooterCatalog />
+
+      {/* Sticky Bottom Promo Banner */}
+      <StickyPromoBanner />
     </div>
   );
 }

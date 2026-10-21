@@ -1,14 +1,51 @@
 @import "tailwindcss";
 
 @theme {
-  --color-wedding-gold: #c5a880;
-  --color-wedding-gold-dark: #a98960;
-  --color-wedding-gold-light: #f5eee6;
-  --color-wedding-bg: #faf7f2;
-  --color-wedding-card: #ffffff;
-  --font-serif: var(--font-cormorant), Georgia, serif;
-  --font-heading: var(--font-playfair), serif;
-  --font-sans: var(--font-montserrat), sans-serif;
+  --color-primary: #7a5513;
+  --color-primary-container: #966d2b;
+  --color-primary-fixed: #ffddb0;
+  --color-primary-fixed-dim: #f0be73;
+  --color-on-primary: #ffffff;
+  --color-on-primary-fixed: #281800;
+  --color-on-primary-fixed-variant: #614000;
+
+  --color-secondary: #466554;
+  --color-secondary-container: #c5e8d2;
+  --color-secondary-fixed: #c8ebd5;
+  --color-secondary-fixed-dim: #acceb9;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-fixed: #012113;
+  --color-on-secondary-fixed-variant: #2e4d3d;
+  --color-on-secondary-container: #4a6958;
+
+  --color-tertiary: #76544f;
+  --color-tertiary-container: #916c67;
+  --color-tertiary-fixed: #ffdad5;
+  --color-tertiary-fixed-dim: #e9bcb6;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-fixed: #2d1512;
+  --color-on-tertiary-fixed-variant: #5e3f3b;
+
+  --color-surface: #f9f9ff;
+  --color-surface-dim: #d7dae3;
+  --color-surface-bright: #f9f9ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f1f3fd;
+  --color-surface-container: #ebeef7;
+  --color-surface-container-high: #e5e8f2;
+  --color-surface-container-highest: #dfe2ec;
+
+  --color-on-surface: #181c23;
+  --color-on-surface-variant: #4f4539;
+  --color-outline: #817567;
+  --color-outline-variant: #d3c4b4;
+
+  --color-inverse-surface: #2d3138;
+  --color-inverse-on-surface: #eef0fa;
+  --color-inverse-primary: #f0be73;
+
+  --font-serif: var(--font-playfair), Georgia, serif;
+  --font-sans: var(--font-plus-jakarta), sans-serif;
 }
 
 html {
@@ -16,10 +53,20 @@ html {
 }
 
 body {
-  background-color: var(--color-wedding-bg);
-  color: #333333;
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
   font-family: var(--font-sans);
-  overflow-x: hidden;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+  display: inline-block;
+  line-height: 1;
+}
+
+.material-symbols-outlined.filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
 @keyframes spin-slow {

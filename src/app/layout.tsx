@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Montserrat, Playfair_Display } from "next/font/google";
+import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -8,27 +8,19 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
+const plusJakarta = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta",
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  style: ["normal", "italic"],
-  display: "swap",
-});
-
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700", "800"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "The Wedding of Alex & Sophie",
-  description: "Together with our families, we invite you to celebrate our special day with us.",
+  title: "JanjiSuci — Platform Undangan Pernikahan Digital Mewah",
+  description: "Eksplorasi undangan digital bertaraf couture yang memadukan kehangatan estetika kertas bertekstur, sentuhan foil emas, dan kecanggihan teknologi interaktif modern.",
   openGraph: {
-    title: "The Wedding of Alex & Sophie",
-    description: "Together with our families, we invite you to celebrate our special day with us.",
+    title: "JanjiSuci — Katalog Template Undangan Pernikahan Digital",
+    description: "Temukan desain impian untuk hari bahagia Anda dengan 120+ pilihan template undangan eksklusif.",
     type: "website",
   },
 };
@@ -40,10 +32,16 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
-      className={`${playfair.variable} ${cormorant.variable} ${montserrat.variable} scroll-smooth`}
+      lang="id"
+      className={`${playfair.variable} ${plusJakarta.variable} scroll-smooth`}
     >
-      <body className="min-h-screen bg-[#FAF7F2] text-[#333333] antialiased">
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        />
+      </head>
+      <body className="min-h-screen bg-[#F9F9FF] text-[#181C23] antialiased selection:bg-[#FFDDB0] selection:text-[#281800]">
         {children}
       </body>
     </html>
