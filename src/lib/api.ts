@@ -1,3 +1,5 @@
+import { WeddingData } from "@/types";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 export interface WishPayload {
@@ -170,13 +172,47 @@ export const api = {
     return await res.json();
   },
 
-  updateWedding: async (slug: string = "dimas-sarah", data: Record<string, unknown>) => {
+  updateWedding: async (
+    slug: string = "dimas-sarah",
+    data: Partial<WeddingData> | WeddingData | Record<string, unknown>
+  ) => {
     const res = await fetch(`${API_BASE}/wedding/${slug}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error("Gagal menyimpan data undangan");
+    return await res.json();
+  },
+
+  // Cloudinary Storage Upload
+  uploadImage: async (file: File, folder: string = "couples") => {
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("folder", folder);
+
+    const res = await fetch(`${API_BASE}/upload`, {
+      method: "POST",
+      body: formData,
+    });
+    const result = await res.json();
+    if (!res.ok || !result.success) {
+      throw new Error(result.message || "Gagal mengunggah foto ke Cloudinary");
+    }
+    return result.data as {
+      url: string;
+      publicId: string;
+      format: string;
+      bytes: number;
+    };
+  },
+
+  deleteUploadedImage: async (publicId: string) => {
+    const res = await fetch(`${API_BASE}/upload`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ publicId }),
+    });
     return await res.json();
   },
 };

@@ -44,6 +44,12 @@ export interface IWedding extends Document {
     bca: string;
     mandiri: string;
   };
+  gallery?: string[];
+  stories?: Array<{
+    year: string;
+    title: string;
+    description: string;
+  }>;
   rsvp: {
     deadline: string;
     maxGuests: string;
@@ -107,6 +113,14 @@ const WeddingSchema = new Schema<IWedding>(
       bca: { type: String, default: "" },
       mandiri: { type: String, default: "" },
     },
+    gallery: { type: [String], default: [] },
+    stories: [
+      {
+        year: { type: String, default: "" },
+        title: { type: String, default: "" },
+        description: { type: String, default: "" },
+      },
+    ],
     rsvp: {
       deadline: { type: String, default: "2026-10-20" },
       maxGuests: { type: String, default: "2" },

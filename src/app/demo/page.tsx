@@ -1,12 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/api";
+import { DEFAULT_WEDDING_DATA } from "@/lib/defaultWedding";
+import { WeddingData } from "@/types";
 import CoverOverlay from "@/components/CoverOverlay";
 import MusicPlayer from "@/components/MusicPlayer";
 import HeroSection from "@/components/HeroSection";
 import QuoteSection from "@/components/QuoteSection";
 import CoupleSection from "@/components/CoupleSection";
+import StorySection from "@/components/StorySection";
 import EventSection from "@/components/EventSection";
 import GallerySection from "@/components/GallerySection";
 import RsvpSection from "@/components/RsvpSection";
@@ -14,9 +20,38 @@ import GiftSection from "@/components/GiftSection";
 import Footer from "@/components/Footer";
 import Toast from "@/components/Toast";
 
-export default function DemoPage() {
+function DemoContent() {
+  const searchParams = useSearchParams();
+  const { user } = useAuth();
+  const slugParam = searchParams.get("slug");
+  const targetSlug = slugParam || user?.weddingSlug || "dimas-sarah";
+
+  const [weddingData, setWeddingData] = useState<WeddingData>(DEFAULT_WEDDING_DATA);
   const [isOpened, setIsOpened] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    api
+      .getWedding(targetSlug)
+      .then((res) => {
+        if (isMounted && res.success && res.data) {
+          setWeddingData({
+            ...DEFAULT_WEDDING_DATA,
+            ...res.data,
+            gallery: res.data.gallery || [],
+            stories: res.data.stories !== undefined ? res.data.stories : (DEFAULT_WEDDING_DATA.stories || []),
+          });
+        }
+      })
+      .catch((err) => {
+        console.warn("Using default wedding data due to fetch error:", err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [targetSlug]);
 
   const handleOpen = () => {
     setIsOpened(true);
@@ -29,33 +64,45 @@ export default function DemoPage() {
     }, 3200);
   };
 
+  const groomNick = weddingData.groom.nickName || weddingData.groom.fullName.split(",")[0].split(" ")[0] || "Dimas";
+  const brideNick = weddingData.bride.nickName || weddingData.bride.fullName.split(",")[0].split(" ")[0] || "Sarah";
+
   return (
     <div className="relative min-h-screen bg-[#FAF7F2]">
       {/* Top Floating Back Bar */}
-      <nav className="fixed top-4 left-4 z-40 bg-stone-900/80 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-semibold shadow-lg hover:bg-stone-900 transition-colors flex items-center gap-2">
-        <Link href="/" className="flex items-center gap-1.5 hover:text-wedding-gold-light">
-          <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-          <span>Kembali ke Katalog JanjiSuci</span>
+      <nav className="fixed top-4 left-4 z-40 bg-stone-900/85 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-semibold shadow-lg hover:bg-stone-900 transition-colors flex items-center gap-2 border border-white/10">
+        <Link href="/editor" className="flex items-center gap-1.5 hover:text-wedding-gold-light transition-colors">
+          <span className="material-symbols-outlined text-[16px]">edit_note</span>
+          <span>Buka Editor Studio</span>
         </Link>
-        <span className="text-white/40">|</span>
-        <span className="text-wedding-gold-light">Live Preview Mode</span>
+        <span className="text-white/30">|</span>
+        <Link href="/" className="flex items-center gap-1.5 hover:text-wedding-gold-light transition-colors">
+          <span className="material-symbols-outlined text-[16px]">home</span>
+          <span>Katalog</span>
+        </Link>
+        <span className="text-white/30">|</span>
+        <span className="text-wedding-gold-light flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          Live: {groomNick} &amp; {brideNick}
+        </span>
       </nav>
 
       {/* Welcome Screen Cover */}
-      <CoverOverlay isOpen={isOpened} onOpen={handleOpen} />
+      <CoverOverlay isOpen={isOpened} onOpen={handleOpen} weddingData={weddingData} />
 
       {/* Floating Audio Controller */}
       <MusicPlayer autoPlayTrigger={isOpened} />
 
       {/* Main Invitation Page */}
       <main className={`transition-opacity duration-700 ${isOpened ? "opacity-100" : "opacity-90"}`}>
-        <HeroSection />
-        <QuoteSection />
-        <CoupleSection />
-        <EventSection />
-        <GallerySection />
-        <RsvpSection onShowToast={showToast} />
-        <GiftSection onShowToast={showToast} />
+        <HeroSection weddingData={weddingData} />
+        <QuoteSection weddingData={weddingData} />
+        <CoupleSection weddingData={weddingData} />
+        <StorySection weddingData={weddingData} />
+        <EventSection weddingData={weddingData} />
+        <GallerySection weddingData={weddingData} />
+        <RsvpSection onShowToast={showToast} weddingData={weddingData} />
+        <GiftSection onShowToast={showToast} weddingData={weddingData} />
         <Footer />
       </main>
 
@@ -65,3 +112,19 @@ export default function DemoPage() {
   );
 }
 
+export default function DemoPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-[#FAF7F2]">
+          <div className="text-center">
+            <div className="w-10 h-10 border-4 border-wedding-gold border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-stone-600 font-serif text-sm">Memuat Undangan JanjiSuci...</p>
+          </div>
+        </div>
+      }
+    >
+      <DemoContent />
+    </Suspense>
+  );
+}

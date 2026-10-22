@@ -2,10 +2,22 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { WeddingData } from "@/types";
 
 interface CoverOverlayProps {
   isOpen: boolean;
   onOpen: () => void;
+  weddingData?: WeddingData;
+  isAbsolute?: boolean;
+  viewMode?: "mobile" | "tablet" | "desktop";
+}
+
+function capitalizeWords(str: string): string {
+  if (!str) return "";
+  return str
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 }
 
 function GuestNameDisplay() {
@@ -19,10 +31,32 @@ function GuestNameDisplay() {
   );
 }
 
-export default function CoverOverlay({ isOpen, onOpen }: CoverOverlayProps) {
+export default function CoverOverlay({
+  isOpen,
+  onOpen,
+  weddingData,
+  isAbsolute = false,
+  viewMode,
+}: CoverOverlayProps) {
+  const rawGroom =
+    weddingData?.groom.nickName ||
+    weddingData?.groom.fullName.split(",")[0].split(" ")[0] ||
+    "Dimas";
+  const rawBride =
+    weddingData?.bride.nickName ||
+    weddingData?.bride.fullName.split(",")[0].split(" ")[0] ||
+    "Sarah";
+
+  const groomName = capitalizeWords(rawGroom);
+  const brideName = capitalizeWords(rawBride);
+
+  const isMobile = viewMode === "mobile";
+
   return (
     <section
-      className={`fixed inset-0 z-50 flex items-center justify-center p-6 text-center transition-all duration-700 ease-in-out bg-cover bg-center ${
+      className={`${
+        isAbsolute ? "absolute z-30" : "fixed z-50"
+      } inset-0 flex items-center justify-center p-5 text-center transition-all duration-700 ease-in-out bg-cover bg-center ${
         isOpen
           ? "-translate-y-full opacity-0 pointer-events-none"
           : "translate-y-0 opacity-100"
@@ -31,20 +65,24 @@ export default function CoverOverlay({ isOpen, onOpen }: CoverOverlayProps) {
         backgroundImage: `linear-gradient(rgba(18, 18, 18, 0.72), rgba(18, 18, 18, 0.85)), url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1600&q=80')`,
       }}
     >
-      <div className="max-w-md w-full mx-auto text-white">
-        <span className="inline-block text-xs uppercase tracking-[0.3em] font-medium text-wedding-gold-light border-b border-wedding-gold pb-1 mb-4">
+      <div className={`w-full mx-auto text-white ${isMobile ? "max-w-xs" : "max-w-md"}`}>
+        <span className="inline-block text-[11px] sm:text-xs uppercase tracking-[0.3em] font-medium text-wedding-gold-light border-b border-wedding-gold pb-1 mb-3">
           Wedding Invitation
         </span>
 
-        <h1 className="font-heading text-4xl sm:text-5xl font-bold tracking-tight text-white mb-2">
-          Alex &amp; Sophie
+        <h1
+          className={`font-heading font-bold tracking-tight text-white mb-2 ${
+            isMobile ? "text-3xl sm:text-4xl" : "text-4xl sm:text-5xl"
+          }`}
+        >
+          {groomName} &amp; {brideName}
         </h1>
 
-        <p className="font-serif italic text-lg sm:text-xl text-wedding-gold-light mb-8">
+        <p className="font-serif italic text-base sm:text-xl text-wedding-gold-light mb-6 sm:mb-8">
           Are getting married
         </p>
 
-        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 mb-8 shadow-xl">
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 sm:p-6 mb-6 sm:mb-8 shadow-xl">
           <p className="text-xs uppercase tracking-widest text-white/80">
             Dear Special Guest,
           </p>

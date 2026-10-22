@@ -1,54 +1,9 @@
 "use client";
 
-export interface WeddingData {
-  title: string;
-  groom: {
-    fullName: string;
-    nickName: string;
-    instagram: string;
-    parents: string;
-    photoUrl: string;
-  };
-  bride: {
-    fullName: string;
-    nickName: string;
-    instagram: string;
-    parents: string;
-    photoUrl: string;
-  };
-  quote: {
-    source: string;
-    text: string;
-  };
-  events: {
-    akad: {
-      date: string;
-      time: string;
-      venue: string;
-      address: string;
-    };
-    resepsi: {
-      date: string;
-      time: string;
-      venue: string;
-      address: string;
-    };
-  };
-  music: {
-    title: string;
-    duration: string;
-    enabled: boolean;
-  };
-  gift: {
-    bca: string;
-    mandiri: string;
-  };
-  rsvp: {
-    deadline: string;
-    maxGuests: string;
-    waNotification: boolean;
-  };
-}
+import { useRef, useState } from "react";
+import { WeddingData, StoryItem } from "@/types";
+import { api } from "@/lib/api";
+export type { WeddingData };
 
 interface EditorStudioProps {
   data: WeddingData;
@@ -63,6 +18,66 @@ export default function EditorStudio({
   activeTab,
   onTabChange,
 }: EditorStudioProps) {
+  const groomInputRef = useRef<HTMLInputElement>(null);
+  const brideInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+
+  const [uploadingGroom, setUploadingGroom] = useState(false);
+  const [uploadingBride, setUploadingBride] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const handleFileUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    target: "groom" | "bride" | "gallery"
+  ) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadError(null);
+
+    try {
+      if (target === "groom") setUploadingGroom(true);
+      if (target === "bride") setUploadingBride(true);
+      if (target === "gallery") setUploadingGallery(true);
+
+      if (target === "gallery") {
+        const uploadedUrls: string[] = [];
+        for (let i = 0; i < files.length; i++) {
+          const res = await api.uploadImage(files[i], "gallery");
+          uploadedUrls.push(res.url);
+        }
+        const currentGallery = data.gallery || [];
+        onChange({
+          ...data,
+          gallery: [...currentGallery, ...uploadedUrls],
+        });
+      } else {
+        const file = files[0];
+        const res = await api.uploadImage(file, target);
+        if (target === "groom") {
+          onChange({
+            ...data,
+            groom: { ...data.groom, photoUrl: res.url },
+          });
+        } else {
+          onChange({
+            ...data,
+            bride: { ...data.bride, photoUrl: res.url },
+          });
+        }
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal mengunggah foto ke Cloudinary";
+      setUploadError(msg);
+    } finally {
+      if (target === "groom") setUploadingGroom(false);
+      if (target === "bride") setUploadingBride(false);
+      if (target === "gallery") setUploadingGallery(false);
+      e.target.value = "";
+    }
+  };
+
   const updateGroom = (field: string, val: string) => {
     onChange({
       ...data,
@@ -104,6 +119,61 @@ export default function EditorStudio({
     });
   };
 
+  const updateStory = (index: number, field: keyof StoryItem, val: string) => {
+    const currentStories = [...(data.stories || [])];
+    if (currentStories[index]) {
+      currentStories[index] = {
+        ...currentStories[index],
+        [field]: val,
+      };
+      onChange({
+        ...data,
+        stories: currentStories,
+      });
+    }
+  };
+
+  const addStory = () => {
+    const currentStories = [...(data.stories || [])];
+    currentStories.push({
+      year: new Date().getFullYear().toString(),
+      title: "Momen Baru",
+      description: "Tuliskan cerita momen berharga Anda di sini...",
+    });
+    onChange({
+      ...data,
+      stories: currentStories,
+    });
+  };
+
+  const removeStory = (index: number) => {
+    const currentStories = (data.stories || []).filter((_, i) => i !== index);
+    onChange({
+      ...data,
+      stories: currentStories,
+    });
+  };
+
+  const loadSampleStories = () => {
+    onChange({
+      ...data,
+      stories: [
+        {
+          year: "2019",
+          title: "Pertama Bertemu",
+          description:
+            "Bertemu tanpa sengaja di studio kreatif saat mengerjakan proyek kolaborasi bersama.",
+        },
+        {
+          year: "2024",
+          title: "Lamaran Romantis",
+          description:
+            "Di bawah gemerlap senja, mengucap janji suci untuk melangkah bersama ke jenjang pernikahan.",
+        },
+      ],
+    });
+  };
+
   return (
     <div className="flex flex-col gap-4">
       {/* Tab Navigation */}
@@ -131,6 +201,23 @@ export default function EditorStudio({
         ))}
       </div>
 
+      {/* Cloudinary Upload Error Alert */}
+      {uploadError && (
+        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px]">error</span>
+            <span>{uploadError}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setUploadError(null)}
+            className="text-red-500 hover:text-red-800 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[16px]">close</span>
+          </button>
+        </div>
+      )}
+
       {/* Tab 1: Mempelai */}
       {activeTab === "pasangan" && (
         <div className="flex flex-col gap-4">
@@ -147,25 +234,52 @@ export default function EditorStudio({
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="relative w-18 h-18 rounded-full overflow-hidden shrink-0 shadow-inner group ring-2 ring-primary/20">
+              <input
+                ref={groomInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleFileUpload(e, "groom")}
+              />
+              <div
+                onClick={() => !uploadingGroom && groomInputRef.current?.click()}
+                className="relative w-18 h-18 rounded-full overflow-hidden shrink-0 shadow-inner group ring-2 ring-primary/20 cursor-pointer"
+                title="Klik untuk upload foto ke Cloudinary"
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  className="w-full h-full object-cover"
+                  className={`w-full h-full object-cover transition-opacity ${uploadingGroom ? "opacity-30" : ""}`}
                   src={data.groom.photoUrl}
                   alt="Groom avatar"
                 />
                 <div className="absolute inset-0 bg-on-surface/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white cursor-pointer transition-opacity">
-                  <span className="material-symbols-outlined text-[20px]">photo_camera</span>
+                  {uploadingGroom ? (
+                    <span className="material-symbols-outlined text-[20px] animate-spin">sync</span>
+                  ) : (
+                    <span className="material-symbols-outlined text-[20px]">photo_camera</span>
+                  )}
                 </div>
+                {uploadingGroom && (
+                  <div className="absolute inset-0 bg-stone-900/60 flex items-center justify-center text-white">
+                    <span className="material-symbols-outlined text-[22px] animate-spin text-primary">sync</span>
+                  </div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-on-surface">Foto Utama Pria</p>
-                <p className="text-xs text-on-surface-variant">Rekomendasi rasio 1:1, maks 3MB</p>
+                <p className="text-xs text-on-surface-variant">
+                  {uploadingGroom ? "Sedang mengunggah ke Cloudinary..." : "Tersimpan di Cloudinary • maks 10MB"}
+                </p>
                 <button
                   type="button"
-                  className="mt-1.5 text-xs font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                  disabled={uploadingGroom}
+                  onClick={() => groomInputRef.current?.click()}
+                  className="mt-1.5 text-xs font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
                 >
-                  <span className="material-symbols-outlined text-[14px]">upload</span> Ganti Pasfoto
+                  <span className={`material-symbols-outlined text-[14px] ${uploadingGroom ? "animate-spin" : ""}`}>
+                    {uploadingGroom ? "sync" : "cloud_upload"}
+                  </span>
+                  <span>{uploadingGroom ? "Mengunggah..." : "Upload ke Cloudinary"}</span>
                 </button>
               </div>
             </div>
@@ -235,25 +349,52 @@ export default function EditorStudio({
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="relative w-18 h-18 rounded-full overflow-hidden shrink-0 shadow-inner group ring-2 ring-tertiary/20">
+              <input
+                ref={brideInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleFileUpload(e, "bride")}
+              />
+              <div
+                onClick={() => !uploadingBride && brideInputRef.current?.click()}
+                className="relative w-18 h-18 rounded-full overflow-hidden shrink-0 shadow-inner group ring-2 ring-tertiary/20 cursor-pointer"
+                title="Klik untuk upload foto ke Cloudinary"
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  className="w-full h-full object-cover"
+                  className={`w-full h-full object-cover transition-opacity ${uploadingBride ? "opacity-30" : ""}`}
                   src={data.bride.photoUrl}
                   alt="Bride avatar"
                 />
                 <div className="absolute inset-0 bg-on-surface/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white cursor-pointer transition-opacity">
-                  <span className="material-symbols-outlined text-[20px]">photo_camera</span>
+                  {uploadingBride ? (
+                    <span className="material-symbols-outlined text-[20px] animate-spin">sync</span>
+                  ) : (
+                    <span className="material-symbols-outlined text-[20px]">photo_camera</span>
+                  )}
                 </div>
+                {uploadingBride && (
+                  <div className="absolute inset-0 bg-stone-900/60 flex items-center justify-center text-white">
+                    <span className="material-symbols-outlined text-[22px] animate-spin text-tertiary">sync</span>
+                  </div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-on-surface">Foto Utama Wanita</p>
-                <p className="text-xs text-on-surface-variant">Rekomendasi rasio 1:1, maks 3MB</p>
+                <p className="text-xs text-on-surface-variant">
+                  {uploadingBride ? "Sedang mengunggah ke Cloudinary..." : "Tersimpan di Cloudinary • maks 10MB"}
+                </p>
                 <button
                   type="button"
-                  className="mt-1.5 text-xs font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                  disabled={uploadingBride}
+                  onClick={() => brideInputRef.current?.click()}
+                  className="mt-1.5 text-xs font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
                 >
-                  <span className="material-symbols-outlined text-[14px]">upload</span> Ganti Pasfoto
+                  <span className={`material-symbols-outlined text-[14px] ${uploadingBride ? "animate-spin" : ""}`}>
+                    {uploadingBride ? "sync" : "cloud_upload"}
+                  </span>
+                  <span>{uploadingBride ? "Mengunggah..." : "Upload ke Cloudinary"}</span>
                 </button>
               </div>
             </div>
@@ -480,7 +621,9 @@ export default function EditorStudio({
                   <span className="material-symbols-outlined text-primary text-[18px]">
                     location_on
                   </span>
-                  <span>The Dharmawangsa Jakarta, Kebayoran Baru</span>
+                  <span className="truncate">
+                    {data.events.resepsi.venue || data.events.akad.venue || "Lokasi Acara"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -488,84 +631,229 @@ export default function EditorStudio({
         </div>
       )}
 
-      {/* Tab 3: Galeri */}
+      {/* Tab 3: Galeri & Cerita Cinta */}
       {activeTab === "galeri" && (
         <div className="flex flex-col gap-4">
+          {/* Galeri Foto Prewedding */}
           <div className="bg-surface-container-lowest p-5 rounded-xl shadow-sm flex flex-col gap-4 border border-outline-variant/20">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-on-surface">Galeri Foto Prewedding</h3>
+              <div>
+                <h3 className="text-base font-bold text-on-surface flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[20px] text-primary">photo_library</span>
+                  <span>Galeri Foto Prewedding</span>
+                </h3>
+                <p className="text-xs text-on-surface-variant">
+                  {uploadingGallery
+                    ? "Sedang mengunggah ke Cloudinary..."
+                    : "Penyimpanan cloud Cloudinary aktif • Maks 10MB/foto"}
+                </p>
+              </div>
+              <input
+                ref={galleryInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => handleFileUpload(e, "gallery")}
+              />
               <button
                 type="button"
-                className="text-xs font-semibold text-primary flex items-center gap-1 cursor-pointer hover:underline"
+                disabled={uploadingGallery}
+                onClick={() => galleryInputRef.current?.click()}
+                className="text-xs font-semibold text-primary flex items-center gap-1 cursor-pointer hover:underline disabled:opacity-50"
               >
-                <span className="material-symbols-outlined text-[16px]">add_photo_alternate</span>
-                <span>Tambah Foto</span>
+                <span className={`material-symbols-outlined text-[16px] ${uploadingGallery ? "animate-spin" : ""}`}>
+                  {uploadingGallery ? "sync" : "add_photo_alternate"}
+                </span>
+                <span>{uploadingGallery ? "Mengunggah..." : "Tambah Foto"}</span>
               </button>
             </div>
 
-            <div className="grid grid-cols-3 gap-2.5">
-              <div className="aspect-square rounded-lg overflow-hidden relative group shadow-xs">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  className="w-full h-full object-cover"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDLKO3OQLcd1UZ8eGfZ1L1B1H1SnWP9eG5YN3ebEfmIdBSqwYqHfNF_BjPha2tXgmRhb6HJSRomBW1ZdyfMhyeJetOR54PfRUIvjAqF-i0czp3zlFKg6mCQaAhALH55HyUmPqh0pGgLYUCY3pqbKCHjUetiqnhdlxtBXzinajCwjp-m3aCgfFUPjG6pq4hQdbGY2IV3vcVrVdLTLbn87xcrRc_1Ky5XKjaA6YZTjGwoadD7k4xuw85bw"
-                  alt="Prewedding 1"
-                />
-                <div className="absolute inset-0 bg-on-surface/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity cursor-pointer">
-                  <span className="material-symbols-outlined text-[18px]">delete</span>
+            {(!data.gallery || data.gallery.length === 0) ? (
+              <div className="border-2 border-dashed border-outline-variant/40 rounded-xl p-8 text-center bg-surface-container-low/40">
+                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-3">
+                  <span className="material-symbols-outlined text-[24px]">add_a_photo</span>
                 </div>
+                <h4 className="text-sm font-bold text-on-surface mb-1">Belum Ada Foto Galeri</h4>
+                <p className="text-xs text-on-surface-variant max-w-xs mx-auto mb-4">
+                  Foto galeri tidak memiliki default stock. Unggah foto prewedding Anda ke cloud untuk langsung ditampilkan pada live preview dan website undangan.
+                </p>
+                <button
+                  type="button"
+                  disabled={uploadingGallery}
+                  onClick={() => galleryInputRef.current?.click()}
+                  className="px-4 py-2 bg-primary text-on-primary text-xs font-semibold rounded-lg shadow-sm hover:opacity-95 transition-all inline-flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  <span className={`material-symbols-outlined text-[18px] ${uploadingGallery ? "animate-spin" : ""}`}>
+                    {uploadingGallery ? "sync" : "cloud_upload"}
+                  </span>
+                  <span>{uploadingGallery ? "Mengunggah ke Cloud..." : "Unggah Foto Prewedding"}</span>
+                </button>
               </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {data.gallery.map((imgUrl, idx) => (
+                  <div key={idx} className="aspect-square rounded-xl overflow-hidden relative group shadow-xs border border-outline-variant/20 bg-stone-100">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      className="w-full h-full object-cover"
+                      src={imgUrl}
+                      alt={`Prewedding ${idx + 1}`}
+                    />
+                    <div className="absolute inset-0 bg-stone-900/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const currentGallery = data.gallery || [];
+                          onChange({
+                            ...data,
+                            gallery: currentGallery.filter((_, i) => i !== idx),
+                          });
+                        }}
+                        title="Hapus foto dari galeri"
+                        className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full shadow-md cursor-pointer transition-transform hover:scale-110 border-none"
+                      >
+                        <span className="material-symbols-outlined text-[18px] block">delete</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
 
-              <div className="aspect-square rounded-lg overflow-hidden relative group shadow-xs">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  className="w-full h-full object-cover"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDbKmyP_yTMyxNS05FiXpV6Y0PYX4jBatVC9bpImSTjrLkZZlUVu3xyROb2zrTfMxDa_xSFe8wyYy0-woMopNk4s2UonOno1Rj9pMAxp9eYD8Uq4mCD7oID-8IJAtIKEq1Di_m_MdmoTTXd1PODBc_vVW2VGiewIYlApHBUJGYEQjAw_HFzUvQhAgnz4nCNxnuWF60Wcjy074vtcnqRTgh4DFTu9Iyv3sfRBxY-oUUSqfKVxivXJSQ8Q"
-                  alt="Prewedding 2"
-                />
-                <div className="absolute inset-0 bg-on-surface/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity cursor-pointer">
-                  <span className="material-symbols-outlined text-[18px]">delete</span>
-                </div>
+                <button
+                  type="button"
+                  disabled={uploadingGallery}
+                  onClick={() => galleryInputRef.current?.click()}
+                  className="aspect-square rounded-xl border-2 border-dashed border-outline-variant/50 bg-surface-container-low flex flex-col items-center justify-center text-on-surface-variant hover:border-primary hover:text-primary cursor-pointer transition-colors disabled:opacity-50"
+                >
+                  {uploadingGallery ? (
+                    <span className="material-symbols-outlined text-[24px] animate-spin text-primary">sync</span>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-[24px]">cloud_upload</span>
+                      <span className="text-xs font-medium mt-1">Upload Foto</span>
+                    </>
+                  )}
+                </button>
               </div>
-
-              <div className="aspect-square rounded-lg border-2 border-dashed border-outline-variant/50 bg-surface-container-low flex flex-col items-center justify-center text-on-surface-variant hover:border-primary hover:text-primary cursor-pointer transition-colors">
-                <span className="material-symbols-outlined text-[24px]">cloud_upload</span>
-                <span className="text-xs font-medium mt-1">Upload</span>
-              </div>
-            </div>
+            )}
           </div>
 
+          {/* Cerita Cinta (Love Journey) */}
           <div className="bg-surface-container-lowest p-5 rounded-xl shadow-sm flex flex-col gap-4 border border-outline-variant/20">
-            <h3 className="text-base font-bold text-on-surface">Cerita Cinta (Love Journey)</h3>
-            <div className="space-y-3">
-              <div className="p-3 bg-surface-container-low rounded-lg border border-outline-variant/10">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-semibold text-primary uppercase">
-                    Pertama Bertemu • 2019
-                  </span>
-                  <span className="material-symbols-outlined text-on-surface-variant text-[16px] cursor-pointer">
-                    edit
-                  </span>
-                </div>
-                <p className="text-xs text-on-surface-variant leading-relaxed">
-                  Bertemu tanpa sengaja di studio desain kreatif Jakarta saat mengerjakan proyek bersama.
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold text-on-surface flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[20px] text-primary">auto_stories</span>
+                  <span>Cerita Cinta (Love Journey)</span>
+                </h3>
+                <p className="text-xs text-on-surface-variant">
+                  Kustomisasi linimasa perjalanan cinta Anda yang tampil di preview &amp; undangan live.
                 </p>
               </div>
-
-              <div className="p-3 bg-surface-container-low rounded-lg border border-outline-variant/10">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-semibold text-primary uppercase">
-                    Lamaran Romantis • 2024
-                  </span>
-                  <span className="material-symbols-outlined text-on-surface-variant text-[16px] cursor-pointer">
-                    edit
-                  </span>
-                </div>
-                <p className="text-xs text-on-surface-variant leading-relaxed">
-                  Di bawah gemerlap senja Labuan Bajo, Dimas mengucap janji suci untuk melangkah ke jenjang pernikahan.
-                </p>
-              </div>
+              <button
+                type="button"
+                onClick={addStory}
+                className="text-xs font-semibold text-primary flex items-center gap-1 cursor-pointer hover:underline"
+              >
+                <span className="material-symbols-outlined text-[16px]">add_circle</span>
+                <span>Tambah Momen</span>
+              </button>
             </div>
+
+            {(!data.stories || data.stories.length === 0) ? (
+              <div className="border border-dashed border-outline-variant/40 rounded-xl p-6 text-center bg-surface-container-low/40">
+                <span className="material-symbols-outlined text-[28px] text-on-surface-variant mb-2 block">history_edu</span>
+                <p className="text-xs text-on-surface-variant mb-4">
+                  Belum ada momen cerita cinta. Anda bisa menambahkan kisah sendiri atau memuat contoh bawaan.
+                </p>
+                <div className="flex items-center justify-center gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={addStory}
+                    className="px-3.5 py-1.5 bg-primary text-on-primary hover:opacity-95 text-xs font-semibold rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">add</span>
+                    <span>Tambah Kisah Baru</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={loadSampleStories}
+                    className="px-3.5 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 text-xs font-semibold rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">auto_fix_high</span>
+                    <span>Gunakan Contoh Cerita</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {data.stories.map((story, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 flex flex-col gap-3 relative transition-all hover:border-primary/30"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-full bg-primary/15 text-primary text-xs font-bold flex items-center justify-center">
+                          {idx + 1}
+                        </span>
+                        <span className="text-xs font-bold text-on-surface">
+                          Momen #{idx + 1}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeStory(idx)}
+                        className="text-on-surface-variant hover:text-red-600 transition-colors cursor-pointer p-1 rounded-md hover:bg-red-50"
+                        title="Hapus momen ini"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="sm:col-span-1">
+                        <label className="block text-[10px] font-semibold text-on-surface-variant mb-1 uppercase tracking-wider">
+                          Tahun / Waktu
+                        </label>
+                        <input
+                          type="text"
+                          value={story.year || ""}
+                          onChange={(e) => updateStory(idx, "year", e.target.value)}
+                          placeholder="Contoh: 2019"
+                          className="w-full bg-surface-container-lowest px-3 py-2 rounded-lg text-sm text-on-surface outline-none border border-outline-variant/30 focus:border-primary transition-all font-mono"
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-[10px] font-semibold text-on-surface-variant mb-1 uppercase tracking-wider">
+                          Judul Momen
+                        </label>
+                        <input
+                          type="text"
+                          value={story.title || ""}
+                          onChange={(e) => updateStory(idx, "title", e.target.value)}
+                          placeholder="Contoh: Pertama Bertemu"
+                          className="w-full bg-surface-container-lowest px-3 py-2 rounded-lg text-sm text-on-surface outline-none border border-outline-variant/30 focus:border-primary transition-all font-semibold"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold text-on-surface-variant mb-1 uppercase tracking-wider">
+                        Deskripsi Cerita
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={story.description || ""}
+                        onChange={(e) => updateStory(idx, "description", e.target.value)}
+                        placeholder="Ceritakan momen indah perjalanan cinta Anda bersama pasangan..."
+                        className="w-full bg-surface-container-lowest px-3 py-2 rounded-lg text-xs sm:text-sm text-on-surface outline-none border border-outline-variant/30 focus:border-primary transition-all resize-none"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -616,12 +904,24 @@ export default function EditorStudio({
                   Format MP3 • {data.music.duration}
                 </p>
               </div>
-              <button
-                type="button"
-                className="text-xs font-semibold text-primary hover:underline cursor-pointer"
-              >
-                Ganti Lagu
-              </button>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-semibold text-on-surface-variant mb-1 uppercase">
+                Judul Lagu Latar &amp; Penyanyi
+              </label>
+              <input
+                type="text"
+                value={data.music.title}
+                onChange={(e) =>
+                  onChange({
+                    ...data,
+                    music: { ...data.music, title: e.target.value },
+                  })
+                }
+                placeholder="Contoh: Kahitna - Soulmate (Instrumental Acoustic)"
+                className="w-full bg-surface-container-low px-3 py-2 rounded-lg text-sm text-on-surface outline-none border border-transparent focus:border-primary/40"
+              />
             </div>
           </div>
 
@@ -632,29 +932,41 @@ export default function EditorStudio({
               <span>Amplop Digital &amp; Kado Online</span>
             </h3>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between p-3 bg-surface-container-low rounded-lg border border-outline-variant/15">
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 bg-surface-container-lowest text-xs rounded font-bold text-on-surface shadow-xs">
-                    BCA
-                  </span>
-                  <span className="text-xs sm:text-sm text-on-surface">{data.gift.bca}</span>
-                </div>
-                <span className="material-symbols-outlined text-[18px] text-on-surface-variant cursor-pointer">
-                  content_copy
-                </span>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-on-surface-variant mb-1 uppercase">
+                  Nomor Rekening BCA &amp; Atas Nama
+                </label>
+                <input
+                  type="text"
+                  value={data.gift.bca}
+                  onChange={(e) =>
+                    onChange({
+                      ...data,
+                      gift: { ...data.gift, bca: e.target.value },
+                    })
+                  }
+                  placeholder="Contoh: 8830-1928-11 a.n Sarah Anindita"
+                  className="w-full bg-surface-container-low px-3 py-2 rounded-lg text-sm text-on-surface outline-none border border-transparent focus:border-primary/40"
+                />
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-surface-container-low rounded-lg border border-outline-variant/15">
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 bg-surface-container-lowest text-xs rounded font-bold text-on-surface shadow-xs">
-                    Mandiri
-                  </span>
-                  <span className="text-xs sm:text-sm text-on-surface">{data.gift.mandiri}</span>
-                </div>
-                <span className="material-symbols-outlined text-[18px] text-on-surface-variant cursor-pointer">
-                  content_copy
-                </span>
+              <div>
+                <label className="block text-[11px] font-semibold text-on-surface-variant mb-1 uppercase">
+                  Nomor Rekening Mandiri &amp; Atas Nama
+                </label>
+                <input
+                  type="text"
+                  value={data.gift.mandiri}
+                  onChange={(e) =>
+                    onChange({
+                      ...data,
+                      gift: { ...data.gift, mandiri: e.target.value },
+                    })
+                  }
+                  placeholder="Contoh: 1370-0012-9901 a.n Dimas Prasetyo"
+                  className="w-full bg-surface-container-low px-3 py-2 rounded-lg text-sm text-on-surface outline-none border border-transparent focus:border-primary/40"
+                />
               </div>
             </div>
           </div>

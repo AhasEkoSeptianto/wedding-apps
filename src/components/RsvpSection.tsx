@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Wish } from "@/types";
+import { Wish, WeddingData } from "@/types";
 import { api } from "@/lib/api";
 
 interface RsvpSectionProps {
   onShowToast: (message: string) => void;
+  weddingData?: WeddingData;
+  viewMode?: "mobile" | "tablet" | "desktop";
 }
 
 const INITIAL_WISHES: Wish[] = [
@@ -27,7 +29,8 @@ const INITIAL_WISHES: Wish[] = [
   },
 ];
 
-export default function RsvpSection({ onShowToast }: RsvpSectionProps) {
+export default function RsvpSection({ onShowToast, weddingData, viewMode }: RsvpSectionProps) {
+  const isMobile = viewMode === "mobile";
   const [wishes, setWishes] = useState<Wish[]>(INITIAL_WISHES);
   const [name, setName] = useState("");
   const [attendance, setAttendance] = useState<"attending" | "not-attending">("attending");
@@ -101,24 +104,32 @@ export default function RsvpSection({ onShowToast }: RsvpSectionProps) {
   };
 
   return (
-    <section id="rsvp" className="py-24 px-6 max-w-5xl mx-auto">
-      <div className="text-center mb-16">
-        <span className="text-xs uppercase tracking-[0.25em] text-wedding-gold-dark font-semibold block mb-2">
+    <section id="rsvp" className={`max-w-5xl mx-auto ${isMobile ? "py-12 px-4" : "py-24 px-6"}`}>
+      <div className={`text-center ${isMobile ? "mb-8" : "mb-16"}`}>
+        <span className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-wedding-gold-dark font-semibold block mb-2">
           Celebrate With Us
         </span>
-        <h2 className="font-heading text-3xl sm:text-4xl font-bold text-stone-800">
+        <h2 className={`font-heading font-bold text-stone-800 ${isMobile ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"}`}>
           RSVP &amp; Best Wishes
         </h2>
         <div className="text-wedding-gold text-lg mt-2">❖</div>
-        <p className="text-stone-500 text-sm sm:text-base max-w-md mx-auto mt-3">
+        <p className={`text-stone-500 max-w-md mx-auto mt-2 ${isMobile ? "text-xs" : "text-sm sm:text-base"}`}>
           Please confirm your attendance and leave warm wishes for the bride and groom.
         </p>
+        {weddingData?.rsvp?.deadline && (
+          <div className="mt-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-900 border border-amber-200/80 rounded-full text-xs font-semibold">
+              <span className="material-symbols-outlined text-[14px] text-amber-600">event_available</span>
+              <span>Batas Konfirmasi: {weddingData.rsvp.deadline}</span>
+            </span>
+          </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+      <div className={`grid gap-6 sm:gap-8 items-start ${isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"}`}>
         {/* RSVP Form */}
-        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#EDE8E0] shadow-sm">
-          <h3 className="font-heading text-xl font-bold text-stone-800 mb-6 pb-3 border-b border-stone-100">
+        <div className={`bg-white rounded-2xl border border-[#EDE8E0] shadow-sm ${isMobile ? "p-5" : "p-6 sm:p-8"}`}>
+          <h3 className="font-heading text-lg sm:text-xl font-bold text-stone-800 mb-4 sm:mb-6 pb-3 border-b border-stone-100">
             Attendance Confirmation
           </h3>
 
@@ -164,8 +175,13 @@ export default function RsvpSection({ onShowToast }: RsvpSectionProps) {
                   onChange={(e) => setGuests(Number(e.target.value))}
                   className="w-full px-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-wedding-gold bg-stone-50 focus:bg-white transition-all"
                 >
-                  <option value={1}>1 Person</option>
-                  <option value={2}>2 Persons</option>
+                  <option value={1}>1 Orang (Tamu Utama)</option>
+                  {weddingData?.rsvp?.maxGuests !== "0" && (
+                    <option value={2}>2 Orang (+1 Pendamping)</option>
+                  )}
+                  {weddingData?.rsvp?.maxGuests === "2" && (
+                    <option value={3}>3 Orang (+2 Keluarga)</option>
+                  )}
                 </select>
               </div>
             )}

@@ -7,6 +7,7 @@ import wishRoutes from "./routes/wishRoutes.js";
 import guestRoutes from "./routes/guestRoutes.js";
 import weddingRoutes from "./routes/weddingRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 
 dotenv.config();
@@ -59,6 +60,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/wishes", wishRoutes);
 app.use("/api/guests", guestRoutes);
 app.use("/api/wedding", weddingRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // Global Error Handler
 app.use(errorHandler);

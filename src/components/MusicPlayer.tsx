@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from "react";
 
 interface MusicPlayerProps {
   autoPlayTrigger: boolean;
+  isAbsolute?: boolean;
 }
 
-export default function MusicPlayer({ autoPlayTrigger }: MusicPlayerProps) {
+export default function MusicPlayer({ autoPlayTrigger, isAbsolute = false }: MusicPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -47,7 +48,9 @@ export default function MusicPlayer({ autoPlayTrigger }: MusicPlayerProps) {
       <button
         onClick={toggleMusic}
         aria-label={isPlaying ? "Pause music" : "Play music"}
-        className="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full bg-wedding-gold hover:bg-wedding-gold-dark text-white border-2 border-white shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 cursor-pointer"
+        className={`${
+          isAbsolute ? "absolute" : "fixed"
+        } bottom-6 right-6 z-40 w-12 h-12 rounded-full bg-wedding-gold hover:bg-wedding-gold-dark text-white border-2 border-white shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 cursor-pointer`}
       >
         <span className={`block transition-transform duration-500 ${isPlaying ? "animate-spin-slow" : ""}`}>
           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">

@@ -51,6 +51,19 @@ const INITIAL_WEDDING_DATA = {
     bca: "8830-1928-11 a.n Sarah Anindita",
     mandiri: "1370-0012-9901 a.n Dimas Prasetyo",
   },
+  gallery: [],
+  stories: [
+    {
+      year: "2019",
+      title: "Pertama Bertemu",
+      description: "Bertemu tanpa sengaja di studio desain kreatif Jakarta saat mengerjakan proyek kolaborasi bersama.",
+    },
+    {
+      year: "2024",
+      title: "Lamaran Romantis",
+      description: "Di bawah gemerlap senja Labuan Bajo, mengucap janji suci untuk melangkah ke jenjang pernikahan.",
+    },
+  ],
   rsvp: {
     deadline: "2025-08-15",
     maxGuests: "2",

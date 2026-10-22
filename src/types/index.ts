@@ -13,3 +13,63 @@ export interface BankAccount {
   holderName: string;
 }
 
+export interface StoryItem {
+  id?: string;
+  year: string;
+  title: string;
+  description: string;
+}
+
+export interface WeddingData {
+  title: string;
+  slug?: string;
+  groom: {
+    fullName: string;
+    nickName: string;
+    instagram: string;
+    parents: string;
+    photoUrl: string;
+  };
+  bride: {
+    fullName: string;
+    nickName: string;
+    instagram: string;
+    parents: string;
+    photoUrl: string;
+  };
+  quote: {
+    source: string;
+    text: string;
+  };
+  events: {
+    akad: {
+      date: string;
+      time: string;
+      venue: string;
+      address: string;
+    };
+    resepsi: {
+      date: string;
+      time: string;
+      venue: string;
+      address: string;
+    };
+  };
+  music: {
+    title: string;
+    duration: string;
+    enabled: boolean;
+  };
+  gift: {
+    bca: string;
+    mandiri: string;
+  };
+  gallery?: string[];
+  stories?: StoryItem[];
+  rsvp: {
+    deadline: string;
+    maxGuests: string;
+    waNotification: boolean;
+  };
+}
+
