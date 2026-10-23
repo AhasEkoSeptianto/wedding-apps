@@ -1,25 +1,50 @@
 "use client";
 
 import { useState } from "react";
+import { WeddingData } from "@/types";
 
 interface GuestLinkGeneratorProps {
   onShowToast: (message: string) => void;
+  weddingData?: WeddingData;
+  slug?: string;
 }
 
-export default function GuestLinkGenerator({ onShowToast }: GuestLinkGeneratorProps) {
+export default function GuestLinkGenerator({
+  onShowToast,
+  weddingData,
+  slug = "dimas-sarah",
+}: GuestLinkGeneratorProps) {
   const [guestName, setGuestName] = useState("Bpk. Bambang Suryo & Partner");
   const [category, setCategory] = useState("VIP");
+
+  const groomNick =
+    weddingData?.groom.nickName ||
+    weddingData?.groom.fullName.split(",")[0].trim().split(" ")[0] ||
+    "Dimas";
+  const brideNick =
+    weddingData?.bride.nickName ||
+    weddingData?.bride.fullName.split(",")[0].trim().split(" ")[0] ||
+    "Sarah";
+
+  const weddingDate =
+    weddingData?.events.resepsi.date ||
+    weddingData?.events.akad.date ||
+    "Sabtu, 24 Agustus 2026";
+  const venue =
+    weddingData?.events.resepsi.venue ||
+    weddingData?.events.akad.venue ||
+    "Grand Ballroom";
 
   const getFormattedUrl = () => {
     const origin = typeof window !== "undefined" ? window.location.origin : "https://janjisuci.com";
     const nameParam = encodeURIComponent(guestName.trim() || "Tamu Undangan");
-    return `${origin}/demo?to=${nameParam}`;
+    return `${origin}/demo?slug=${slug}&to=${nameParam}`;
   };
 
   const getWhatsAppMessage = () => {
     const name = guestName.trim() || "Bapak/Ibu/Saudara/i";
     const url = getFormattedUrl();
-    return `Yth. ${name},\n\nTanpa mengurangi rasa hormat, perkenankan kami mengundang Anda untuk menghadiri resepsi pernikahan kami:\n\nDimas & Sarah\nSabtu, 24 Agustus 2025\n\nUntuk informasi acara lengkap, denah lokasi, dan konfirmasi kehadiran, silakan klik tautan resmi berikut:\n${url}\n\nMerupakan suatu kehormatan dan kebahagiaan bagi kami apabila Anda berkenan hadir dan memberikan doa restu.\n\nTerima kasih kami ucapkan,\nDimas & Sarah`;
+    return `Yth. ${name},\n\nTanpa mengurangi rasa hormat, perkenankan kami mengundang Anda untuk menghadiri resepsi pernikahan kami:\n\n*${groomNick} & ${brideNick}*\n🗓️ ${weddingDate}\n📍 ${venue}\n\nUntuk informasi acara lengkap, denah lokasi, dan konfirmasi kehadiran, silakan klik tautan resmi berikut:\n${url}\n\nMerupakan suatu kehormatan dan kebahagiaan bagi kami apabila Anda berkenan hadir dan memberikan doa restu.\n\nTerima kasih kami ucapkan,\n${groomNick} & ${brideNick}`;
   };
 
   const handleCopyLink = () => {

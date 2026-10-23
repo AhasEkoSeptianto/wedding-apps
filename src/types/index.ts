@@ -20,6 +20,20 @@ export interface StoryItem {
   description: string;
 }
 
+export interface GuestItem {
+  id: string;
+  name: string;
+  phone: string;
+  category: "VIP" | "Keluarga" | "Sahabat" | "Reguler";
+  status: "Hadir" | "Ragu" | "Belum Respon" | "Tidak Hadir";
+  pax: number;
+  table: string;
+  qrCode?: string;
+  checkedIn?: boolean;
+  checkedInAt?: string | null;
+  createdAt?: string;
+}
+
 export interface WeddingData {
   title: string;
   slug?: string;

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 interface DashboardSidebarProps {
   isOpen?: boolean;
@@ -10,15 +11,17 @@ interface DashboardSidebarProps {
 
 export default function DashboardSidebar({ isOpen = false, onClose }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   const isOverview = pathname === "/dashboard";
   const isEditor = pathname === "/editor" || pathname === "/live-demo-editor";
+  const isGuests = pathname === "/dashboard/guests";
 
   const navItems = [
     { label: "Ikhtisar & RSVP", icon: "grid_view", href: "/dashboard", active: isOverview },
     { label: "Live Demo & Editor", icon: "edit_note", href: "/editor", active: isEditor },
     { label: "Katalog Template", icon: "auto_awesome_motion", href: "/" },
-    { label: "Daftar Tamu", icon: "groups", href: "/dashboard#buku-tamu" },
+    { label: "Daftar Tamu", icon: "groups", href: "/dashboard/guests", active: isGuests },
     { label: "Amplop & Ucapan", icon: "card_giftcard", href: "/dashboard#amplop-ucapan" },
     { label: "Paket Langganan", icon: "loyalty", href: "/paket-harga" },
   ];
@@ -97,7 +100,7 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
             />
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-on-surface truncate">
-                Dimas &amp; Sarah
+                {user?.name || "Dimas & Sarah"}
               </p>
               <p className="text-[11px] text-on-surface-variant truncate">
                 Paket Premium VIP

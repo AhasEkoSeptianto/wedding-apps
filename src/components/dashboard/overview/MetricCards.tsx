@@ -1,6 +1,65 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
+
+interface GuestStats {
+  total: number;
+  hadir: number;
+  totalHadirPax: number;
+  ragu: number;
+  belumRespon: number;
+  tidakHadir: number;
+  checkedIn: number;
+  attendanceRatePercent: number;
+}
+
 export default function MetricCards() {
+  const [stats, setStats] = useState<GuestStats>({
+    total: 342,
+    hadir: 268,
+    totalHadirPax: 412,
+    ragu: 44,
+    belumRespon: 20,
+    tidakHadir: 10,
+    checkedIn: 180,
+    attendanceRatePercent: 78,
+  });
+  const [wishesCount, setWishesCount] = useState<number>(198);
+
+  useEffect(() => {
+    api
+      .getGuestStats()
+      .then((res) => {
+        if (res.success && res.data) {
+          setStats((prev) => ({
+            ...prev,
+            ...res.data,
+            total: res.data.total > 0 ? res.data.total : prev.total,
+            hadir: res.data.total > 0 ? res.data.hadir : prev.hadir,
+            totalHadirPax: res.data.totalHadirPax > 0 ? res.data.totalHadirPax : prev.totalHadirPax,
+            ragu: res.data.total > 0 ? res.data.ragu : prev.ragu,
+            belumRespon: res.data.total > 0 ? res.data.belumRespon : prev.belumRespon,
+            tidakHadir: res.data.total > 0 ? res.data.tidakHadir : prev.tidakHadir,
+          }));
+        }
+      })
+      .catch(() => {});
+
+    api
+      .getWishes()
+      .then((res) => {
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          setWishesCount(res.data.length);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const totalGuests = stats.total;
+  const hadirRate = totalGuests > 0 ? Math.round((stats.hadir / totalGuests) * 100) : 0;
+  const raguRate = totalGuests > 0 ? Math.round((stats.ragu / totalGuests) * 100) : 0;
+
   return (
     <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Card 1: Total Undangan */}
@@ -16,24 +75,24 @@ export default function MetricCards() {
           </div>
 
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="font-serif text-3xl font-bold text-on-surface">450</span>
-            <span className="text-xs text-on-surface-variant">/ 500 Tamu</span>
+            <span className="font-serif text-3xl font-bold text-on-surface">{stats.total}</span>
+            <span className="text-xs text-on-surface-variant">Tamu Terdata</span>
           </div>
 
           <p className="mt-1 text-xs text-secondary flex items-center gap-1 font-semibold">
             <span className="material-symbols-outlined text-[16px]">trending_up</span>
-            <span>90% terdistribusi</span>
+            <span>{hadirRate}% Terkonfirmasi Hadir</span>
           </p>
         </div>
 
         <div className="mt-4 pt-1">
           <div className="flex justify-between text-xs text-on-surface-variant mb-1.5">
-            <span>380 via WA</span>
-            <span>70 Link Pribadi</span>
+            <span>{stats.hadir} Hadir</span>
+            <span>{stats.belumRespon} Belum Respon</span>
           </div>
           <div className="w-full bg-surface-container rounded-full h-1.5 flex overflow-hidden">
-            <div className="bg-primary h-1.5" style={{ width: "84%" }} />
-            <div className="bg-inverse-primary h-1.5" style={{ width: "16%" }} />
+            <div className="bg-primary h-1.5" style={{ width: `${hadirRate}%` }} />
+            <div className="bg-inverse-primary h-1.5" style={{ width: `${100 - hadirRate}%` }} />
           </div>
         </div>
       </div>
@@ -51,8 +110,8 @@ export default function MetricCards() {
           </div>
 
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="font-serif text-3xl font-bold text-on-surface">342</span>
-            <span className="text-xs text-on-surface-variant">Respon (76%)</span>
+            <span className="font-serif text-3xl font-bold text-on-surface">{stats.hadir}</span>
+            <span className="text-xs text-on-surface-variant">Hadir ({hadirRate}%)</span>
           </div>
 
           <div className="mt-2 flex items-center gap-3">
@@ -70,7 +129,7 @@ export default function MetricCards() {
                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 fill="none"
                 stroke="currentColor"
-                strokeDasharray="78, 100"
+                strokeDasharray={`${hadirRate}, 100`}
                 strokeLinecap="round"
                 strokeWidth="4"
               />
@@ -79,8 +138,8 @@ export default function MetricCards() {
                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 fill="none"
                 stroke="currentColor"
-                strokeDasharray="13, 100"
-                strokeDashoffset="-78"
+                strokeDasharray={`${raguRate}, 100`}
+                strokeDashoffset={`-${hadirRate}`}
                 strokeWidth="4"
               />
             </svg>
@@ -88,22 +147,22 @@ export default function MetricCards() {
             <div className="text-[11px] leading-tight text-on-surface-variant space-y-0.5">
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-secondary" />
-                <span>268 Hadir</span>
+                <span>{stats.hadir} Hadir</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-primary" />
-                <span>44 Ragu-ragu</span>
+                <span>{stats.ragu} Ragu-ragu</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-outline" />
-                <span>30 Tidak Hadir</span>
+                <span>{stats.tidakHadir} Berhalangan</span>
               </div>
             </div>
           </div>
         </div>
 
         <div className="mt-4 pt-1 text-xs text-on-surface-variant">
-          Estimasi Pax: <strong className="text-on-surface font-semibold">412 Orang</strong>
+          Estimasi Kursi: <strong className="text-on-surface font-semibold">{stats.totalHadirPax} Pax</strong>
         </div>
       </div>
 
@@ -129,13 +188,13 @@ export default function MetricCards() {
 
           <div className="mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed text-[11px] font-semibold">
             <span className="material-symbols-outlined text-[14px]">arrow_upward</span>
-            <span>+18% hari ini</span>
+            <span>Transfer Bank &amp; E-Wallet</span>
           </div>
         </div>
 
         <div className="mt-4 pt-1 flex items-center justify-between text-xs text-on-surface-variant">
-          <span>142 Amplop Transfer</span>
-          <span className="font-semibold text-primary">BCA, Mandiri, QRIS</span>
+          <span>Rekening Aktif</span>
+          <span className="font-semibold text-primary">BCA, Mandiri</span>
         </div>
       </div>
 
@@ -152,8 +211,8 @@ export default function MetricCards() {
           </div>
 
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="font-serif text-3xl font-bold text-on-surface">198</span>
-            <span className="text-xs text-on-surface-variant">Pesan Kasih</span>
+            <span className="font-serif text-3xl font-bold text-on-surface">{wishesCount}</span>
+            <span className="text-xs text-on-surface-variant">Pesan Masuk</span>
           </div>
 
           <div className="mt-2 flex -space-x-2 overflow-hidden py-1">
@@ -176,14 +235,14 @@ export default function MetricCards() {
               alt="Avatar 3"
             />
             <div className="h-7 w-7 rounded-full ring-2 ring-surface-container-lowest bg-surface-container flex items-center justify-center text-[10px] font-bold text-on-surface-variant">
-              +195
+              +{wishesCount}
             </div>
           </div>
         </div>
 
         <div className="mt-4 pt-1 flex items-center justify-between text-xs text-on-surface-variant">
-          <span>Moderasi Otomatis</span>
-          <span className="text-secondary font-semibold">Aktif</span>
+          <span>Live Sync</span>
+          <span className="text-secondary font-semibold">Terkoneksi</span>
         </div>
       </div>
     </section>
