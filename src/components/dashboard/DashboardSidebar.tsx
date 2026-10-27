@@ -87,6 +87,22 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
                 <span>{item.label}</span>
               </Link>
             ))}
+            {user?.role === "admin" && (
+              <div className="pt-4 mt-4 border-t border-outline-variant/30">
+                <div className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-amber-700">
+                  Panel Khusus Staf
+                </div>
+                <Link
+                  href="/admin/dashboard"
+                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm bg-amber-500/10 text-amber-900 border border-amber-400/30 font-semibold hover:bg-amber-500/20 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[20px] text-amber-600">
+                    terminal
+                  </span>
+                  <span>Panel Administrasi</span>
+                </Link>
+              </div>
+            )}
           </nav>
         </div>
 

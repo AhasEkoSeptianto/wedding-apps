@@ -1,4 +1,4 @@
-import { WeddingData } from "@/types";
+import { WeddingData, HtmlTemplate } from "@/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
@@ -57,6 +57,23 @@ export interface LoginPayload {
   password: string;
 }
 
+export interface HtmlTemplatePayload {
+  slug?: string;
+  name: string;
+  category: string;
+  description?: string;
+  previewColor?: string;
+  thumbnailUrl?: string;
+  previewAlbum?: string[];
+  price?: string;
+  designer?: string;
+  tier?: "vip" | "gold" | "free";
+  tierBadge?: string;
+  html: string;
+  isPreset?: boolean;
+  isActive?: boolean;
+}
+
 export const api = {
   // Auth
   register: async (payload: RegisterPayload) => {
@@ -81,6 +98,17 @@ export const api = {
     return data;
   },
 
+  adminLogin: async (payload: LoginPayload) => {
+    const res = await fetch(`${API_BASE}/auth/admin-login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Login admin gagal");
+    return data as { success: boolean; token: string; user: UserProfile; message: string };
+  },
+
   getMe: async (token: string) => {
     const res = await fetch(`${API_BASE}/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -90,6 +118,7 @@ export const api = {
     if (!res.ok) throw new Error(data.message || "Gagal mengambil profil");
     return data;
   },
+
   // Health
   checkHealth: async () => {
     try {
@@ -98,6 +127,66 @@ export const api = {
     } catch (err) {
       return { status: "offline", error: err };
     }
+  },
+
+  // HTML Template Design Management (Admin & Client Catalog)
+  getTemplates: async (params?: { category?: string; search?: string; all?: boolean }) => {
+    const query = new URLSearchParams();
+    if (params?.category) query.set("category", params.category);
+    if (params?.search) query.set("search", params.search);
+    if (params?.all) query.set("all", "true");
+
+    const qs = query.toString() ? `?${query.toString()}` : "";
+    const res = await fetch(`${API_BASE}/templates${qs}`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Gagal mengambil data template HTML");
+    return (await res.json()) as { success: boolean; count: number; data: HtmlTemplate[] };
+  },
+
+  getTemplate: async (idOrSlug: string) => {
+    const res = await fetch(`${API_BASE}/templates/${encodeURIComponent(idOrSlug)}`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Gagal mengambil data template");
+    return (await res.json()) as { success: boolean; data: HtmlTemplate };
+  },
+
+  createTemplate: async (payload: HtmlTemplatePayload, token?: string) => {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(`${API_BASE}/templates`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Gagal membuat template baru");
+    return data as { success: boolean; data: HtmlTemplate; message: string };
+  },
+
+  updateTemplate: async (id: string, payload: Partial<HtmlTemplatePayload>, token?: string) => {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(`${API_BASE}/templates/${id}`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Gagal memperbarui template");
+    return data as { success: boolean; data: HtmlTemplate; message: string };
+  },
+
+  deleteTemplate: async (id: string, token?: string) => {
+    const headers: Record<string, string> = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(`${API_BASE}/templates/${id}`, {
+      method: "DELETE",
+      headers,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Gagal menghapus template");
+    return data as { success: boolean; message: string };
   },
 
   // Wishes & RSVP
@@ -134,15 +223,16 @@ export const api = {
     return await res.json();
   },
 
-  // Amplop Digital (Gifts)
-  getGifts: async (params?: { slug?: string; status?: string; search?: string }) => {
+  // Digital Envelope / Gifts
+  getGifts: async (params?: { slug?: string; search?: string; status?: "confirmed" | "pending" }) => {
     const query = new URLSearchParams();
     if (params?.slug) query.set("slug", params.slug);
-    if (params?.status) query.set("status", params.status);
     if (params?.search) query.set("search", params.search);
+    if (params?.status) query.set("status", params.status);
 
-    const res = await fetch(`${API_BASE}/gifts?${query.toString()}`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Gagal mengambil daftar amplop digital");
+    const qs = query.toString() ? `?${query.toString()}` : "";
+    const res = await fetch(`${API_BASE}/gifts${qs}`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Gagal mengambil data amplop digital");
     return await res.json();
   },
 
@@ -152,9 +242,8 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Gagal mencatat amplop digital");
-    return data;
+    if (!res.ok) throw new Error("Gagal mengirim konfirmasi tanda kasih");
+    return await res.json();
   },
 
   updateGiftStatus: async (id: string, status: "confirmed" | "pending") => {
@@ -163,28 +252,26 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Gagal memperbarui status amplop");
-    return data;
+    if (!res.ok) throw new Error("Gagal mengubah status amplop");
+    return await res.json();
   },
 
   deleteGift: async (id: string) => {
     const res = await fetch(`${API_BASE}/gifts/${id}`, {
       method: "DELETE",
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Gagal menghapus amplop");
-    return data;
+    if (!res.ok) throw new Error("Gagal menghapus riwayat amplop");
+    return await res.json();
   },
 
-  // Guests (Buku Tamu)
-  getGuests: async (params?: { category?: string; search?: string; status?: string }) => {
-    const query = new URLSearchParams();
-    if (params?.category) query.set("category", params.category);
-    if (params?.search) query.set("search", params.search);
-    if (params?.status) query.set("status", params.status);
+  // Guests Book
+  getGuests: async (category?: string, search?: string) => {
+    const params = new URLSearchParams();
+    if (category) params.set("category", category);
+    if (search) params.set("search", search);
+    const qs = params.toString() ? `?${params.toString()}` : "";
 
-    const res = await fetch(`${API_BASE}/guests?${query.toString()}`, { cache: "no-store" });
+    const res = await fetch(`${API_BASE}/guests${qs}`, { cache: "no-store" });
     if (!res.ok) throw new Error("Gagal mengambil daftar tamu");
     return await res.json();
   },

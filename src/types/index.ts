@@ -54,6 +54,26 @@ export interface GuestItem {
   createdAt?: string;
 }
 
+export interface HtmlTemplate {
+  id: string;
+  slug: string;
+  name: string;
+  category: string;
+  description: string;
+  previewColor: string;
+  thumbnailUrl?: string;
+  previewAlbum?: string[];
+  price?: string;
+  designer?: string;
+  tier?: "vip" | "gold" | "free";
+  tierBadge?: string;
+  html: string;
+  isPreset?: boolean;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface WeddingData {
   title: string;
   slug?: string;

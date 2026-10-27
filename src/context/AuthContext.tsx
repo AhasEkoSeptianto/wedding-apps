@@ -8,6 +8,7 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   login: (payload: LoginPayload) => Promise<void>;
+  adminLogin: (payload: LoginPayload) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => void;
 }
@@ -89,6 +90,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const adminLogin = async (payload: LoginPayload) => {
+    setIsLoading(true);
+    try {
+      const res = await api.adminLogin(payload);
+      setToken(res.token);
+      setUser(res.user);
+      localStorage.setItem("janjisuci_auth_token", res.token);
+      localStorage.setItem("janjisuci_auth_user", JSON.stringify(res.user));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const register = async (payload: RegisterPayload) => {
     setIsLoading(true);
     try {
@@ -109,6 +123,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         token,
         isLoading,
         login,
+        adminLogin,
         register,
         logout,
       }}

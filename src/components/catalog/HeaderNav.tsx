@@ -89,6 +89,15 @@ export default function HeaderNav() {
 
           {user ? (
             <div className="hidden sm:flex items-center gap-3">
+              {user.role === "admin" && (
+                <Link
+                  href="/admin/dashboard"
+                  className="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-900 border border-amber-400/40 flex items-center gap-1 hover:bg-amber-500/25 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[14px]">terminal</span>
+                  <span>Panel Admin</span>
+                </Link>
+              )}
               <Link
                 href="/dashboard"
                 className="text-xs sm:text-sm font-semibold text-primary hover:text-primary-container transition-colors"

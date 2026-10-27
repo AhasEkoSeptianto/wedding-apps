@@ -23,7 +23,8 @@ interface LiveDeviceCanvasProps {
 export default function LiveDeviceCanvas({ data }: LiveDeviceCanvasProps) {
   const [deviceMode, setDeviceMode] = useState<"mobile" | "tablet" | "desktop">("mobile");
   const [zoomLevel, setZoomLevel] = useState(100);
-  const [isOpened, setIsOpened] = useState(true);
+  // Default preview starts with cover/sampul active as requested
+  const [isOpened, setIsOpened] = useState(false);
   const [canvasToast, setCanvasToast] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -118,7 +119,7 @@ export default function LiveDeviceCanvas({ data }: LiveDeviceCanvasProps) {
             onClick={() => setIsOpened(!isOpened)}
             className={`px-3 py-1.5 rounded-full text-xs font-medium border flex items-center gap-1.5 transition-colors cursor-pointer ${
               !isOpened
-                ? "bg-primary text-on-primary border-primary"
+                ? "bg-primary text-on-primary border-primary shadow-xs"
                 : "bg-surface-container text-on-surface border-outline-variant/30 hover:bg-surface-container-high"
             }`}
             title="Klik untuk melihat sampul depan / cover overlay"
@@ -136,46 +137,40 @@ export default function LiveDeviceCanvas({ data }: LiveDeviceCanvasProps) {
                 ? "bg-amber-50 text-amber-900 border-amber-300"
                 : "bg-emerald-50 text-emerald-900 border-emerald-300"
             }`}
-            title={isCustomHtmlMode ? "Sedang menggunakan Template HTML Kustom" : "Sedang menggunakan Tema Visual Bawaan"}
+            title={isCustomHtmlMode ? "Sedang menggunakan Template HTML Pilihan Desainer" : "Sedang menggunakan Tema Visual Bawaan"}
           >
             <span className="material-symbols-outlined text-[14px]">
               {isCustomHtmlMode ? "html" : "palette"}
             </span>
             <span className="hidden sm:inline">
-              {isCustomHtmlMode ? "Kustom HTML" : "Tema Visual"}
+              {isCustomHtmlMode ? "Template HTML" : "Tema Visual"}
             </span>
           </span>
 
           <div className="h-4 w-px bg-surface-variant mx-1" />
 
           {/* Zoom controls */}
-          <button
-            onClick={() => setZoomLevel((z) => Math.max(65, z - 10))}
-            className="w-7 h-7 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface cursor-pointer"
-            type="button"
-            title="Zoom out"
-          >
-            <span className="material-symbols-outlined text-[16px]">zoom_out</span>
-          </button>
-          <span className="text-xs font-semibold text-on-surface min-w-9 text-center">
-            {zoomLevel}%
-          </span>
-          <button
-            onClick={() => setZoomLevel((z) => Math.min(120, z + 10))}
-            className="w-7 h-7 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface cursor-pointer"
-            type="button"
-            title="Zoom in"
-          >
-            <span className="material-symbols-outlined text-[16px]">zoom_in</span>
-          </button>
-          <button
-            onClick={() => setZoomLevel(100)}
-            className="w-7 h-7 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface cursor-pointer"
-            title="Reset Zoom"
-            type="button"
-          >
-            <span className="material-symbols-outlined text-[16px]">refresh</span>
-          </button>
+          <div className="flex items-center gap-1 bg-surface-container px-2 py-1 rounded-full">
+            <button
+              onClick={() => setZoomLevel((z) => Math.max(z - 10, 60))}
+              className="p-1 rounded-full hover:bg-surface-container-high text-on-surface-variant transition-colors"
+              title="Perkecil Canvas"
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[14px]">zoom_out</span>
+            </button>
+            <span className="text-[11px] font-mono font-medium px-1.5 text-on-surface min-w-[36px] text-center">
+              {zoomLevel}%
+            </span>
+            <button
+              onClick={() => setZoomLevel((z) => Math.min(z + 10, 130))}
+              className="p-1 rounded-full hover:bg-surface-container-high text-on-surface-variant transition-colors"
+              title="Perbesar Canvas"
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[14px]">zoom_in</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -227,7 +222,7 @@ export default function LiveDeviceCanvas({ data }: LiveDeviceCanvasProps) {
           </div>
         )}
 
-        {/* Device Viewport Canvas (100% Identical to /demo) */}
+        {/* Device Viewport Canvas */}
         <div
           className={`relative w-full h-full overflow-y-auto scroll-smooth flex flex-col ${
             deviceMode === "mobile"
@@ -241,42 +236,41 @@ export default function LiveDeviceCanvas({ data }: LiveDeviceCanvasProps) {
             color: isCustomHtmlMode ? "inherit" : theme.colors.text,
           }}
         >
+          {/* Universal Cover Screen Overlay (active by default for both Custom HTML & Standard Theme) */}
+          <CoverOverlay
+            isOpen={isOpened}
+            onOpen={() => setIsOpened(true)}
+            weddingData={data}
+            isAbsolute={true}
+            viewMode={deviceMode}
+          />
+
+          {/* Floating Audio Controller */}
+          <MusicPlayer autoPlayTrigger={isOpened} isAbsolute={true} />
+
           {isCustomHtmlMode ? (
             /* Render Full Custom HTML in Sandboxed Responsive iframe */
-            <iframe
-              srcDoc={compiledHtml}
-              title="Preview Undangan Kustom HTML"
-              className="w-full h-full border-0 bg-transparent"
-              sandbox="allow-scripts allow-same-origin allow-popups"
-            />
+            <div className={`w-full h-full transition-opacity duration-700 ${isOpened ? "opacity-100" : "opacity-0"}`}>
+              <iframe
+                srcDoc={compiledHtml}
+                title="Preview Undangan Template HTML"
+                className="w-full h-full border-0 bg-transparent"
+                sandbox="allow-scripts allow-same-origin allow-popups"
+              />
+            </div>
           ) : (
             /* Render Standard React Components with Visual Theme */
-            <>
-              {/* Cover Screen Overlay */}
-              <CoverOverlay
-                isOpen={isOpened}
-                onOpen={() => setIsOpened(true)}
-                weddingData={data}
-                isAbsolute={true}
-                viewMode={deviceMode}
-              />
-
-              {/* Floating Audio Controller */}
-              <MusicPlayer autoPlayTrigger={isOpened} isAbsolute={true} />
-
-              {/* Complete Live Invitation Content */}
-              <main className={`transition-opacity duration-700 ${isOpened ? "opacity-100" : "opacity-90"}`}>
-                <HeroSection weddingData={data} viewMode={deviceMode} />
-                <QuoteSection weddingData={data} viewMode={deviceMode} />
-                <CoupleSection weddingData={data} viewMode={deviceMode} />
-                <StorySection weddingData={data} viewMode={deviceMode} />
-                <EventSection weddingData={data} viewMode={deviceMode} />
-                <GallerySection weddingData={data} viewMode={deviceMode} />
-                <RsvpSection onShowToast={showToast} weddingData={data} viewMode={deviceMode} />
-                <GiftSection onShowToast={showToast} weddingData={data} viewMode={deviceMode} />
-                <Footer weddingData={data} />
-              </main>
-            </>
+            <main className={`transition-opacity duration-700 ${isOpened ? "opacity-100" : "opacity-90"}`}>
+              <HeroSection weddingData={data} viewMode={deviceMode} />
+              <QuoteSection weddingData={data} viewMode={deviceMode} />
+              <CoupleSection weddingData={data} viewMode={deviceMode} />
+              <StorySection weddingData={data} viewMode={deviceMode} />
+              <EventSection weddingData={data} viewMode={deviceMode} />
+              <GallerySection weddingData={data} viewMode={deviceMode} />
+              <RsvpSection onShowToast={showToast} weddingData={data} viewMode={deviceMode} />
+              <GiftSection onShowToast={showToast} weddingData={data} viewMode={deviceMode} />
+              <Footer weddingData={data} />
+            </main>
           )}
         </div>
 
@@ -298,7 +292,7 @@ export default function LiveDeviceCanvas({ data }: LiveDeviceCanvasProps) {
       <div className="text-xs text-on-surface-variant mt-4 flex items-center gap-2 text-center">
         <span className="material-symbols-outlined text-[16px] text-secondary">verified</span>
         <span>
-          Preview ini 100% identik dengan tampilan undangan asli di <code className="text-primary font-mono">/demo?slug={currentSlug}</code>.
+          Canvas preview live default dengan <strong>Sampul Aktif</strong>. Klik tombol <strong>Buka Undangan</strong> untuk melihat isi undangan.
         </span>
       </div>
     </div>

@@ -31,6 +31,7 @@ function DemoContent() {
   const targetSlug = slugParam || user?.weddingSlug || "dimas-sarah";
 
   const [weddingData, setWeddingData] = useState<WeddingData>(DEFAULT_WEDDING_DATA);
+  // Default preview starts with cover/sampul active as requested
   const [isOpened, setIsOpened] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -69,19 +70,13 @@ function DemoContent() {
     setIsOpened(true);
   };
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 3200);
-  };
-
   const currentTheme = getTheme(weddingData.themeId);
-  const groomNick = weddingData.groom.nickName || weddingData.groom.fullName.split(",")[0].split(" ")[0] || "Dimas";
-  const brideNick = weddingData.bride.nickName || weddingData.bride.fullName.split(",")[0].split(" ")[0] || "Sarah";
-
   const isCustomHtmlMode = weddingData.designMode === "custom_html";
 
+  const groomNick = weddingData.groom.nickName || weddingData.groom.fullName.split(" ")[0] || "Dimas";
+  const brideNick = weddingData.bride.nickName || weddingData.bride.fullName.split(" ")[0] || "Sarah";
+
+  // Precompile Custom HTML
   const compiledHtml = useMemo(() => {
     if (!isCustomHtmlMode) return "";
     return renderHtmlTemplate(weddingData.customHtml || "", weddingData, {
@@ -92,32 +87,40 @@ function DemoContent() {
   // Mode 1: Custom HTML Template Full Screen
   if (isCustomHtmlMode) {
     return (
-      <div className="relative min-h-screen bg-stone-900">
+      <div className="relative min-h-screen bg-stone-900 overflow-hidden">
         {/* Top Floating Back Bar */}
         <nav className="fixed top-4 left-4 z-40 bg-stone-900/90 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-semibold shadow-xl hover:bg-stone-900 transition-colors flex items-center gap-2 border border-white/15">
-          <Link href={`/editor?slug=${targetSlug}`} className="flex items-center gap-1.5 hover:text-wedding-gold-light transition-colors">
+          <Link href={`/editor?slug=${targetSlug}`} className="flex items-center gap-1.5 hover:text-amber-300 transition-colors">
             <span className="material-symbols-outlined text-[16px]">edit_note</span>
             <span>Buka Editor Studio</span>
           </Link>
           <span className="text-white/30">|</span>
-          <Link href="/" className="flex items-center gap-1.5 hover:text-wedding-gold-light transition-colors">
+          <Link href="/" className="flex items-center gap-1.5 hover:text-amber-300 transition-colors">
             <span className="material-symbols-outlined text-[16px]">home</span>
             <span>Katalog</span>
           </Link>
           <span className="text-white/30">|</span>
           <span className="text-amber-300 flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            <span>Kustom HTML: {groomNick} &amp; {brideNick}</span>
+            <span>Template HTML: {groomNick} &amp; {brideNick}</span>
           </span>
         </nav>
 
+        {/* Welcome Screen Cover (Active by Default) */}
+        <CoverOverlay isOpen={isOpened} onOpen={handleOpen} weddingData={weddingData} />
+
+        {/* Floating Audio Controller */}
+        <MusicPlayer autoPlayTrigger={isOpened} />
+
         {/* Fullscreen Sandboxed Custom HTML */}
-        <iframe
-          srcDoc={compiledHtml}
-          title={`Undangan ${groomNick} & ${brideNick}`}
-          className="w-full min-h-screen border-0 block"
-          sandbox="allow-scripts allow-same-origin allow-popups"
-        />
+        <div className={`transition-opacity duration-700 ${isOpened ? "opacity-100" : "opacity-0"}`}>
+          <iframe
+            srcDoc={compiledHtml}
+            title={`Undangan ${groomNick} & ${brideNick}`}
+            className="w-full min-h-screen border-0 block"
+            sandbox="allow-scripts allow-same-origin allow-popups"
+          />
+        </div>
       </div>
     );
   }
@@ -133,23 +136,23 @@ function DemoContent() {
     >
       {/* Top Floating Back Bar */}
       <nav className="fixed top-4 left-4 z-40 bg-stone-900/85 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-semibold shadow-lg hover:bg-stone-900 transition-colors flex items-center gap-2 border border-white/10">
-        <Link href={`/editor?slug=${targetSlug}`} className="flex items-center gap-1.5 hover:text-wedding-gold-light transition-colors">
+        <Link href={`/editor?slug=${targetSlug}`} className="flex items-center gap-1.5 hover:text-amber-300 transition-colors">
           <span className="material-symbols-outlined text-[16px]">edit_note</span>
           <span>Buka Editor Studio</span>
         </Link>
         <span className="text-white/30">|</span>
-        <Link href="/" className="flex items-center gap-1.5 hover:text-wedding-gold-light transition-colors">
+        <Link href="/" className="flex items-center gap-1.5 hover:text-amber-300 transition-colors">
           <span className="material-symbols-outlined text-[16px]">home</span>
           <span>Katalog</span>
         </Link>
         <span className="text-white/30">|</span>
-        <span className="text-wedding-gold-light flex items-center gap-1">
+        <span className="text-amber-300 flex items-center gap-1">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           Live: {groomNick} &amp; {brideNick} ({currentTheme.name})
         </span>
       </nav>
 
-      {/* Welcome Screen Cover */}
+      {/* Welcome Screen Cover (Active by Default) */}
       <CoverOverlay isOpen={isOpened} onOpen={handleOpen} weddingData={weddingData} />
 
       {/* Floating Audio Controller */}
@@ -163,13 +166,15 @@ function DemoContent() {
         <StorySection weddingData={weddingData} />
         <EventSection weddingData={weddingData} />
         <GallerySection weddingData={weddingData} />
-        <RsvpSection onShowToast={showToast} weddingData={weddingData} />
-        <GiftSection onShowToast={showToast} weddingData={weddingData} />
+        <RsvpSection onShowToast={setToastMessage} weddingData={weddingData} />
+        <GiftSection onShowToast={setToastMessage} weddingData={weddingData} />
         <Footer weddingData={weddingData} />
       </main>
 
-      {/* Toast Feedback */}
-      <Toast message={toastMessage} />
+      {/* Floating Toast Notification */}
+      {toastMessage && (
+        <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+      )}
     </div>
   );
 }
@@ -178,11 +183,8 @@ export default function DemoPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#FAF7F2]">
-          <div className="text-center">
-            <div className="w-10 h-10 border-4 border-wedding-gold border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-stone-600 font-serif text-sm">Memuat Undangan JanjiSuci...</p>
-          </div>
+        <div className="min-h-screen bg-stone-900 flex items-center justify-center text-white">
+          <div className="w-8 h-8 border-4 border-amber-400 border-t-transparent rounded-full animate-spin" />
         </div>
       }
     >

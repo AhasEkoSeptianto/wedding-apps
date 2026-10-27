@@ -2,9 +2,10 @@
 
 interface ToastProps {
   message: string | null;
+  onClose?: () => void;
 }
 
-export default function Toast({ message }: ToastProps) {
+export default function Toast({ message, onClose }: ToastProps) {
   if (!message) return null;
 
   return (
@@ -12,8 +13,16 @@ export default function Toast({ message }: ToastProps) {
       <svg className="w-4 h-4 text-wedding-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
       </svg>
-      {message}
+      <span>{message}</span>
+      {onClose && (
+        <button
+          type="button"
+          onClick={onClose}
+          className="ml-2 text-stone-400 hover:text-white"
+        >
+          ✕
+        </button>
+      )}
     </div>
   );
 }
-

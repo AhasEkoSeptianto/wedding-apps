@@ -129,6 +129,60 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
   }
 }
 
+// POST /api/auth/admin-login (Admin & Workers only)
+export async function adminLogin(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      res.status(400).json({
+        success: false,
+        message: "Email dan password wajib diisi.",
+      });
+      return;
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        message: "Kredensial salah atau akun pekerja tidak ditemukan.",
+      });
+      return;
+    }
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      res.status(401).json({
+        success: false,
+        message: "Email atau password yang Anda masukkan salah.",
+      });
+      return;
+    }
+
+    // Strict role check: Worker / Administrator only
+    if (user.role !== "admin") {
+      res.status(403).json({
+        success: false,
+        message: "Akses ditolak! Akun ini terdaftar sebagai Klien, bukan Akun Staf/Administrator.",
+      });
+      return;
+    }
+
+    const token = generateToken(user._id.toString());
+    const safeUser = await User.findById(user._id);
+
+    res.json({
+      success: true,
+      message: `Selamat datang di Panel Administrasi, ${user.name}!`,
+      token,
+      user: safeUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 // GET /api/auth/me
 export async function getMe(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {

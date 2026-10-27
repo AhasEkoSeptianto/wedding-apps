@@ -9,6 +9,7 @@ import weddingRoutes from "./routes/weddingRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import giftRoutes from "./routes/giftRoutes.js";
+import templateRoutes from "./routes/templateRoutes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 
 dotenv.config();
@@ -41,7 +42,7 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(morgan("dev"));
 
 // Database Connection
@@ -63,14 +64,17 @@ app.use("/api/guests", guestRoutes);
 app.use("/api/wedding", weddingRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/gifts", giftRoutes);
+app.use("/api/templates", templateRoutes);
 
 // Global Error Handler
 app.use(errorHandler);
 
 // Start Server
-app.listen(PORT, () => {
-  console.log(`\n💍 JanjiSuci Backend running on http://localhost:${PORT}`);
-  console.log(`📡 Health Check: http://localhost:${PORT}/api/health`);
-  console.log(`🌐 Allowed Client: ${CLIENT_ORIGIN}\n`);
-});
+if (process.env.NODE_ENV !== "test") {
+  app.listen(PORT, () => {
+    console.log(`🚀 JanjiSuci API Server running on port ${PORT}`);
+    console.log(`🌐 Base URL: http://localhost:${PORT}/api`);
+  });
+}
 
+export default app;

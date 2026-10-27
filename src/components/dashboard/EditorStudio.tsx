@@ -1,11 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { WeddingData, StoryItem } from "@/types";
+import { useRef, useState, useEffect } from "react";
+import { WeddingData, StoryItem, HtmlTemplate } from "@/types";
 import { api } from "@/lib/api";
 import { getAllThemes, getTheme, THEME_CATEGORIES } from "@/lib/themes";
 import {
-  AVAILABLE_PLACEHOLDERS,
   PRESET_HTML_TEMPLATES,
 } from "@/lib/templateEngine";
 export type { WeddingData };
@@ -32,35 +31,51 @@ export default function EditorStudio({
   const [uploadingGallery, setUploadingGallery] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [themeCategoryFilter, setThemeCategoryFilter] = useState<string>("Semua");
-  const htmlEditorRef = useRef<HTMLTextAreaElement>(null);
-  const [tagCategoryFilter, setTagCategoryFilter] = useState<string>("Semua");
-  const [showTagCheatSheet, setShowTagCheatSheet] = useState<boolean>(false);
-  const [copiedTag, setCopiedTag] = useState<string | null>(null);
 
-  const handleInsertTag = (tag: string) => {
-    const textarea = htmlEditorRef.current;
-    if (!textarea) {
-      const current = data.customHtml || "";
-      onChange({ ...data, customHtml: current + " " + tag });
-      return;
-    }
-    const start = textarea.selectionStart ?? 0;
-    const end = textarea.selectionEnd ?? 0;
-    const current = data.customHtml || "";
-    const before = current.substring(0, start);
-    const after = current.substring(end);
-    const nextVal = before + tag + after;
-    onChange({ ...data, customHtml: nextVal });
+  // HTML Templates fetched from Admin & MongoDB
+  const [htmlTemplates, setHtmlTemplates] = useState<HtmlTemplate[]>([]);
+  const [htmlCategoryFilter, setHtmlCategoryFilter] = useState<string>("Semua");
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
 
-    setCopiedTag(tag);
-    setTimeout(() => setCopiedTag(null), 2000);
-
-    setTimeout(() => {
-      textarea.focus();
-      const newPos = start + tag.length;
-      textarea.setSelectionRange(newPos, newPos);
-    }, 0);
-  };
+  useEffect(() => {
+    setLoadingTemplates(true);
+    api.getTemplates()
+      .then((res) => {
+        if (res.data && res.data.length > 0) {
+          setHtmlTemplates(res.data);
+        } else {
+          setHtmlTemplates(
+            PRESET_HTML_TEMPLATES.map((p) => ({
+              id: p.id,
+              slug: p.id,
+              name: p.name,
+              category: p.category,
+              description: p.description,
+              previewColor: p.previewColor,
+              html: p.html,
+              isPreset: true,
+              isActive: true,
+            }))
+          );
+        }
+      })
+      .catch(() => {
+        setHtmlTemplates(
+          PRESET_HTML_TEMPLATES.map((p) => ({
+            id: p.id,
+            slug: p.id,
+            name: p.name,
+            category: p.category,
+            description: p.description,
+            previewColor: p.previewColor,
+            html: p.html,
+            isPreset: true,
+            isActive: true,
+          }))
+        );
+      })
+      .finally(() => setLoadingTemplates(false));
+  }, []);
 
   const currentTheme = getTheme(data.themeId);
   const allThemes = getAllThemes();
@@ -281,10 +296,12 @@ export default function EditorStudio({
             <button
               type="button"
               onClick={() => {
+                const defaultTemplate = htmlTemplates[0] || PRESET_HTML_TEMPLATES[0];
                 onChange({
                   ...data,
                   designMode: "custom_html",
-                  customHtml: data.customHtml || PRESET_HTML_TEMPLATES[0].html,
+                  customHtml: data.customHtml || defaultTemplate.html,
+                  themeId: data.themeId || defaultTemplate.slug || defaultTemplate.id,
                 });
               }}
               className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
@@ -294,7 +311,7 @@ export default function EditorStudio({
               }`}
             >
               <span className="material-symbols-outlined text-[16px]">html</span>
-              <span>Kustom Template HTML (Full Custom)</span>
+              <span>Katalog Template HTML (Desainer)</span>
             </button>
           </div>
 
@@ -499,20 +516,20 @@ export default function EditorStudio({
               </div>
             </>
           ) : (
-            /* Mode 2: Full Custom HTML Template Studio */
+            /* Mode 2: Katalog Template HTML Pilihan Desainer (Khusus Client: Hanya Pilih dari Katalog) */
             <div className="flex flex-col gap-4">
-              {/* Custom HTML Info Banner */}
-              <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              {/* Client Info Banner */}
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-[20px]">code</span>
+                  <div className="w-10 h-10 rounded-xl bg-amber-500 text-stone-950 flex items-center justify-center shrink-0 shadow-sm font-bold">
+                    <span className="material-symbols-outlined text-[20px]">style</span>
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-on-surface">
-                      Full Custom HTML Template Engine
+                      Katalog Desain Template HTML Eksklusif
                     </h3>
-                    <p className="text-xs text-on-surface-variant">
-                      Ketik atau tempel kode HTML/CSS kustom Anda. Data user (nama, tanggal, galeri, kisah cinta, dll) akan otomatis terisi melalui tag <code className="text-primary font-mono bg-primary/10 px-1 py-0.5 rounded text-[11px]">{"{{placeholder}}"}</code>.
+                    <p className="text-xs text-on-surface-variant leading-relaxed">
+                      Koleksi template HTML dirancang dan dikelola secara eksklusif oleh staf desainer JanjiSuci melalui Panel Administrasi. Anda cukup memilih template yang Anda sukai; seluruh nama pasangan, jadwal acara, galeri foto, dan amplop digital Anda otomatis terpasang dengan rapi.
                     </p>
                   </div>
                 </div>
@@ -521,244 +538,125 @@ export default function EditorStudio({
                   href={`/demo?slug=${data.slug || "dimas-sarah"}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-lg bg-primary text-on-primary text-xs font-semibold hover:bg-primary-container transition-colors flex items-center gap-1.5 shrink-0 self-end sm:self-auto shadow-xs"
+                  className="px-3.5 py-1.5 rounded-lg bg-primary text-on-primary text-xs font-semibold hover:bg-primary-container transition-colors flex items-center gap-1.5 shrink-0 self-end sm:self-auto shadow-xs"
                 >
                   <span className="material-symbols-outlined text-[16px]">open_in_new</span>
-                  <span>Buka Preview HTML</span>
+                  <span>Buka Preview Full</span>
                 </a>
               </div>
 
-              {/* Preset Template Chooser */}
-              <div className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/20 shadow-sm flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-primary" />
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-on-surface">
-                      Muat Template Bawaan (Preset)
-                    </h4>
-                  </div>
-                  <span className="text-[11px] text-on-surface-variant">Klik untuk menerapkan struktur dasar</span>
-                </div>
+              {/* Category Filter Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                {["Semua", "Luxury", "Floral", "Modern", "Tradisional", "Rustic"].map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setHtmlCategoryFilter(cat)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
+                      htmlCategoryFilter === cat
+                        ? "bg-primary text-on-primary"
+                        : "bg-surface-container text-on-surface-variant hover:text-on-surface border border-outline-variant/20"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                  {PRESET_HTML_TEMPLATES.map((preset) => (
-                    <button
-                      key={preset.id}
-                      type="button"
-                      onClick={() => {
-                        if (
-                          confirm(
-                            `Terapkan template "${preset.name}"? Kode HTML yang ada saat ini akan diganti dengan preset ini.`
-                          )
-                        ) {
-                          onChange({ ...data, customHtml: preset.html });
-                        }
-                      }}
-                      className="p-3 rounded-xl border border-outline-variant/20 hover:border-primary bg-surface hover:bg-surface-container transition-all text-left flex flex-col justify-between gap-2 cursor-pointer group"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between gap-1 mb-1">
-                          <span className="font-bold text-xs text-on-surface group-hover:text-primary transition-colors">
-                            {preset.name}
-                          </span>
-                          <span
-                            className="w-2.5 h-2.5 rounded-full shrink-0"
-                            style={{ backgroundColor: preset.previewColor }}
-                          />
+              {/* Template Grid List */}
+              {loadingTemplates ? (
+                <div className="p-12 text-center bg-surface-container-lowest rounded-2xl border border-outline-variant/20">
+                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                  <p className="text-xs text-on-surface-variant">Memuat katalog template dari tim desainer...</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {htmlTemplates
+                    .filter((t) => htmlCategoryFilter === "Semua" || (t.category && t.category.toLowerCase().includes(htmlCategoryFilter.toLowerCase())))
+                    .map((template) => {
+                      const isSelected =
+                        data.designMode === "custom_html" &&
+                        (data.themeId === template.slug || data.themeId === template.id);
+
+                      return (
+                        <div
+                          key={template.id || template.slug}
+                          className={`rounded-2xl border p-4 flex flex-col justify-between gap-3 transition-all ${
+                            isSelected
+                              ? "bg-surface-container-lowest border-primary ring-2 ring-primary/20 shadow-md"
+                              : "bg-surface-container-lowest border-outline-variant/20 hover:border-primary/50 shadow-xs"
+                          }`}
+                        >
+                          <div>
+                            {/* Color Header Bar */}
+                            <div
+                              className="h-20 rounded-xl mb-3 p-3 flex items-start justify-between relative overflow-hidden"
+                              style={{
+                                backgroundColor: `${template.previewColor || "#b38742"}20`,
+                                backgroundImage: template.thumbnailUrl
+                                  ? `linear-gradient(to top, rgba(0,0,0,0.7), transparent), url('${template.thumbnailUrl}')`
+                                  : `radial-gradient(circle at top right, ${template.previewColor || "#b38742"}40, transparent 80%)`,
+                                backgroundSize: "cover",
+                                backgroundPosition: "center",
+                                border: `1px solid ${template.previewColor || "#b38742"}40`,
+                              }}
+                            >
+                              <span
+                                className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-white shadow-xs relative z-10"
+                                style={{ backgroundColor: template.previewColor || "#b38742" }}
+                              >
+                                {template.category}
+                              </span>
+                              {isSelected && (
+                                <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-bold flex items-center gap-1 shadow-sm relative z-10">
+                                  <span className="material-symbols-outlined text-[12px]">check</span>
+                                  <span>Sedang Aktif</span>
+                                </span>
+                              )}
+                            </div>
+
+                            <h4 className="font-bold text-sm text-on-surface mb-1">
+                              {template.name}
+                            </h4>
+                            <p className="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">
+                              {template.description || "Desain tata letak HTML modern dengan ornamen tipografi eksklusif."}
+                            </p>
+                          </div>
+
+                          <div className="pt-3 border-t border-outline-variant/15 flex items-center justify-between">
+                            <span className="text-[11px] font-mono text-on-surface-variant flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[13px] text-primary">verified</span>
+                              <span>Desain Terverifikasi</span>
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onChange({
+                                  ...data,
+                                  designMode: "custom_html",
+                                  customHtml: template.html,
+                                  themeId: template.slug || template.id,
+                                });
+                              }}
+                              disabled={isSelected}
+                              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                                isSelected
+                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-default"
+                                  : "bg-primary text-on-primary hover:bg-primary-container shadow-xs active:scale-95"
+                              }`}
+                            >
+                              <span className="material-symbols-outlined text-[14px]">
+                                {isSelected ? "done" : "check_circle"}
+                              </span>
+                              <span>{isSelected ? "Template Aktif" : "Gunakan Template"}</span>
+                            </button>
+                          </div>
                         </div>
-                        <p className="text-[11px] text-on-surface-variant line-clamp-2 leading-relaxed">
-                          {preset.description}
-                        </p>
-                      </div>
-                      <span className="text-[10px] font-semibold text-primary flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[12px]">download</span>
-                        <span>Pakai Template Ini</span>
-                      </span>
-                    </button>
-                  ))}
+                      );
+                    })}
                 </div>
-              </div>
-
-              {/* Dynamic Placeholders Toolbar */}
-              <div className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/20 shadow-sm flex flex-col gap-3">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary text-[18px]">data_object</span>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-on-surface">
-                      Sisipkan Tag Data Dinamis (Klik untuk Memasukkan)
-                    </h4>
-                  </div>
-
-                  {copiedTag && (
-                    <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 animate-fade-in flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[14px]">check</span>
-                      <span>{copiedTag} disisipkan!</span>
-                    </span>
-                  )}
-                </div>
-
-                {/* Category Pills for Tags */}
-                <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none">
-                  {[
-                    "Semua",
-                    "Mempelai",
-                    "Acara & Lokasi",
-                    "Kutipan",
-                    "Komponen Dinamis",
-                    "Tamu & Hadiah",
-                  ].map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setTagCategoryFilter(cat)}
-                      className={`px-2.5 py-1 rounded-md text-[11px] font-semibold whitespace-nowrap transition-colors cursor-pointer ${
-                        tagCategoryFilter === cat
-                          ? "bg-primary text-on-primary"
-                          : "bg-surface-container text-on-surface-variant hover:text-on-surface"
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Tags Grid */}
-                <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto p-1 bg-surface-container-low rounded-lg border border-outline-variant/15">
-                  {AVAILABLE_PLACEHOLDERS.filter((p) =>
-                    tagCategoryFilter === "Semua" ? true : p.category === tagCategoryFilter
-                  ).map((placeholder) => (
-                    <button
-                      key={placeholder.tag}
-                      type="button"
-                      onClick={() => handleInsertTag(placeholder.tag)}
-                      title={`${placeholder.description} (Cth: ${placeholder.example})`}
-                      className="px-2 py-1 rounded bg-surface hover:bg-primary hover:text-on-primary text-on-surface text-[11px] font-mono border border-outline-variant/20 transition-all flex items-center gap-1 cursor-pointer active:scale-95"
-                    >
-                      <span>{placeholder.tag}</span>
-                      <span className="material-symbols-outlined text-[12px] opacity-60">add</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Code Editor Container */}
-              <div className="bg-[#181a20] rounded-2xl border border-stone-800 shadow-md overflow-hidden flex flex-col">
-                {/* Editor Header Bar */}
-                <div className="bg-[#121316] px-4 py-2.5 border-b border-stone-800 flex items-center justify-between text-xs text-stone-300">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[16px] text-amber-400">html</span>
-                    <span className="font-mono font-bold text-stone-200">template.html</span>
-                    <span className="text-[11px] text-stone-500">• HTML5 + CSS + Placeholders</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] text-stone-400 font-mono">
-                      {(data.customHtml || "").length} Karakter
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        navigator.clipboard.writeText(data.customHtml || "");
-                        alert("Kode HTML berhasil disalin ke clipboard!");
-                      }}
-                      className="px-2.5 py-1 rounded bg-stone-800 hover:bg-stone-700 text-stone-200 text-[11px] font-medium transition-colors flex items-center gap-1 cursor-pointer"
-                    >
-                      <span className="material-symbols-outlined text-[13px]">content_copy</span>
-                      <span>Salin</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (confirm("Kembalikan kode HTML ke template bawaan Royal Gold?")) {
-                          onChange({ ...data, customHtml: PRESET_HTML_TEMPLATES[0].html });
-                        }
-                      }}
-                      className="px-2.5 py-1 rounded bg-stone-800 hover:bg-stone-700 text-stone-200 text-[11px] font-medium transition-colors flex items-center gap-1 cursor-pointer"
-                    >
-                      <span className="material-symbols-outlined text-[13px]">restart_alt</span>
-                      <span>Reset</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Textarea Editor */}
-                <textarea
-                  ref={htmlEditorRef}
-                  value={data.customHtml || ""}
-                  onChange={(e) => onChange({ ...data, customHtml: e.target.value })}
-                  placeholder="<!DOCTYPE html>&#10;<html>&#10;...&#10;<h1>The Wedding of {{couple_names}}</h1>"
-                  rows={20}
-                  spellCheck={false}
-                  className="w-full bg-[#181a20] text-stone-200 font-mono text-xs p-4 leading-relaxed outline-none resize-y border-0 focus:ring-0 selection:bg-primary/30"
-                  style={{ minHeight: "420px" }}
-                />
-
-                {/* Editor Footer Bar */}
-                <div className="bg-[#121316] px-4 py-2 border-t border-stone-800 flex items-center justify-between text-[11px] text-stone-400">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>Real-time Live Sync aktif ke Canvas Preview</span>
-                  </div>
-                  <span className="font-mono">UTF-8 • Sandbox Isolated</span>
-                </div>
-              </div>
-
-              {/* Collapsible Live Tag Values Inspector */}
-              <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/20 overflow-hidden shadow-sm">
-                <button
-                  type="button"
-                  onClick={() => setShowTagCheatSheet(!showTagCheatSheet)}
-                  className="w-full p-4 flex items-center justify-between text-left hover:bg-surface-container transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary text-[18px]">table_chart</span>
-                    <span className="text-xs font-bold uppercase tracking-wider text-on-surface">
-                      Tabel Data Pengantin Saat Ini (Live Values)
-                    </span>
-                  </div>
-                  <span className="material-symbols-outlined text-[18px] text-on-surface-variant transition-transform">
-                    {showTagCheatSheet ? "expand_less" : "expand_more"}
-                  </span>
-                </button>
-
-                {showTagCheatSheet && (
-                  <div className="p-4 border-t border-outline-variant/15 overflow-x-auto">
-                    <table className="w-full text-xs text-left">
-                      <thead>
-                        <tr className="border-b border-outline-variant/20 text-on-surface-variant text-[11px] font-bold uppercase tracking-wider">
-                          <th className="pb-2 pr-3">Tag Placeholder</th>
-                          <th className="pb-2 pr-3">Keterangan</th>
-                          <th className="pb-2">Nilai Saat Ini (Diambil dari Form Anda)</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-outline-variant/10 font-sans">
-                        {[
-                          { tag: "{{couple_names}}", label: "Nama Panggilan", val: `${data.groom.nickName || "Dimas"} & ${data.bride.nickName || "Sarah"}` },
-                          { tag: "{{groom_name}}", label: "Mempelai Pria", val: data.groom.fullName || "Dimas Prasetyo, S.T." },
-                          { tag: "{{bride_name}}", label: "Mempelai Wanita", val: data.bride.fullName || "Sarah Anindita, M.Ds." },
-                          { tag: "{{akad_date}}", label: "Tanggal Akad", val: data.events.akad.date || "Sabtu, 24 Agustus 2026" },
-                          { tag: "{{akad_venue}}", label: "Lokasi Akad", val: data.events.akad.venue || "Masjid Agung Sunda Kelapa" },
-                          { tag: "{{resepsi_date}}", label: "Tanggal Resepsi", val: data.events.resepsi.date || "Sabtu, 24 Agustus 2026" },
-                          { tag: "{{resepsi_venue}}", label: "Lokasi Resepsi", val: data.events.resepsi.venue || "The Dharmawangsa Ballroom" },
-                          { tag: "{{quote_source}}", label: "Sumber Kutipan", val: data.quote.source || "QS. Ar-Rum: 21" },
-                          { tag: "{{gift_bca}}", label: "Rekening BCA", val: data.gift.bca || "8830-1928-11" },
-                          { tag: "{{guest_name}}", label: "Nama Tamu", val: "[Dinamis dari URL ?to= atau ?guest=]" },
-                          { tag: "{{gallery_grid}}", label: "Galeri Foto", val: `[${(data.gallery || []).length} Foto Terunggah]` },
-                          { tag: "{{stories_timeline}}", label: "Kisah Cinta", val: `[${(data.stories || []).length} Kisah Cinta]` },
-                        ].map((row) => (
-                          <tr key={row.tag} className="hover:bg-surface-container-low transition-colors">
-                            <td className="py-2 pr-3 font-mono text-[11px] text-primary font-bold">{row.tag}</td>
-                            <td className="py-2 pr-3 text-on-surface-variant">{row.label}</td>
-                            <td className="py-2 font-medium text-on-surface truncate max-w-xs">{row.val}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           )}
         </div>

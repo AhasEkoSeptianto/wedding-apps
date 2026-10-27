@@ -55,6 +55,16 @@ export default function DashboardHeader({ onToggleSidebar }: DashboardHeaderProp
 
       {/* Right Controls */}
       <div className="flex items-center gap-3 sm:gap-4">
+        {user?.role === "admin" && (
+          <Link
+            href="/admin/dashboard"
+            className="text-xs font-bold px-2.5 py-1.5 rounded-full bg-amber-500/15 text-amber-900 border border-amber-400/40 flex items-center gap-1 hover:bg-amber-500/25 transition-colors"
+          >
+            <span className="material-symbols-outlined text-[15px]">terminal</span>
+            <span className="hidden sm:inline">Panel Admin</span>
+          </Link>
+        )}
+
         {user ? (
           <div className="hidden sm:flex flex-col text-right">
             <span className="text-xs font-semibold text-on-surface leading-tight">

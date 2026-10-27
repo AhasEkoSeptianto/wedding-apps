@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function FooterCatalog() {
   return (
     <footer id="paket" className="w-full bg-surface-container-low border-t border-outline-variant/30 mt-16">
@@ -90,7 +92,14 @@ export default function FooterCatalog() {
 
         <div className="pt-4 border-t border-outline-variant/30 flex flex-col sm:flex-row items-center justify-between text-on-surface-variant text-xs gap-2">
           <span>Diciptakan dengan penuh cinta di Indonesia.</span>
-          <span>Elegan, Abadi, &amp; Tanpa Batas.</span>
+          <div className="flex items-center gap-4">
+            <span>Elegan, Abadi, &amp; Tanpa Batas.</span>
+            <span>•</span>
+            <Link href="/admin/login" className="hover:text-primary transition-colors inline-flex items-center gap-1 font-medium">
+              <span className="material-symbols-outlined text-[13px]">admin_panel_settings</span>
+              <span>Portal Pekerja / Admin</span>
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

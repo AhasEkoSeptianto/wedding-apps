@@ -1,229 +1,192 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-
-export interface TemplateItem {
-  id: string;
-  title: string;
-  designer: string;
-  category: string[];
-  themeTag: string;
-  tier: "vip" | "gold" | "free";
-  tierBadge: string;
-  tierBadgeColor: string;
-  rating: number;
-  popularity: number;
-  couplesCount: string;
-  price: string;
-  imageUrl: string;
-  imageAlt: string;
-}
-
-const TEMPLATES: TemplateItem[] = [
-  {
-    id: "royal-bloom",
-    title: "The Royal Bloom",
-    designer: "Atelier Janji",
-    category: ["royal", "botanical"],
-    themeTag: "Royal Champagne",
-    tier: "vip",
-    tierBadge: "Paket VIP",
-    tierBadgeColor: "bg-tertiary-fixed text-on-tertiary-fixed",
-    rating: 4.9,
-    popularity: 1480,
-    couplesCount: "1.4k+ pasangan",
-    price: "Rp 249.000",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCCe-lOr70z0BHX3WNohr5iBvzHYw9qpa94vnghmX9QU3W3qsVrAErCrJtB26a71OtHGFQbS3C-NGLhraGQSiarEda0zZHv5ppeDf4D6yCFHVWu9HO-yphf8yqoMYbHdwrK5WvdyOlnblOsYrZERRqPd2znz72p7fguhPHguQ327Qj21npXwNX-JPq-ZpeyjyVp2Kqr2MsyVp0GRkz-Tk6EkRp0s14DaA0tbXWWVo5x_UJ6QVCbPty9JA",
-    imageAlt: "Luxurious golden wedding invitation card mockup on ivory heavy cotton paper with embossed delicate gold foil botanical foliage",
-  },
-  {
-    id: "serene-botanical",
-    title: "Serene Botanical",
-    designer: "Narra Studio",
-    category: ["botanical", "rustic"],
-    themeTag: "Botanical Sage",
-    tier: "gold",
-    tierBadge: "Terlaris",
-    tierBadgeColor: "bg-secondary-fixed text-on-secondary-fixed",
-    rating: 5.0,
-    popularity: 1820,
-    couplesCount: "1.8k+ pasangan",
-    price: "Rp 149.000",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCeNbGo2PcbSSnFS3DFeMHtdxjjWvZz3RFiu5RpPSc3R8Y-G8mv5PmutELXssCmQ4XmRTjg_qvQg4eAPbXo2SvCc53OdxhrzDj9Gv2Vf66Ho0weviPjVAajUk-YaD5bgiZl7yikv_UxzFEX6uvw3hQBSXX3rYnpDcqh4KjMjSpkVzKyBdpCrzQrVlS2jUIHw998ZgNF9noiflwFw0w-BZnXvS1aEgfxAjrDL_xnZQBDKdLF_6DjrE1Ziw",
-    imageAlt: "Sage green and eucalyptus botanical digital wedding invitation sleeve preview, watercolor olive branches",
-  },
-  {
-    id: "golden-amore",
-    title: "Golden Amore",
-    designer: "Maison L'Amour",
-    category: ["royal", "artdeco"],
-    themeTag: "Classic Royal",
-    tier: "vip",
-    tierBadge: "Paket VIP",
-    tierBadgeColor: "bg-primary-fixed text-on-primary-fixed",
-    rating: 4.8,
-    popularity: 1120,
-    couplesCount: "1.1k+ pasangan",
-    price: "Rp 249.000",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuC7bqxp6lprocYuM0Y3PYd-WbkQcEVdc8V9CELVdCULuYThmdC4JlRM7WMbx2ED7xcb4v8j1uR3an3_ERONAUXo6GNhE9BYnVlMVqHm_MdNNb1Jng13X5ZY8QddbSl85HIWY9YHdHD9rHKIP3urfJA-gPhOLK45rZGWH7IBQcjMkhhlmgBgvZiC6etAnj6N5kYwdgrlais_UvxhGDuGBfEclNugKWRj9CLSraeaMjLr63N-vv0Mo0RrBA",
-    imageAlt: "Smartphone mock-up displaying luxury gold foil wedding invitation with geometric art deco borders",
-  },
-  {
-    id: "heritage-kasunanan",
-    title: "Heritage Kasunanan",
-    designer: "Pusaka Visual",
-    category: ["traditional"],
-    themeTag: "Adat Jawa Karaton",
-    tier: "gold",
-    tierBadge: "Adat Favorit",
-    tierBadgeColor: "bg-tertiary-fixed text-on-tertiary-fixed",
-    rating: 4.9,
-    popularity: 2100,
-    couplesCount: "2.1k+ pasangan",
-    price: "Rp 149.000",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCBvxKNAJFQLI0PAKy1u6x5216TXqxhTDo50f4zYp-zUcaADho7TNnTpVf_GK9o-_kp_UlWidgZwpuYd71qNS8tmyFbS8TxDFPR2VW9oOBaE2sakUfbWgkxmmY8yMPpEZK3MUhiZruh_qYmOcyMJU-AXKd16i_s48mo4uF6Vam6zZugZyAUG0bEmFHAgaSzN-yvxM4lBW9amOZYT-gUrmwrGEylcA5730wPZO9FZb0u0_Xksn5cKpHtfg",
-    imageAlt: "Traditional Indonesian Javanese royal wedding invitation design, golden batik kawung ornament",
-  },
-  {
-    id: "minimalist-elegance",
-    title: "Minimalist Elegance",
-    designer: "Studio Linimasa",
-    category: ["minimalist"],
-    themeTag: "Modern Editorial",
-    tier: "free",
-    tierBadge: "Gratis",
-    tierBadgeColor: "bg-secondary-fixed text-on-secondary-fixed",
-    rating: 4.9,
-    popularity: 2950,
-    couplesCount: "2.9k+ pasangan",
-    price: "Gratis",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCH12rI5-CVhQf0XDmK9qPdXhs5a4NklUpY3iHCtlMTTaTIVIY2mtbSHBFFKANevQSPD8NUa7XyS76Vm70TSxllpO3mmRAgMn_N34qOL57le7Cwl2MF4i7Vj71AXvu2iQIROUsvvmAA_Mty00jLf_TS6cKd6x6ksf-xil-t9GxtLXZMnA2n4I3OsGH6AYYAcpDq2O26G6sra89tqTc6ey7M70IPgMAsT40gI0C_JW8ahNFs6yH6vIRIpg",
-    imageAlt: "Editorial minimalist clean digital wedding invitation mockup on textured off-white heavy linen paper",
-  },
-  {
-    id: "emerald-romance",
-    title: "Emerald Romance",
-    designer: "Bespoke Atelier",
-    category: ["botanical", "royal"],
-    themeTag: "Emerald Forest",
-    tier: "gold",
-    tierBadge: "Paket Gold",
-    tierBadgeColor: "bg-surface-container-highest text-on-surface",
-    rating: 4.8,
-    popularity: 980,
-    couplesCount: "980+ pasangan",
-    price: "Rp 149.000",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuA1pPWwuVqL0YfCOJRw9aDxnOxSXW2vwf5XIoPag_Pefqz99r5psN978paVKJx13rL2MhNdDwjxoPdUC-cwcHEhu_rxWYhApZgCRhca66lKPuBoTLpCWWn8VNtwDrQYD5Fy9qKRG7JXFgroeRjKs2kmzqydXvlKYoAnMLSDsJseEKgzguiBncOraK-aMFcy926OE2F-kQEyjm7H6OOBVHJhgc7KkoZBDguH24PYl9124zKx4pF-hhxalg",
-    imageAlt: "Deep emerald green invitation card with intricate warm champagne gold filigree borders",
-  },
-  {
-    id: "blushing-petals",
-    title: "Blushing Petals",
-    designer: "Floraison Paper",
-    category: ["rustic", "botanical"],
-    themeTag: "Rustic Floral",
-    tier: "free",
-    tierBadge: "Gratis",
-    tierBadgeColor: "bg-secondary-fixed text-on-secondary-fixed",
-    rating: 4.9,
-    popularity: 1650,
-    couplesCount: "1.6k+ pasangan",
-    price: "Gratis",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCP_18ZCTmtQ_wQMUAfykjFiRGyzJns0ToVhWDXFrrs6D-lQ9dB4ulqkxr_WZsGJP8ahMCGz5rRwKJnaP9H-aHpR3IWil8ZKh3GlTeAPW_JP4rAk68ve_uFqzJQRJNuCA8_Fxn4-HNb3MeS-WPro-QpInDa05aF869BT3BFbMyrkiJ69dB0oH08xOtJNDLCtCaQjERGgFt2zJbELu7Ph2Ts4M_rGG7opKTAj3UbyvRXTm0yJsNGxYHbyQ",
-    imageAlt: "Soft dusty rose blush wedding invitation card mockup with pressed dried floral petals",
-  },
-  {
-    id: "noir-celestial",
-    title: "Noir Celestial",
-    designer: "Vogue Wedding Studio",
-    category: ["artdeco", "minimalist"],
-    themeTag: "Art Deco Noir",
-    tier: "vip",
-    tierBadge: "Eksklusif",
-    tierBadgeColor: "bg-tertiary-fixed text-on-tertiary-fixed",
-    rating: 4.9,
-    popularity: 870,
-    couplesCount: "870+ pasangan",
-    price: "Rp 299.000",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuB2XMyqL3mItmvJSaJaJcjcJPCHdnVstJeWBPOq9GESxO-u7lSMn4fwahDJBENRRRs4e85oY7Qnvp6yd3dJqO-sJzLOCke6hd1vz0wwZRuLi2W_kUf8hNiVwR4FDdbGqgAe7iBMTcHHR8EqiHqQ7suzO6ttyXOHfhTRN7NIFCkrxeWQkxvqh0NsznL_pqJZKpZVPTC7pnmFugS3aEnWAVoGj-q0eUbEjuJQu_qYyvLWtz3EvPOUaT9I8A",
-    imageAlt: "Dramatic modern monochrome dark mode wedding invitation on matte black cotton cardstock with refined metallic gold foil",
-  },
-];
-
-const CATEGORIES = [
-  { id: "all", label: "Semua Tema" },
-  { id: "rustic", label: "Rustic & Vintage" },
-  { id: "botanical", label: "Botanical Floral" },
-  { id: "royal", label: "Royal Gold & Luxury" },
-  { id: "minimalist", label: "Minimalist Modern" },
-  { id: "traditional", label: "Adat Tradisional (Jawa, Minang, Sunda, Batak, Bali)" },
-  { id: "artdeco", label: "Monokrom & Art Deco" },
-];
+import { useEffect, useMemo, useState } from "react";
+import { api } from "@/lib/api";
+import { HtmlTemplate, WeddingData } from "@/types";
+import { DEFAULT_WEDDING_DATA } from "@/lib/defaultWedding";
+import { renderHtmlTemplate, PRESET_HTML_TEMPLATES } from "@/lib/templateEngine";
+import CoverOverlay from "@/components/CoverOverlay";
 
 interface TemplateCatalogProps {
   searchQuery: string;
 }
 
+const SAMPLE_WEDDING_DATA: WeddingData = {
+  ...DEFAULT_WEDDING_DATA,
+  title: "Pernikahan Dimas & Sarah",
+  slug: "dimas-sarah",
+};
+
 export default function TemplateCatalog({ searchQuery }: TemplateCatalogProps) {
+  const [templates, setTemplates] = useState<HtmlTemplate[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [onlyFree, setOnlyFree] = useState(false);
   const [sortBy, setSortBy] = useState("popular");
-  const [modeFilter, setModeFilter] = useState("all");
-  const [featureFilter, setFeatureFilter] = useState("all");
 
-  const filteredTemplates = useMemo(() => {
-    return TEMPLATES.filter((item) => {
-      // Category match
-      const matchesCategory =
-        selectedCategory === "all" || item.category.includes(selectedCategory);
+  // Modal State for Preview & Album
+  const [activeModalTemplate, setActiveModalTemplate] = useState<HtmlTemplate | null>(null);
+  const [modalTab, setModalTab] = useState<"album" | "interactive">("album");
+  const [selectedAlbumIndex, setSelectedAlbumIndex] = useState(0);
+  const [interactiveDevice, setInteractiveDevice] = useState<"mobile" | "desktop">("mobile");
+  const [isCoverOpen, setIsCoverOpen] = useState(false);
 
-      // Free toggle match
-      const matchesFree = !onlyFree || item.tier === "free";
+  // Fetch only published templates from MongoDB backend
+  useEffect(() => {
+    setIsLoading(true);
+    // api.getTemplates() without all=true returns only active (published) templates
+    api.getTemplates()
+      .then((res) => {
+        if (res.data && res.data.length > 0) {
+          setTemplates(res.data);
+        } else {
+          // Fallback presets if database is freshly starting
+          setTemplates(
+            PRESET_HTML_TEMPLATES.map((p) => ({
+              id: p.id,
+              slug: p.id,
+              name: p.name,
+              category: p.category,
+              description: p.description,
+              previewColor: p.previewColor,
+              thumbnailUrl:
+                p.id === "royal-gold-majesty"
+                  ? "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80"
+                  : p.id === "botanical-sage-romance"
+                  ? "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80"
+                  : "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80",
+              previewAlbum: [
+                "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+                "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
+                "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=1200&q=80",
+              ],
+              price: p.id === "vogue-noir-editorial" ? "Gratis" : "Rp 149.000",
+              designer: "Atelier JanjiSuci",
+              tier: p.id === "royal-gold-majesty" ? "vip" : p.id === "vogue-noir-editorial" ? "free" : "gold",
+              tierBadge: p.id === "royal-gold-majesty" ? "Paket VIP" : p.id === "vogue-noir-editorial" ? "Gratis" : "Terlaris",
+              html: p.html,
+              isPreset: true,
+              isActive: true,
+            }))
+          );
+        }
+      })
+      .catch((err) => {
+        console.warn("Could not fetch published templates from server, using fallback:", err);
+        setTemplates(
+          PRESET_HTML_TEMPLATES.map((p) => ({
+            id: p.id,
+            slug: p.id,
+            name: p.name,
+            category: p.category,
+            description: p.description,
+            previewColor: p.previewColor,
+            thumbnailUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+            previewAlbum: [
+              "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+            ],
+            price: "Rp 149.000",
+            designer: "Atelier JanjiSuci",
+            tier: "gold",
+            tierBadge: "Terlaris",
+            html: p.html,
+            isPreset: true,
+            isActive: true,
+          }))
+        );
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
 
-      // Search match
-      const query = searchQuery.toLowerCase().trim();
-      const matchesSearch =
-        !query ||
-        item.title.toLowerCase().includes(query) ||
-        item.themeTag.toLowerCase().includes(query) ||
-        item.designer.toLowerCase().includes(query) ||
-        item.category.some((c) => c.includes(query));
-
-      return matchesCategory && matchesFree && matchesSearch;
-    }).sort((a, b) => {
-      if (sortBy === "popular") return b.popularity - a.popularity;
-      if (sortBy === "rating") return b.rating - a.rating;
-      if (sortBy === "affordable") {
-        const aFree = a.tier === "free" ? 0 : 1;
-        const bFree = b.tier === "free" ? 0 : 1;
-        return aFree - bFree;
-      }
-      return 0;
+  // Compute dynamic categories based on published templates from MongoDB
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    templates.forEach((t) => {
+      if (t.category) set.add(t.category);
     });
-  }, [selectedCategory, onlyFree, searchQuery, sortBy]);
+    return [
+      { id: "all", label: "Semua Tema" },
+      ...Array.from(set).map((cat) => ({ id: cat.toLowerCase(), label: cat })),
+    ];
+  }, [templates]);
+
+  // Filtered Templates according to search, category, and free filter
+  const filteredTemplates = useMemo(() => {
+    return templates
+      .filter((item) => {
+        // Category match
+        const matchesCategory =
+          selectedCategory === "all" ||
+          (item.category && item.category.toLowerCase().includes(selectedCategory.toLowerCase()));
+
+        // Free toggle match
+        const matchesFree = !onlyFree || item.tier === "free" || item.price === "Gratis";
+
+        // Search match
+        const query = searchQuery.toLowerCase().trim();
+        const matchesSearch =
+          !query ||
+          item.name.toLowerCase().includes(query) ||
+          item.slug.toLowerCase().includes(query) ||
+          (item.description && item.description.toLowerCase().includes(query)) ||
+          (item.category && item.category.toLowerCase().includes(query)) ||
+          (item.designer && item.designer.toLowerCase().includes(query));
+
+        return matchesCategory && matchesFree && matchesSearch;
+      })
+      .sort((a, b) => {
+        if (sortBy === "popular") return (b.isPreset ? 1 : 0) - (a.isPreset ? 1 : 0);
+        if (sortBy === "affordable") {
+          const aFree = a.tier === "free" || a.price === "Gratis" ? 0 : 1;
+          const bFree = b.tier === "free" || b.price === "Gratis" ? 0 : 1;
+          return aFree - bFree;
+        }
+        return 0;
+      });
+  }, [templates, selectedCategory, onlyFree, searchQuery, sortBy]);
+
+  // Compiled HTML for interactive preview in modal
+  const compiledModalHtml = useMemo(() => {
+    if (!activeModalTemplate) return "";
+    return renderHtmlTemplate(activeModalTemplate.html || "", SAMPLE_WEDDING_DATA, {
+      guestName: "Bapak / Ibu Tamu Terhormat",
+    });
+  }, [activeModalTemplate]);
+
+  // All album photos for active modal template (fallback to thumbnail if album empty)
+  const currentAlbumPhotos = useMemo(() => {
+    if (!activeModalTemplate) return [];
+    const list = (activeModalTemplate.previewAlbum || []).filter(Boolean);
+    if (list.length === 0 && activeModalTemplate.thumbnailUrl) {
+      list.push(activeModalTemplate.thumbnailUrl);
+    }
+    if (list.length === 0) {
+      list.push("https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80");
+    }
+    return list;
+  }, [activeModalTemplate]);
+
+  const openPreviewModal = (template: HtmlTemplate, initialTab: "album" | "interactive" = "album") => {
+    setActiveModalTemplate(template);
+    setModalTab(initialTab);
+    setSelectedAlbumIndex(0);
+    setIsCoverOpen(false);
+  };
 
   return (
     <section className="w-full max-w-[1360px] mx-auto px-4 md:px-12 pb-16">
       {/* Category Pills (Horizontal Scroll) */}
-      <div className="w-full overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
+      <div className="w-full overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-none">
         <div className="flex items-center gap-2 min-w-max">
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-4 py-2 rounded-full font-semibold text-xs sm:text-sm transition-all shadow-xs cursor-pointer ${
+              className={`px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                 selectedCategory === cat.id
-                  ? "bg-secondary text-on-secondary shadow-sm"
-                  : "bg-surface-container-lowest text-on-surface-variant hover:text-primary"
+                  ? "bg-primary text-on-primary shadow-xs"
+                  : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface border border-outline-variant/20"
               }`}
             >
               {cat.label}
@@ -232,64 +195,34 @@ export default function TemplateCatalog({ searchQuery }: TemplateCatalogProps) {
         </div>
       </div>
 
-      {/* Secondary Filter Bar & Sort By */}
-      <div className="mt-4 p-4 rounded-xl bg-surface-container-low shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 border border-outline-variant/20">
-        {/* Design Modes & Feature Tags */}
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-lowest shadow-xs text-on-surface-variant text-xs sm:text-sm">
-            <span className="font-semibold text-on-surface">Mode:</span>
-            <select
-              value={modeFilter}
-              onChange={(e) => setModeFilter(e.target.value)}
-              className="bg-transparent text-primary font-semibold focus:outline-none cursor-pointer"
-            >
-              <option value="all">Semua Tampilan</option>
-              <option value="web-scroll">Web Scroll Interaktif</option>
-              <option value="envelope">Amplop Buka Animasi</option>
-              <option value="story">Instagram Story Style</option>
-            </select>
-          </div>
-
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-lowest shadow-xs text-on-surface-variant text-xs sm:text-sm">
-            <span className="font-semibold text-on-surface">Fitur Utama:</span>
-            <select
-              value={featureFilter}
-              onChange={(e) => setFeatureFilter(e.target.value)}
-              className="bg-transparent text-primary font-semibold focus:outline-none cursor-pointer"
-            >
-              <option value="all">Semua Fitur</option>
-              <option value="music">Ada Background Musik</option>
-              <option value="gallery3d">Galeri Foto 3D Parallax</option>
-              <option value="streaming">Live Video Streaming</option>
-              <option value="countdown">Hitung Mundur Waktu</option>
-              <option value="qr">Buku Tamu QR Code</option>
-            </select>
-          </div>
-
-          {/* Quick toggle chip */}
+      {/* Filter and Sorting Bar */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mt-6 pt-4 border-t border-outline-variant/30">
+        {/* Left Toggle & Status Notice */}
+        <div className="flex items-center gap-4 flex-wrap">
           <button
             onClick={() => setOnlyFree(!onlyFree)}
-            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors text-xs font-semibold cursor-pointer ${
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
               onlyFree
-                ? "bg-secondary text-on-secondary"
-                : "bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-high"
+                ? "bg-secondary-container text-on-secondary-container border-secondary"
+                : "bg-surface-container-low text-on-surface-variant border-outline-variant/30 hover:bg-surface-container"
             }`}
           >
-            <span className="material-symbols-outlined text-[16px] text-primary">
-              card_giftcard
+            <span className="material-symbols-outlined text-[16px]">
+              {onlyFree ? "check_circle" : "radio_button_unchecked"}
             </span>
             <span>Hanya Gratis</span>
           </button>
+
+          <span className="text-xs text-on-surface-variant flex items-center gap-1.5 bg-surface-container-lowest px-3 py-1 rounded-full border border-outline-variant/20">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Koleksi Terverifikasi dari Panel Admin</span>
+          </span>
         </div>
 
         {/* Sort & Count */}
         <div className="flex items-center justify-between lg:justify-end gap-4">
           <span className="text-xs sm:text-sm text-on-surface-variant">
-            Menampilkan{" "}
-            <strong className="text-on-surface">
-              {filteredTemplates.length} Desain
-            </strong>{" "}
-            Masterpiece
+            Menampilkan <strong className="text-on-surface">{filteredTemplates.length} Desain</strong> Masterpiece
           </span>
 
           <div className="flex items-center gap-2">
@@ -301,12 +234,10 @@ export default function TemplateCatalog({ searchQuery }: TemplateCatalogProps) {
                 id="sortBySelect"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="appearance-none pl-3 pr-8 py-1.5 rounded-lg bg-surface-container-lowest shadow-xs text-on-surface text-xs sm:text-sm font-medium cursor-pointer focus:outline-none"
+                className="appearance-none pl-3 pr-8 py-1.5 rounded-lg bg-surface-container-lowest shadow-xs text-on-surface text-xs sm:text-sm font-medium cursor-pointer focus:outline-none border border-outline-variant/20"
               >
                 <option value="popular">Terpopuler</option>
-                <option value="newest">Desain Terbaru</option>
                 <option value="affordable">Harga Terjangkau</option>
-                <option value="rating">Rating Tertinggi</option>
               </select>
               <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[18px]">
                 expand_more
@@ -316,137 +247,420 @@ export default function TemplateCatalog({ searchQuery }: TemplateCatalogProps) {
         </div>
       </div>
 
-      {/* Grid of Template Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
-        {filteredTemplates.map((template) => (
-          <div
-            key={template.id}
-            className="group flex flex-col rounded-xl bg-surface-container-lowest shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1.5 border border-outline-variant/20"
-          >
-            {/* Card Thumbnail */}
-            <div className="relative aspect-[3/4] w-full overflow-hidden bg-surface-container">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={template.imageUrl}
-                alt={template.imageAlt}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
+      {/* Grid of Template Cards (Published Only) */}
+      {isLoading ? (
+        <div className="py-24 text-center">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm font-medium text-on-surface">Memuat desain resmi terpublikasi...</p>
+        </div>
+      ) : filteredTemplates.length === 0 ? (
+        <div className="py-20 text-center bg-surface-container-lowest rounded-3xl border border-dashed border-outline-variant/30 p-8 my-8">
+          <span className="material-symbols-outlined text-outline text-[48px] mb-2 block">
+            palette
+          </span>
+          <h3 className="text-base font-bold text-on-surface">Belum ada template pada kategori ini</h3>
+          <p className="text-xs text-on-surface-variant mt-1 max-w-sm mx-auto">
+            Hanya desain yang telah dipublish oleh staf admin yang tampil di sini. Silakan periksa kembali beberapa saat lagi.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
+          {filteredTemplates.map((template) => (
+            <div
+              key={template.id || template.slug}
+              className="group flex flex-col rounded-2xl bg-surface-container-lowest shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1.5 border border-outline-variant/20"
+            >
+              {/* Card Thumbnail & Album Overlay */}
+              <div
+                className="relative aspect-[3/4] w-full overflow-hidden bg-stone-900 cursor-pointer"
+                onClick={() => openPreviewModal(template, "album")}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={
+                    template.thumbnailUrl ||
+                    (template.previewAlbum && template.previewAlbum[0]) ||
+                    "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80"
+                  }
+                  alt={template.name}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
 
-              {/* Hover Overlay with Live Demo and Choose */}
-              <div className="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                <div className="w-full flex items-center justify-between gap-2">
+                {/* Hover Action Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openPreviewModal(template, "album");
+                      }}
+                      className="flex-1 py-2 px-2.5 rounded-full bg-white/90 hover:bg-white text-stone-900 text-xs font-bold transition-all flex items-center justify-center gap-1 shadow-md"
+                    >
+                      <span className="material-symbols-outlined text-[16px] text-primary">photo_library</span>
+                      <span>Lihat Album</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openPreviewModal(template, "interactive");
+                      }}
+                      className="flex-1 py-2 px-2.5 rounded-full bg-primary hover:bg-primary-container text-on-primary text-xs font-bold transition-all flex items-center justify-center gap-1 shadow-md"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">visibility</span>
+                      <span>Demo Live</span>
+                    </button>
+                  </div>
+
                   <Link
-                    href={`/demo?theme=${template.id}`}
-                    className="flex-1 py-2 px-2 rounded-full bg-surface-container-lowest/90 backdrop-blur-md text-on-surface text-xs font-semibold hover:bg-surface-container-lowest transition-colors flex items-center justify-center gap-1 shadow-sm"
+                    href={`/editor?theme=${template.slug}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-full py-2 px-3 rounded-full bg-primary hover:bg-primary-container text-on-primary text-xs font-bold text-center shadow-lg transition-all flex items-center justify-center gap-1"
                   >
-                    <span className="material-symbols-outlined text-[16px]">visibility</span>
-                    <span>Live Demo</span>
-                  </Link>
-                  <Link
-                    href={`/editor?theme=${template.id}`}
-                    className="flex-1 py-2 px-2 rounded-full bg-primary text-on-primary text-xs font-semibold hover:bg-primary-container transition-colors flex items-center justify-center gap-1 shadow-sm"
-                  >
-                    <span>Pilih Desain</span>
+                    <span>Gunakan Desain Ini</span>
                     <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                   </Link>
                 </div>
+
+                {/* Badges */}
+                <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
+                  {/* Category Pill */}
+                  <span
+                    className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-white shadow-md uppercase tracking-wider backdrop-blur-md"
+                    style={{ backgroundColor: template.previewColor || "#b38742" }}
+                  >
+                    {template.category}
+                  </span>
+
+                  {/* Tier / Status Ribbon */}
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/95 text-stone-900 shadow-sm border border-stone-200">
+                    {template.tierBadge || "Eksklusif"}
+                  </span>
+                </div>
+
+                {/* Album Photo Count Pill */}
+                {(template.previewAlbum || []).length > 1 && (
+                  <span className="absolute bottom-3 right-3 px-2 py-0.5 rounded-md bg-stone-900/80 backdrop-blur-sm text-white text-[10px] font-medium flex items-center gap-1 border border-white/20">
+                    <span className="material-symbols-outlined text-[13px]">collections</span>
+                    <span>{(template.previewAlbum || []).length} Foto Album</span>
+                  </span>
+                )}
               </div>
 
-              {/* Tier Ribbon */}
-              <span
-                className={`absolute top-3 right-3 px-2.5 py-0.5 rounded-full text-[11px] font-semibold shadow-xs ${template.tierBadgeColor}`}
-              >
-                {template.tierBadge}
-              </span>
+              {/* Card Details */}
+              <div className="p-4 flex flex-col flex-grow justify-between">
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <h3
+                      onClick={() => openPreviewModal(template, "album")}
+                      className="font-serif text-base font-bold text-on-surface truncate group-hover:text-primary transition-colors cursor-pointer"
+                    >
+                      {template.name}
+                    </h3>
+                    <div className="flex items-center gap-1 shrink-0 text-primary">
+                      <span className="material-symbols-outlined text-[15px]">verified</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-on-surface-variant truncate">
+                    Desainer: <span className="text-on-surface font-medium">{template.designer || "Atelier JanjiSuci"}</span>
+                  </p>
+                  <p className="text-xs text-on-surface-variant line-clamp-2 mt-2 leading-relaxed">
+                    {template.description || "Desain tata letak HTML elegan dengan nuansa modern dan ornamen khas Indonesia."}
+                  </p>
+                </div>
 
-              {/* Theme Tag */}
-              <span className="absolute bottom-3 left-3 px-2 py-0.5 rounded bg-surface/90 backdrop-blur-sm text-primary text-[11px] font-semibold group-hover:opacity-0 transition-opacity">
-                {template.themeTag}
-              </span>
+                <div className="pt-3 mt-3 flex items-center justify-between border-t border-outline-variant/15">
+                  <button
+                    type="button"
+                    onClick={() => openPreviewModal(template, "album")}
+                    className="text-xs font-semibold text-primary hover:text-primary-container transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[15px]">collections</span>
+                    <span>Lihat Preview</span>
+                  </button>
+
+                  <span className="text-sm font-bold text-primary font-mono">
+                    {template.price || "Rp 149.000"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* FORM PREVIEW & ALBUM MODAL */}
+      {activeModalTemplate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-stone-950/85 backdrop-blur-md animate-fade-in">
+          <div className="bg-surface-container-lowest rounded-3xl w-full max-w-5xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-outline-variant/30">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-outline-variant/20 flex items-center justify-between bg-surface-container-lowest">
+              <div className="flex items-center gap-3 min-w-0">
+                <span
+                  className="w-3.5 h-3.5 rounded-full shrink-0"
+                  style={{ backgroundColor: activeModalTemplate.previewColor || "#b38742" }}
+                />
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-serif text-lg sm:text-xl font-bold text-on-surface truncate">
+                      {activeModalTemplate.name}
+                    </h3>
+                    <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">
+                      {activeModalTemplate.category}
+                    </span>
+                  </div>
+                  <p className="text-xs text-on-surface-variant">
+                    Karya Eksklusif {activeModalTemplate.designer || "JanjiSuci Studio"} &bull; Terverifikasi Panel Staf
+                  </p>
+                </div>
+              </div>
+
+              {/* View Mode Switcher: Album Foto vs Live Interactive */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center bg-surface-container p-1 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setModalTab("album")}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                      modalTab === "album"
+                        ? "bg-surface-container-lowest text-primary shadow-xs"
+                        : "text-on-surface-variant hover:text-on-surface"
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[16px]">photo_library</span>
+                    <span>Album Mockup</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setModalTab("interactive")}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                      modalTab === "interactive"
+                        ? "bg-surface-container-lowest text-primary shadow-xs"
+                        : "text-on-surface-variant hover:text-on-surface"
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[16px]">devices</span>
+                    <span>Interactive Demo</span>
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveModalTemplate(null)}
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[20px]">close</span>
+                </button>
+              </div>
             </div>
 
-            {/* Card Details */}
-            <div className="p-4 flex flex-col flex-grow justify-between">
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <h3 className="font-serif text-lg font-bold text-on-surface truncate">
-                    {template.title}
-                  </h3>
-                  <div className="flex items-center gap-1 shrink-0 text-primary">
-                    <span className="material-symbols-outlined filled text-[16px]">
-                      star
-                    </span>
-                    <span className="text-xs font-bold">{template.rating.toFixed(1)}</span>
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto">
+              {/* TAB 1: ALBUM FOTO PREVIEW */}
+              {modalTab === "album" && (
+                <div className="p-6 space-y-6">
+                  {/* Hero Showcase Large Preview */}
+                  <div className="relative aspect-[16/9] sm:aspect-[21/9] w-full rounded-2xl overflow-hidden bg-stone-900 border border-outline-variant/30 shadow-lg">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={currentAlbumPhotos[selectedAlbumIndex]}
+                      alt={`${activeModalTemplate.name} Preview ${selectedAlbumIndex + 1}`}
+                      className="w-full h-full object-cover transition-all duration-500"
+                    />
+
+                    {/* Image Counter Badge */}
+                    <div className="absolute bottom-4 right-4 px-3 py-1 rounded-full bg-stone-950/80 backdrop-blur-md text-white text-xs font-semibold border border-white/20">
+                      Foto {selectedAlbumIndex + 1} dari {currentAlbumPhotos.length}
+                    </div>
+                  </div>
+
+                  {/* Thumbnail Carousel Strip */}
+                  <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
+                    {currentAlbumPhotos.map((url, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setSelectedAlbumIndex(idx)}
+                        className={`relative w-28 h-20 rounded-xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
+                          selectedAlbumIndex === idx
+                            ? "border-primary ring-2 ring-primary/30 scale-105"
+                            : "border-outline-variant/30 opacity-75 hover:opacity-100"
+                        }`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={url}
+                          alt={`Thumbnail ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Template Details & Features Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-outline-variant/20">
+                    <div className="md:col-span-2 space-y-2">
+                      <h4 className="font-bold text-sm text-on-surface">Deskripsi &amp; Konsep Desain</h4>
+                      <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+                        {activeModalTemplate.description ||
+                          "Template HTML modern berkelas tinggi dengan tata letak visual elegan, ramah layar smartphone, dan ornamen mewah untuk menyempurnakan hari bahagia Anda."}
+                      </p>
+
+                      <div className="pt-3 flex items-center gap-3 flex-wrap">
+                        <span className="text-xs font-semibold text-on-surface-variant">Fitur Bawaan:</span>
+                        <span className="px-2.5 py-1 rounded-md bg-surface-container text-xs text-on-surface">
+                          Sampul Buka Undangan
+                        </span>
+                        <span className="px-2.5 py-1 rounded-md bg-surface-container text-xs text-on-surface">
+                          Countdown Timer
+                        </span>
+                        <span className="px-2.5 py-1 rounded-md bg-surface-container text-xs text-on-surface">
+                          Galeri Foto Cloudinary
+                        </span>
+                        <span className="px-2.5 py-1 rounded-md bg-surface-container text-xs text-on-surface">
+                          Amplop Digital 1-Klik
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/20 space-y-3">
+                      <div>
+                        <span className="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider block">
+                          Warna Aksen Desain
+                        </span>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span
+                            className="w-5 h-5 rounded-full border border-outline-variant/40"
+                            style={{ backgroundColor: activeModalTemplate.previewColor || "#b38742" }}
+                          />
+                          <span className="text-xs font-mono font-bold text-on-surface">
+                            {activeModalTemplate.previewColor || "#b38742"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-outline-variant/20">
+                        <span className="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider block">
+                          Investasi Desain
+                        </span>
+                        <div className="text-lg font-bold text-primary font-mono mt-0.5">
+                          {activeModalTemplate.price || "Rp 149.000"}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <p className="text-xs text-on-surface-variant">
-                  Desainer: <span className="text-on-surface font-medium">{template.designer}</span>
-                </p>
+              )}
+
+              {/* TAB 2: LIVE INTERACTIVE PREVIEW */}
+              {modalTab === "interactive" && (
+                <div className="p-4 sm:p-6 bg-stone-900 flex flex-col items-center justify-center min-h-[500px]">
+                  {/* Device Controller & Cover State Toggle */}
+                  <div className="mb-4 flex items-center justify-between w-full max-w-4xl px-2 flex-wrap gap-2">
+                    <div className="flex items-center gap-2 bg-stone-950 px-3 py-1.5 rounded-full border border-stone-800">
+                      <span className="text-xs text-stone-400">Pilih Tampilan:</span>
+                      <button
+                        type="button"
+                        onClick={() => setInteractiveDevice("mobile")}
+                        className={`px-3 py-1 rounded-full text-xs font-semibold cursor-pointer ${
+                          interactiveDevice === "mobile"
+                            ? "bg-primary text-on-primary"
+                            : "text-stone-300 hover:text-white"
+                        }`}
+                      >
+                        Mobile (390px)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setInteractiveDevice("desktop")}
+                        className={`px-3 py-1 rounded-full text-xs font-semibold cursor-pointer ${
+                          interactiveDevice === "desktop"
+                            ? "bg-primary text-on-primary"
+                            : "text-stone-300 hover:text-white"
+                        }`}
+                      >
+                        Desktop
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsCoverOpen((prev) => !prev)}
+                      className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-stone-950 text-stone-300 hover:text-white flex items-center gap-1.5 cursor-pointer border border-stone-800 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">
+                        {isCoverOpen ? "mail_lock" : "drafts"}
+                      </span>
+                      <span>{isCoverOpen ? "Tutup Sampul Kembali" : "Posisi Sampul Aktif"}</span>
+                    </button>
+                  </div>
+
+                  {/* Device Canvas Frame with Cover Overlay Active by Default */}
+                  <div
+                    className={`relative bg-white rounded-3xl shadow-2xl overflow-hidden border border-stone-800 transition-all ${
+                      interactiveDevice === "mobile"
+                        ? "w-[390px] h-[640px] ring-8 ring-stone-950"
+                        : "w-full max-w-4xl h-[640px] rounded-xl"
+                    }`}
+                  >
+                    <CoverOverlay
+                      isOpen={isCoverOpen}
+                      onOpen={() => setIsCoverOpen(true)}
+                      weddingData={SAMPLE_WEDDING_DATA}
+                      isAbsolute={true}
+                      viewMode={interactiveDevice}
+                    />
+
+                    <div className={`w-full h-full transition-opacity duration-700 ${isCoverOpen ? "opacity-100" : "opacity-0"}`}>
+                      <iframe
+                        srcDoc={compiledModalHtml}
+                        title={activeModalTemplate.name}
+                        className="w-full h-full border-0"
+                        sandbox="allow-scripts allow-same-origin allow-popups"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer Bar */}
+            <div className="px-6 py-4 border-t border-outline-variant/20 flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface-container-lowest">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-on-surface-variant">
+                  Harga: <strong className="text-on-surface font-mono">{activeModalTemplate.price || "Rp 149.000"}</strong>
+                </span>
+                <span className="text-outline-variant">&bull;</span>
+                <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px]">check</span>
+                  <span>Siap Dipakai Langsung</span>
+                </span>
               </div>
 
-              <div className="pt-4 mt-2 flex items-center justify-between border-t border-outline-variant/15">
-                <div className="flex items-center gap-1 text-on-surface-variant text-xs">
-                  <span className="material-symbols-outlined text-[16px] text-secondary">
-                    favorite
-                  </span>
-                  <span>{template.couplesCount}</span>
-                </div>
-                <span
-                  className={`text-sm font-bold ${
-                    template.price === "Gratis" ? "text-secondary" : "text-primary"
-                  }`}
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setActiveModalTemplate(null)}
+                  className="px-4 py-2.5 rounded-xl border border-outline-variant/30 text-xs font-semibold text-on-surface hover:bg-surface-container transition-colors flex-1 sm:flex-initial"
                 >
-                  {template.price}
-                </span>
+                  Tutup
+                </button>
+
+                <Link
+                  href={`/editor?theme=${activeModalTemplate.slug}`}
+                  className="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary text-xs font-bold shadow-md transition-all flex items-center justify-center gap-1.5 flex-1 sm:flex-initial"
+                >
+                  <span>Pilih &amp; Buat Undangan Ini</span>
+                  <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </Link>
               </div>
             </div>
           </div>
-        ))}
-      </div>
-
-      {/* Pagination */}
-      <div className="mt-12 flex items-center justify-center gap-2">
-        <button
-          type="button"
-          aria-label="Previous Page"
-          className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
-        >
-          <span className="material-symbols-outlined text-[20px]">chevron_left</span>
-        </button>
-        <button
-          type="button"
-          className="w-10 h-10 rounded-full bg-primary text-on-primary text-sm font-bold shadow-sm cursor-pointer"
-        >
-          1
-        </button>
-        <button
-          type="button"
-          className="w-10 h-10 rounded-full bg-surface-container-lowest hover:bg-surface-container flex items-center justify-center text-on-surface text-sm transition-colors cursor-pointer"
-        >
-          2
-        </button>
-        <button
-          type="button"
-          className="w-10 h-10 rounded-full bg-surface-container-lowest hover:bg-surface-container flex items-center justify-center text-on-surface text-sm transition-colors cursor-pointer"
-        >
-          3
-        </button>
-        <span className="px-2 text-outline">...</span>
-        <button
-          type="button"
-          className="w-10 h-10 rounded-full bg-surface-container-lowest hover:bg-surface-container flex items-center justify-center text-on-surface text-sm transition-colors cursor-pointer"
-        >
-          15
-        </button>
-        <button
-          type="button"
-          aria-label="Next Page"
-          className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
-        >
-          <span className="material-symbols-outlined text-[20px]">chevron_right</span>
-        </button>
-      </div>
+        </div>
+      )}
     </section>
   );
 }
-

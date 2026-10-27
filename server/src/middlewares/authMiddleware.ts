@@ -44,3 +44,22 @@ export async function protect(req: AuthRequest, res: Response, next: NextFunctio
   }
 }
 
+export function requireAdmin(req: AuthRequest, res: Response, next: NextFunction): void {
+  if (!req.user) {
+    res.status(401).json({
+      success: false,
+      message: "Akses ditolak. Silakan login terlebih dahulu.",
+    });
+    return;
+  }
+
+  if (req.user.role !== "admin") {
+    res.status(403).json({
+      success: false,
+      message: "Akses ditolak. Halaman dan aksi ini hanya diperuntukkan bagi pekerja/staf administrasi.",
+    });
+    return;
+  }
+
+  next();
+}

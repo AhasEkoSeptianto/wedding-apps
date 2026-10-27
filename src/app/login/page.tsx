@@ -191,6 +191,18 @@ export default function LoginPage() {
               Daftar Akun Baru
             </Link>
           </div>
+
+          {/* Worker / Admin Portal Link */}
+          <div className="mt-4 pt-4 border-t border-outline-variant/15 text-center text-[11px] text-on-surface-variant">
+            <span>Staf atau pekerja JanjiSuci? </span>
+            <Link
+              href="/admin/login"
+              className="font-bold text-amber-700 hover:text-amber-800 transition-colors inline-flex items-center gap-0.5"
+            >
+              <span className="material-symbols-outlined text-[13px]">admin_panel_settings</span>
+              <span>Login Portal Administrasi</span>
+            </Link>
+          </div>
         </div>
       </div>
     </div>
