@@ -3,6 +3,9 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface IWedding extends Document {
   slug: string;
   title: string;
+  themeId?: string;
+  designMode?: "standard" | "custom_html";
+  customHtml?: string;
   groom: {
     fullName: string;
     nickName: string;
@@ -71,6 +74,19 @@ const WeddingSchema = new Schema<IWedding>(
     title: {
       type: String,
       default: "Pernikahan Dimas & Sarah",
+    },
+    themeId: {
+      type: String,
+      default: "royal-bloom",
+    },
+    designMode: {
+      type: String,
+      enum: ["standard", "custom_html"],
+      default: "standard",
+    },
+    customHtml: {
+      type: String,
+      default: "",
     },
     groom: {
       fullName: { type: String, default: "" },
@@ -142,4 +158,3 @@ const WeddingSchema = new Schema<IWedding>(
 );
 
 export const Wedding = mongoose.model<IWedding>("Wedding", WeddingSchema);
-

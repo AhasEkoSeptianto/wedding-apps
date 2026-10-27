@@ -16,10 +16,16 @@ function EditorStudioContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const slugParam = searchParams.get("slug");
+  const themeParam = searchParams.get("theme");
   const slug = slugParam || user?.weddingSlug || "dimas-sarah";
 
-  const [data, setData] = useState<WeddingData>(DEFAULT_WEDDING_DATA);
-  const [activeTab, setActiveTab] = useState<"pasangan" | "acara" | "galeri" | "fitur" | "rsvp">("pasangan");
+  const [data, setData] = useState<WeddingData>(() => ({
+    ...DEFAULT_WEDDING_DATA,
+    themeId: themeParam || DEFAULT_WEDDING_DATA.themeId || "royal-bloom",
+  }));
+  const [activeTab, setActiveTab] = useState<"tema" | "pasangan" | "acara" | "galeri" | "fitur" | "rsvp">(
+    themeParam ? "tema" : "pasangan"
+  );
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [toastText, setToastText] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -35,6 +41,9 @@ function EditorStudioContent() {
           setData({
             ...DEFAULT_WEDDING_DATA,
             ...res.data,
+            themeId: themeParam || res.data.themeId || "royal-bloom",
+            designMode: res.data.designMode || DEFAULT_WEDDING_DATA.designMode || "standard",
+            customHtml: res.data.customHtml || DEFAULT_WEDDING_DATA.customHtml,
             gallery: res.data.gallery || [],
             stories: res.data.stories !== undefined ? res.data.stories : (DEFAULT_WEDDING_DATA.stories || []),
           });
@@ -49,7 +58,7 @@ function EditorStudioContent() {
     return () => {
       isCurrent = false;
     };
-  }, [slug]);
+  }, [slug, themeParam]);
 
   const showToast = (msg: string) => {
     setToastText(msg);
@@ -119,54 +128,31 @@ function EditorStudioContent() {
                     Pernikahan {groomNick} &amp; {brideNick}
                   </h1>
                   <span className="px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[11px] font-semibold inline-flex items-center gap-1">
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        isSaving ? "bg-amber-500 animate-ping" : "bg-secondary animate-pulse"
-                      }`}
-                    />
-                    {isSaving ? "Menyimpan perubahan..." : "Tersinkron ke Cloud"}
+                    <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
+                    Aktif Mengedit
                   </span>
+                  {data.designMode === "custom_html" && (
+                    <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-bold">
+                      HTML Kustom
+                    </span>
+                  )}
                 </div>
-                <p className="text-xs text-on-surface-variant flex items-center gap-1.5 mt-0.5">
-                  <span className="material-symbols-outlined text-[14px] text-primary">
-                    cloud_done
-                  </span>
-                  <span>
-                    Sinkronisasi database: {lastSync} (Slug:{" "}
-                    <code className="text-primary font-mono">{slug}</code>)
-                  </span>
+                <p className="text-xs text-on-surface-variant flex items-center gap-2 mt-0.5">
+                  <span>Slug: <strong className="text-on-surface font-mono">{slug}</strong></span>
+                  <span>•</span>
+                  <span>Disinkronkan: {lastSync}</span>
                 </p>
               </div>
             </div>
 
-            {/* Quick Tool Actions */}
-            <div className="flex items-center gap-2 flex-wrap">
-              {/* Undo / Redo */}
-              <div className="flex items-center bg-surface-container rounded-full p-1 shadow-xs border border-outline-variant/15">
-                <button
-                  type="button"
-                  onClick={() => showToast("Fitur Undo tersedia")}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest transition-colors cursor-pointer"
-                  title="Undo (Ctrl+Z)"
-                >
-                  <span className="material-symbols-outlined text-[18px]">undo</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => showToast("Fitur Redo tersedia")}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest transition-colors cursor-pointer"
-                  title="Redo (Ctrl+Y)"
-                >
-                  <span className="material-symbols-outlined text-[18px]">redo</span>
-                </button>
-              </div>
-
+            {/* Action Bar */}
+            <div className="flex items-center gap-2 flex-wrap self-end lg:self-auto">
               {/* Buka Live Preview / Demo */}
               <Link
-                href={`/demo?slug=${slug}`}
+                href={`/demo?slug=${slug}${data.themeId ? `&theme=${data.themeId}` : ""}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-colors border border-outline-variant/20"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-colors border border-outline-variant/20 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px] text-primary">visibility</span>
                 <span>Live Demo</span>

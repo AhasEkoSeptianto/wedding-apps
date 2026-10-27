@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { WeddingData } from "@/types";
+import { getTheme } from "@/lib/themes";
 
 interface HeroSectionProps {
   weddingData?: WeddingData;
@@ -17,6 +18,7 @@ function capitalizeWords(str: string): string {
 }
 
 export default function HeroSection({ weddingData, viewMode }: HeroSectionProps) {
+  const theme = getTheme(weddingData?.themeId);
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -101,7 +103,10 @@ export default function HeroSection({ weddingData, viewMode }: HeroSectionProps)
       }}
     >
       <div className={`w-full mx-auto z-10 flex flex-col items-center ${isMobile ? "max-w-xs" : "max-w-2xl"}`}>
-        <span className="text-[11px] sm:text-xs uppercase tracking-[0.35em] text-wedding-gold-light mb-3 sm:mb-4">
+        <span
+          className="text-[11px] sm:text-xs uppercase tracking-[0.35em] mb-3 sm:mb-4"
+          style={{ color: theme.colors.accent }}
+        >
           The Wedding Celebration of
         </span>
 
@@ -114,7 +119,7 @@ export default function HeroSection({ weddingData, viewMode }: HeroSectionProps)
         </h1>
 
         <p className="flex items-center gap-2 text-xs sm:text-base tracking-widest text-white/90 mb-8 sm:mb-10">
-          <svg className="w-4 h-4 text-wedding-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 shrink-0" style={{ color: theme.colors.accent }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeWidth="2" />
             <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2" />
             <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2" />

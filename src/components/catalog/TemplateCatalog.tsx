@@ -336,17 +336,17 @@ export default function TemplateCatalog({ searchQuery }: TemplateCatalogProps) {
               <div className="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
                 <div className="w-full flex items-center justify-between gap-2">
                   <Link
-                    href="/demo"
+                    href={`/demo?theme=${template.id}`}
                     className="flex-1 py-2 px-2 rounded-full bg-surface-container-lowest/90 backdrop-blur-md text-on-surface text-xs font-semibold hover:bg-surface-container-lowest transition-colors flex items-center justify-center gap-1 shadow-sm"
                   >
                     <span className="material-symbols-outlined text-[16px]">visibility</span>
                     <span>Live Demo</span>
                   </Link>
                   <Link
-                    href="/demo"
+                    href={`/editor?theme=${template.id}`}
                     className="flex-1 py-2 px-2 rounded-full bg-primary text-on-primary text-xs font-semibold hover:bg-primary-container transition-colors flex items-center justify-center gap-1 shadow-sm"
                   >
-                    <span>Pilih</span>
+                    <span>Pilih Desain</span>
                     <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                   </Link>
                 </div>

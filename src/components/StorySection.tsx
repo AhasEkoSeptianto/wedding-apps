@@ -1,6 +1,7 @@
 "use client";
 
 import { WeddingData, StoryItem } from "@/types";
+import { getTheme } from "@/lib/themes";
 
 interface StorySectionProps {
   weddingData?: WeddingData;
@@ -24,6 +25,7 @@ const DEFAULT_STORIES: StoryItem[] = [
 
 export default function StorySection({ weddingData, viewMode }: StorySectionProps) {
   const isMobile = viewMode === "mobile";
+  const theme = getTheme(weddingData?.themeId);
 
   const stories =
     weddingData?.stories !== undefined
@@ -33,17 +35,35 @@ export default function StorySection({ weddingData, viewMode }: StorySectionProp
   const hasStories = stories && stories.length > 0;
 
   return (
-    <section id="story" className={`bg-[#FDFBF7] border-y border-[#EDE8E0] ${isMobile ? "py-14 px-4" : "py-24 px-6"}`}>
+    <section
+      id="story"
+      style={{
+        backgroundColor: theme.colors.surface,
+        borderColor: theme.colors.surfaceBorder,
+      }}
+      className={`border-y transition-colors duration-500 ${isMobile ? "py-14 px-4" : "py-24 px-6"}`}
+    >
       <div className="max-w-4xl mx-auto">
         <div className={`text-center ${isMobile ? "mb-10" : "mb-16"}`}>
-          <span className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-wedding-gold-dark font-semibold block mb-2">
+          <span
+            style={{ color: theme.colors.primaryDark }}
+            className="text-[11px] sm:text-xs uppercase tracking-[0.25em] font-semibold block mb-2"
+          >
             How It Began
           </span>
-          <h2 className={`font-heading font-bold text-stone-800 ${isMobile ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"}`}>
+          <h2
+            style={{ color: theme.colors.textHeading }}
+            className={`font-heading font-bold ${isMobile ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"}`}
+          >
             Cerita Cinta Kami
           </h2>
-          <div className="text-wedding-gold text-lg mt-2">❖</div>
-          <p className="text-xs sm:text-sm text-stone-500 mt-2 max-w-md mx-auto">
+          <div style={{ color: theme.colors.primary }} className="text-lg mt-2">
+            {theme.ornament.symbol}
+          </div>
+          <p
+            style={{ color: theme.colors.textBody }}
+            className="text-xs sm:text-sm mt-2 max-w-md mx-auto"
+          >
             Perjalanan indah yang membawa dua insan melangkah menuju ikatan suci pernikahan.
           </p>
         </div>
@@ -53,7 +73,10 @@ export default function StorySection({ weddingData, viewMode }: StorySectionProp
           <div className="relative">
             {/* Central Vertical Line (hidden on very small mobile, visible on desktop/tablet) */}
             {!isMobile && (
-              <div className="absolute left-1/2 -translate-x-1/2 top-4 bottom-4 w-0.5 bg-wedding-gold/30 hidden md:block" />
+              <div
+                style={{ backgroundColor: `${theme.colors.primary}4D` }}
+                className="absolute left-1/2 -translate-x-1/2 top-4 bottom-4 w-0.5 hidden md:block"
+              />
             )}
 
             <div className="space-y-8 md:space-y-12">
@@ -71,8 +94,17 @@ export default function StorySection({ weddingData, viewMode }: StorySectionProp
                   >
                     {/* Timeline Node Dot (Desktop) */}
                     {!isMobile && (
-                      <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-white border-2 border-wedding-gold items-center justify-center shadow-md z-10">
-                        <span className="w-2.5 h-2.5 rounded-full bg-wedding-gold" />
+                      <div
+                        style={{
+                          backgroundColor: theme.colors.surface,
+                          borderColor: theme.colors.primary,
+                        }}
+                        className="hidden md:flex absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full border-2 items-center justify-center shadow-md z-10"
+                      >
+                        <span
+                          style={{ backgroundColor: theme.colors.primary }}
+                          className="w-2.5 h-2.5 rounded-full"
+                        />
                       </div>
                     )}
 
@@ -85,29 +117,54 @@ export default function StorySection({ weddingData, viewMode }: StorySectionProp
                         isMobile ? "max-w-md mx-auto" : "md:w-1/2 " + (isEven ? "md:pr-10" : "md:pl-10")
                       }`}
                     >
-                      <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#EDE8E0] shadow-xs hover:shadow-md transition-all relative group">
+                      <div
+                        style={{
+                          backgroundColor: theme.colors.bg,
+                          borderColor: theme.colors.surfaceBorder,
+                        }}
+                        className="rounded-2xl p-6 sm:p-7 border shadow-xs hover:shadow-md transition-all relative group"
+                      >
                         {/* Mobile Node indicator */}
                         {isMobile && (
                           <div className="flex items-center gap-2 mb-3">
-                            <span className="w-2 h-2 rounded-full bg-wedding-gold" />
-                            <span className="text-[11px] font-semibold text-wedding-gold uppercase tracking-wider">
+                            <span
+                              style={{ backgroundColor: theme.colors.primary }}
+                              className="w-2 h-2 rounded-full"
+                            />
+                            <span
+                              style={{ color: theme.colors.primaryDark }}
+                              className="text-[11px] font-semibold uppercase tracking-wider"
+                            >
                               Momen #{idx + 1}
                             </span>
                           </div>
                         )}
 
                         <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
-                          <h3 className="font-heading text-lg sm:text-xl font-bold text-stone-800">
+                          <h3
+                            style={{ color: theme.colors.textHeading }}
+                            className="font-heading text-lg sm:text-xl font-bold"
+                          >
                             {story.title}
                           </h3>
                           {story.year && (
-                            <span className="px-3 py-1 bg-wedding-gold-light/60 text-wedding-gold-dark text-xs font-bold rounded-full border border-wedding-gold/20 font-mono">
+                            <span
+                              style={{
+                                backgroundColor: theme.colors.primaryLight,
+                                color: theme.colors.primaryDark,
+                                borderColor: `${theme.colors.primary}33`,
+                              }}
+                              className="px-3 py-1 text-xs font-bold rounded-full border font-mono"
+                            >
                               {story.year}
                             </span>
                           )}
                         </div>
 
-                        <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+                        <p
+                          style={{ color: theme.colors.textBody }}
+                          className="text-xs sm:text-sm leading-relaxed"
+                        >
                           {story.description}
                         </p>
                       </div>
@@ -119,14 +176,32 @@ export default function StorySection({ weddingData, viewMode }: StorySectionProp
           </div>
         ) : (
           /* Empty State when no stories added yet */
-          <div className="bg-white rounded-2xl border-2 border-dashed border-[#E5DACD] p-8 sm:p-12 text-center max-w-lg mx-auto">
-            <div className="w-14 h-14 rounded-full bg-wedding-gold-light/60 flex items-center justify-center mx-auto mb-4 text-wedding-gold-dark">
+          <div
+            style={{
+              backgroundColor: theme.colors.surface,
+              borderColor: theme.colors.surfaceBorder,
+            }}
+            className="rounded-2xl border-2 border-dashed p-8 sm:p-12 text-center max-w-lg mx-auto"
+          >
+            <div
+              style={{
+                backgroundColor: theme.colors.primaryLight,
+                color: theme.colors.primaryDark,
+              }}
+              className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
+            >
               <span className="material-symbols-outlined text-[28px]">history_edu</span>
             </div>
-            <h4 className="font-heading text-lg font-bold text-stone-800 mb-1">
+            <h4
+              style={{ color: theme.colors.textHeading }}
+              className="font-heading text-lg font-bold mb-1"
+            >
               Cerita Cinta Belum Diisi
             </h4>
-            <p className="text-xs sm:text-sm text-stone-500 leading-relaxed max-w-sm mx-auto">
+            <p
+              style={{ color: theme.colors.textBody }}
+              className="text-xs sm:text-sm leading-relaxed max-w-sm mx-auto"
+            >
               Silakan tambahkan momen cerita perjalanan cinta Anda melalui menu <strong>Galeri &amp; Cerita Cinta</strong> di Editor Studio agar tampil secara otomatis di sini.
             </p>
           </div>

@@ -7,6 +7,9 @@ const DEFAULT_SLUG = "dimas-sarah";
 const INITIAL_WEDDING_DATA = {
   slug: DEFAULT_SLUG,
   title: "Pernikahan Dimas & Sarah",
+  themeId: "royal-bloom",
+  designMode: "standard",
+  customHtml: "",
   groom: {
     fullName: "Dimas Prasetyo, S.T.",
     nickName: "Dimas",

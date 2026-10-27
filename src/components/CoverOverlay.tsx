@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { WeddingData } from "@/types";
+import { getTheme } from "@/lib/themes";
 
 interface CoverOverlayProps {
   isOpen: boolean;
@@ -38,6 +39,7 @@ export default function CoverOverlay({
   isAbsolute = false,
   viewMode,
 }: CoverOverlayProps) {
+  const theme = getTheme(weddingData?.themeId);
   const rawGroom =
     weddingData?.groom.nickName ||
     weddingData?.groom.fullName.split(",")[0].split(" ")[0] ||
@@ -66,7 +68,10 @@ export default function CoverOverlay({
       }}
     >
       <div className={`w-full mx-auto text-white ${isMobile ? "max-w-xs" : "max-w-md"}`}>
-        <span className="inline-block text-[11px] sm:text-xs uppercase tracking-[0.3em] font-medium text-wedding-gold-light border-b border-wedding-gold pb-1 mb-3">
+        <span
+          className="inline-block text-[11px] sm:text-xs uppercase tracking-[0.3em] font-medium pb-1 mb-3 border-b"
+          style={{ borderColor: theme.colors.accent, color: theme.colors.accent }}
+        >
           Wedding Invitation
         </span>
 
@@ -78,7 +83,10 @@ export default function CoverOverlay({
           {groomName} &amp; {brideName}
         </h1>
 
-        <p className="font-serif italic text-base sm:text-xl text-wedding-gold-light mb-6 sm:mb-8">
+        <p
+          className="font-serif italic text-base sm:text-xl mb-6 sm:mb-8"
+          style={{ color: theme.colors.accent }}
+        >
           Are getting married
         </p>
 
@@ -96,7 +104,10 @@ export default function CoverOverlay({
 
         <button
           onClick={onOpen}
-          className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-wedding-gold text-white font-medium text-sm tracking-wide shadow-lg hover:bg-wedding-gold-dark hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+          className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full text-white font-medium text-sm tracking-wide shadow-lg hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+          style={{
+            backgroundColor: theme.colors.primary,
+          }}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5" />
@@ -107,4 +118,3 @@ export default function CoverOverlay({
     </section>
   );
 }
-

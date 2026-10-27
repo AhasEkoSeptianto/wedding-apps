@@ -1,8 +1,12 @@
 import { WeddingData } from "@/types";
+import { PRESET_HTML_TEMPLATES } from "@/lib/templateEngine";
 
 export const DEFAULT_WEDDING_DATA: WeddingData = {
   title: "Pernikahan Dimas & Sarah",
   slug: "dimas-sarah",
+  themeId: "royal-bloom",
+  designMode: "standard",
+  customHtml: PRESET_HTML_TEMPLATES[0].html,
   groom: {
     fullName: "Dimas Prasetyo, S.T.",
     nickName: "Dimas",
@@ -68,4 +72,3 @@ export const DEFAULT_WEDDING_DATA: WeddingData = {
     waNotification: true,
   },
 };
-

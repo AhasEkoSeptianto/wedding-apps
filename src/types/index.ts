@@ -37,6 +37,9 @@ export interface GuestItem {
 export interface WeddingData {
   title: string;
   slug?: string;
+  themeId?: string;
+  designMode?: "standard" | "custom_html";
+  customHtml?: string;
   groom: {
     fullName: string;
     nickName: string;
@@ -86,4 +89,3 @@ export interface WeddingData {
     waNotification: boolean;
   };
 }
-

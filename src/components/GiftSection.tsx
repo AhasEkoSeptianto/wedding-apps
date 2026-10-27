@@ -1,6 +1,7 @@
 "use client";
 
 import { BankAccount, WeddingData } from "@/types";
+import { getTheme } from "@/lib/themes";
 
 interface GiftSectionProps {
   onShowToast: (message: string) => void;
@@ -10,6 +11,7 @@ interface GiftSectionProps {
 
 export default function GiftSection({ onShowToast, weddingData, viewMode }: GiftSectionProps) {
   const isMobile = viewMode === "mobile";
+  const theme = getTheme(weddingData?.themeId);
 
   const parseAccount = (raw: string, bankDefault: string, holderDefault: string): BankAccount => {
     if (!raw) return { bank: bankDefault, accountNumber: "-", holderName: holderDefault };
@@ -57,16 +59,34 @@ export default function GiftSection({ onShowToast, weddingData, viewMode }: Gift
   };
 
   return (
-    <section id="gift" className={`bg-[#FAF7F2] border-t border-[#EDE8E0] ${isMobile ? "py-12 px-4" : "py-24 px-6"}`}>
+    <section
+      id="gift"
+      className={`border-t ${isMobile ? "py-12 px-4" : "py-24 px-6"}`}
+      style={{
+        backgroundColor: `${theme.colors.bg}`,
+        borderColor: theme.colors.border,
+      }}
+    >
       <div className="max-w-4xl mx-auto text-center">
-        <span className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-wedding-gold-dark font-semibold block mb-2">
+        <span
+          className="text-[11px] sm:text-xs uppercase tracking-[0.25em] font-semibold block mb-2"
+          style={{ color: theme.colors.primary }}
+        >
           Share Your Blessings
         </span>
-        <h2 className={`font-heading font-bold text-stone-800 ${isMobile ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"}`}>
+        <h2
+          className={`font-heading font-bold ${isMobile ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"}`}
+          style={{ color: theme.colors.text }}
+        >
           Wedding Gift
         </h2>
-        <div className="text-wedding-gold text-lg mt-2">❖</div>
-        <p className={`text-stone-500 max-w-lg mx-auto mt-2 mb-8 ${isMobile ? "text-xs" : "text-sm sm:text-base mb-12"}`}>
+        <div className="text-lg mt-2" style={{ color: theme.colors.accent }}>
+          {theme.ornament.symbol}
+        </div>
+        <p
+          className={`max-w-lg mx-auto mt-2 mb-8 ${isMobile ? "text-xs" : "text-sm sm:text-base mb-12"}`}
+          style={{ color: theme.colors.muted }}
+        >
           Doa restu Anda merupakan karunia terindah bagi kami. Bagi yang ingin mengirimkan tanda kasih secara virtual, dapat melalui:
         </p>
 
@@ -74,23 +94,41 @@ export default function GiftSection({ onShowToast, weddingData, viewMode }: Gift
           {accounts.map((acc, idx) => (
             <div
               key={idx}
-              className={`bg-white rounded-2xl border border-[#EDE8E0] shadow-sm w-full text-center hover:shadow-md transition-all ${
+              className={`rounded-2xl shadow-sm w-full text-center hover:shadow-md transition-all ${
                 isMobile ? "p-5 max-w-[320px]" : "p-8 max-w-sm"
               }`}
+              style={{
+                backgroundColor: theme.colors.surface,
+                border: `1px solid ${theme.colors.border}`,
+              }}
             >
-              <h4 className="text-[11px] sm:text-xs uppercase tracking-wider font-bold text-wedding-gold-dark mb-3">
+              <h4
+                className="text-[11px] sm:text-xs uppercase tracking-wider font-bold mb-3"
+                style={{ color: theme.colors.primary }}
+              >
                 {acc.bank}
               </h4>
-              <p className={`font-mono font-bold tracking-wider text-stone-800 mb-1 break-all ${isMobile ? "text-xl" : "text-2xl"}`}>
+              <p
+                className={`font-mono font-bold tracking-wider mb-1 break-all ${isMobile ? "text-xl" : "text-2xl"}`}
+                style={{ color: theme.colors.text }}
+              >
                 {acc.accountNumber}
               </p>
-              <p className="text-xs sm:text-sm text-stone-500 mb-5">
+              <p
+                className="text-xs sm:text-sm mb-5"
+                style={{ color: theme.colors.muted }}
+              >
                 {acc.holderName}
               </p>
               <button
                 type="button"
                 onClick={() => handleCopy(acc.accountNumber)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-wedding-gold text-wedding-gold-dark hover:bg-wedding-gold hover:text-white text-xs font-semibold tracking-wider transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border text-xs font-semibold tracking-wider transition-all cursor-pointer hover:opacity-90"
+                style={{
+                  borderColor: theme.colors.primary,
+                  color: theme.colors.primary,
+                  backgroundColor: `${theme.colors.primary}10`,
+                }}
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
@@ -104,4 +142,3 @@ export default function GiftSection({ onShowToast, weddingData, viewMode }: Gift
     </section>
   );
 }
-

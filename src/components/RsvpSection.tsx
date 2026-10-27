@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Wish, WeddingData } from "@/types";
 import { api } from "@/lib/api";
+import { getTheme } from "@/lib/themes";
 
 interface RsvpSectionProps {
   onShowToast: (message: string) => void;
@@ -31,6 +32,7 @@ const INITIAL_WISHES: Wish[] = [
 
 export default function RsvpSection({ onShowToast, weddingData, viewMode }: RsvpSectionProps) {
   const isMobile = viewMode === "mobile";
+  const theme = getTheme(weddingData?.themeId);
   const [wishes, setWishes] = useState<Wish[]>(INITIAL_WISHES);
   const [name, setName] = useState("");
   const [attendance, setAttendance] = useState<"attending" | "not-attending">("attending");
@@ -106,20 +108,38 @@ export default function RsvpSection({ onShowToast, weddingData, viewMode }: Rsvp
   return (
     <section id="rsvp" className={`max-w-5xl mx-auto ${isMobile ? "py-12 px-4" : "py-24 px-6"}`}>
       <div className={`text-center ${isMobile ? "mb-8" : "mb-16"}`}>
-        <span className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-wedding-gold-dark font-semibold block mb-2">
+        <span
+          className="text-[11px] sm:text-xs uppercase tracking-[0.25em] font-semibold block mb-2"
+          style={{ color: theme.colors.primary }}
+        >
           Celebrate With Us
         </span>
-        <h2 className={`font-heading font-bold text-stone-800 ${isMobile ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"}`}>
+        <h2
+          className={`font-heading font-bold ${isMobile ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"}`}
+          style={{ color: theme.colors.text }}
+        >
           RSVP &amp; Best Wishes
         </h2>
-        <div className="text-wedding-gold text-lg mt-2">❖</div>
-        <p className={`text-stone-500 max-w-md mx-auto mt-2 ${isMobile ? "text-xs" : "text-sm sm:text-base"}`}>
+        <div className="text-lg mt-2" style={{ color: theme.colors.accent }}>
+          {theme.ornament.symbol}
+        </div>
+        <p
+          className={`max-w-md mx-auto mt-2 ${isMobile ? "text-xs" : "text-sm sm:text-base"}`}
+          style={{ color: theme.colors.muted }}
+        >
           Please confirm your attendance and leave warm wishes for the bride and groom.
         </p>
         {weddingData?.rsvp?.deadline && (
           <div className="mt-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-900 border border-amber-200/80 rounded-full text-xs font-semibold">
-              <span className="material-symbols-outlined text-[14px] text-amber-600">event_available</span>
+            <span
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+              style={{
+                backgroundColor: `${theme.colors.accent}20`,
+                color: theme.colors.primary,
+                border: `1px solid ${theme.colors.border}`,
+              }}
+            >
+              <span className="material-symbols-outlined text-[14px]">event_available</span>
               <span>Batas Konfirmasi: {weddingData.rsvp.deadline}</span>
             </span>
           </div>
@@ -128,14 +148,23 @@ export default function RsvpSection({ onShowToast, weddingData, viewMode }: Rsvp
 
       <div className={`grid gap-6 sm:gap-8 items-start ${isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"}`}>
         {/* RSVP Form */}
-        <div className={`bg-white rounded-2xl border border-[#EDE8E0] shadow-sm ${isMobile ? "p-5" : "p-6 sm:p-8"}`}>
-          <h3 className="font-heading text-lg sm:text-xl font-bold text-stone-800 mb-4 sm:mb-6 pb-3 border-b border-stone-100">
+        <div
+          className={`rounded-2xl shadow-sm ${isMobile ? "p-5" : "p-6 sm:p-8"}`}
+          style={{
+            backgroundColor: theme.colors.surface,
+            border: `1px solid ${theme.colors.border}`,
+          }}
+        >
+          <h3
+            className="font-heading text-lg sm:text-xl font-bold mb-4 sm:mb-6 pb-3 border-b"
+            style={{ color: theme.colors.text, borderColor: theme.colors.border }}
+          >
             Attendance Confirmation
           </h3>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="name" className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2">
+              <label htmlFor="name" className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: theme.colors.text }}>
                 Full Name
               </label>
               <input
@@ -145,19 +174,27 @@ export default function RsvpSection({ onShowToast, weddingData, viewMode }: Rsvp
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter your name"
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-wedding-gold bg-stone-50 focus:bg-white transition-all"
+                className="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none transition-all"
+                style={{
+                  borderColor: theme.colors.border,
+                  backgroundColor: "rgba(255,255,255,0.7)",
+                }}
               />
             </div>
 
             <div>
-              <label htmlFor="attendance" className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2">
+              <label htmlFor="attendance" className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: theme.colors.text }}>
                 Will You Attend?
               </label>
               <select
                 id="attendance"
                 value={attendance}
                 onChange={(e) => setAttendance(e.target.value as "attending" | "not-attending")}
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-wedding-gold bg-stone-50 focus:bg-white transition-all"
+                className="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none transition-all"
+                style={{
+                  borderColor: theme.colors.border,
+                  backgroundColor: "rgba(255,255,255,0.7)",
+                }}
               >
                 <option value="attending">Yes, Joyfully Attending</option>
                 <option value="not-attending">Sorry, Unable to Attend</option>
@@ -166,14 +203,18 @@ export default function RsvpSection({ onShowToast, weddingData, viewMode }: Rsvp
 
             {attendance === "attending" && (
               <div>
-                <label htmlFor="guests" className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2">
+                <label htmlFor="guests" className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: theme.colors.text }}>
                   Number of Guests
                 </label>
                 <select
                   id="guests"
                   value={guests}
                   onChange={(e) => setGuests(Number(e.target.value))}
-                  className="w-full px-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-wedding-gold bg-stone-50 focus:bg-white transition-all"
+                  className="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none transition-all"
+                  style={{
+                    borderColor: theme.colors.border,
+                    backgroundColor: "rgba(255,255,255,0.7)",
+                  }}
                 >
                   <option value={1}>1 Orang (Tamu Utama)</option>
                   {weddingData?.rsvp?.maxGuests !== "0" && (
@@ -187,7 +228,7 @@ export default function RsvpSection({ onShowToast, weddingData, viewMode }: Rsvp
             )}
 
             <div>
-              <label htmlFor="message" className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2">
+              <label htmlFor="message" className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: theme.colors.text }}>
                 Wishes &amp; Prayers
               </label>
               <textarea
@@ -197,14 +238,21 @@ export default function RsvpSection({ onShowToast, weddingData, viewMode }: Rsvp
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Write your blessings and prayers here..."
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:border-wedding-gold bg-stone-50 focus:bg-white transition-all"
+                className="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none transition-all"
+                style={{
+                  borderColor: theme.colors.border,
+                  backgroundColor: "rgba(255,255,255,0.7)",
+                }}
               />
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3.5 px-6 rounded-full bg-wedding-gold hover:bg-wedding-gold-dark text-white text-sm font-semibold tracking-wide shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className="w-full py-3.5 px-6 rounded-full text-white text-sm font-semibold tracking-wide shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              style={{
+                backgroundColor: theme.colors.primary,
+              }}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -215,12 +263,24 @@ export default function RsvpSection({ onShowToast, weddingData, viewMode }: Rsvp
         </div>
 
         {/* Wishes List */}
-        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-[#EDE8E0] shadow-sm">
-          <div className="flex items-center justify-between pb-3 mb-6 border-b border-stone-100">
-            <h3 className="font-heading text-xl font-bold text-stone-800">
+        <div
+          className="rounded-2xl p-6 sm:p-8 shadow-sm"
+          style={{
+            backgroundColor: theme.colors.surface,
+            border: `1px solid ${theme.colors.border}`,
+          }}
+        >
+          <div className="flex items-center justify-between pb-3 mb-6 border-b" style={{ borderColor: theme.colors.border }}>
+            <h3 className="font-heading text-xl font-bold" style={{ color: theme.colors.text }}>
               Warm Wishes
             </h3>
-            <span className="text-xs bg-wedding-gold-light text-wedding-gold-dark px-3 py-1 rounded-full font-semibold">
+            <span
+              className="text-xs px-3 py-1 rounded-full font-semibold"
+              style={{
+                backgroundColor: `${theme.colors.accent}25`,
+                color: theme.colors.primary,
+              }}
+            >
               {wishes.length} Messages
             </span>
           </div>
@@ -229,10 +289,17 @@ export default function RsvpSection({ onShowToast, weddingData, viewMode }: Rsvp
             {wishes.map((item) => (
               <div
                 key={item.id}
-                className="p-4 rounded-xl bg-stone-50 border-l-4 border-wedding-gold"
+                className="p-4 rounded-xl border-l-4"
+                style={{
+                  backgroundColor: `${theme.colors.bg}80`,
+                  borderLeftColor: theme.colors.primary,
+                  borderTop: `1px solid ${theme.colors.border}`,
+                  borderRight: `1px solid ${theme.colors.border}`,
+                  borderBottom: `1px solid ${theme.colors.border}`,
+                }}
               >
                 <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <h4 className="font-semibold text-stone-800 text-sm">
+                  <h4 className="font-semibold text-sm" style={{ color: theme.colors.text }}>
                     {item.name}
                   </h4>
                   <span
@@ -245,10 +312,10 @@ export default function RsvpSection({ onShowToast, weddingData, viewMode }: Rsvp
                     {item.attendance === "attending" ? "Attending" : "Absent"}
                   </span>
                 </div>
-                <p className="text-xs sm:text-sm text-stone-600 leading-relaxed mb-2">
+                <p className="text-xs sm:text-sm leading-relaxed mb-2" style={{ color: theme.colors.muted }}>
                   {item.message}
                 </p>
-                <span className="text-[10px] text-stone-400">
+                <span className="text-[10px] opacity-75" style={{ color: theme.colors.muted }}>
                   {item.createdAt}
                 </span>
               </div>
@@ -259,4 +326,3 @@ export default function RsvpSection({ onShowToast, weddingData, viewMode }: Rsvp
     </section>
   );
 }
-

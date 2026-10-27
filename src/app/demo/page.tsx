@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
 import { DEFAULT_WEDDING_DATA } from "@/lib/defaultWedding";
 import { WeddingData } from "@/types";
+import { getTheme } from "@/lib/themes";
+import { renderHtmlTemplate } from "@/lib/templateEngine";
 import CoverOverlay from "@/components/CoverOverlay";
 import MusicPlayer from "@/components/MusicPlayer";
 import HeroSection from "@/components/HeroSection";
@@ -24,6 +26,8 @@ function DemoContent() {
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const slugParam = searchParams.get("slug");
+  const themeParam = searchParams.get("theme");
+  const guestParam = searchParams.get("to") || searchParams.get("guest") || "Bapak / Ibu Tamu Terhormat";
   const targetSlug = slugParam || user?.weddingSlug || "dimas-sarah";
 
   const [weddingData, setWeddingData] = useState<WeddingData>(DEFAULT_WEDDING_DATA);
@@ -39,19 +43,27 @@ function DemoContent() {
           setWeddingData({
             ...DEFAULT_WEDDING_DATA,
             ...res.data,
+            themeId: themeParam || res.data.themeId || "royal-bloom",
+            designMode: res.data.designMode || DEFAULT_WEDDING_DATA.designMode || "standard",
+            customHtml: res.data.customHtml || DEFAULT_WEDDING_DATA.customHtml,
             gallery: res.data.gallery || [],
             stories: res.data.stories !== undefined ? res.data.stories : (DEFAULT_WEDDING_DATA.stories || []),
           });
+        } else if (themeParam) {
+          setWeddingData((prev) => ({ ...prev, themeId: themeParam }));
         }
       })
       .catch((err) => {
         console.warn("Using default wedding data due to fetch error:", err);
+        if (themeParam) {
+          setWeddingData((prev) => ({ ...prev, themeId: themeParam }));
+        }
       });
 
     return () => {
       isMounted = false;
     };
-  }, [targetSlug]);
+  }, [targetSlug, themeParam]);
 
   const handleOpen = () => {
     setIsOpened(true);
@@ -64,14 +76,64 @@ function DemoContent() {
     }, 3200);
   };
 
+  const currentTheme = getTheme(weddingData.themeId);
   const groomNick = weddingData.groom.nickName || weddingData.groom.fullName.split(",")[0].split(" ")[0] || "Dimas";
   const brideNick = weddingData.bride.nickName || weddingData.bride.fullName.split(",")[0].split(" ")[0] || "Sarah";
 
+  const isCustomHtmlMode = weddingData.designMode === "custom_html";
+
+  const compiledHtml = useMemo(() => {
+    if (!isCustomHtmlMode) return "";
+    return renderHtmlTemplate(weddingData.customHtml || "", weddingData, {
+      guestName: guestParam,
+    });
+  }, [isCustomHtmlMode, weddingData, guestParam]);
+
+  // Mode 1: Custom HTML Template Full Screen
+  if (isCustomHtmlMode) {
+    return (
+      <div className="relative min-h-screen bg-stone-900">
+        {/* Top Floating Back Bar */}
+        <nav className="fixed top-4 left-4 z-40 bg-stone-900/90 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-semibold shadow-xl hover:bg-stone-900 transition-colors flex items-center gap-2 border border-white/15">
+          <Link href={`/editor?slug=${targetSlug}`} className="flex items-center gap-1.5 hover:text-wedding-gold-light transition-colors">
+            <span className="material-symbols-outlined text-[16px]">edit_note</span>
+            <span>Buka Editor Studio</span>
+          </Link>
+          <span className="text-white/30">|</span>
+          <Link href="/" className="flex items-center gap-1.5 hover:text-wedding-gold-light transition-colors">
+            <span className="material-symbols-outlined text-[16px]">home</span>
+            <span>Katalog</span>
+          </Link>
+          <span className="text-white/30">|</span>
+          <span className="text-amber-300 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+            <span>Kustom HTML: {groomNick} &amp; {brideNick}</span>
+          </span>
+        </nav>
+
+        {/* Fullscreen Sandboxed Custom HTML */}
+        <iframe
+          srcDoc={compiledHtml}
+          title={`Undangan ${groomNick} & ${brideNick}`}
+          className="w-full min-h-screen border-0 block"
+          sandbox="allow-scripts allow-same-origin allow-popups"
+        />
+      </div>
+    );
+  }
+
+  // Mode 2: Standard Visual React Components
   return (
-    <div className="relative min-h-screen bg-[#FAF7F2]">
+    <div
+      className="relative min-h-screen transition-colors duration-300"
+      style={{
+        backgroundColor: currentTheme.colors.bg,
+        color: currentTheme.colors.text,
+      }}
+    >
       {/* Top Floating Back Bar */}
       <nav className="fixed top-4 left-4 z-40 bg-stone-900/85 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-semibold shadow-lg hover:bg-stone-900 transition-colors flex items-center gap-2 border border-white/10">
-        <Link href="/editor" className="flex items-center gap-1.5 hover:text-wedding-gold-light transition-colors">
+        <Link href={`/editor?slug=${targetSlug}`} className="flex items-center gap-1.5 hover:text-wedding-gold-light transition-colors">
           <span className="material-symbols-outlined text-[16px]">edit_note</span>
           <span>Buka Editor Studio</span>
         </Link>
@@ -83,7 +145,7 @@ function DemoContent() {
         <span className="text-white/30">|</span>
         <span className="text-wedding-gold-light flex items-center gap-1">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          Live: {groomNick} &amp; {brideNick}
+          Live: {groomNick} &amp; {brideNick} ({currentTheme.name})
         </span>
       </nav>
 
@@ -103,7 +165,7 @@ function DemoContent() {
         <GallerySection weddingData={weddingData} />
         <RsvpSection onShowToast={showToast} weddingData={weddingData} />
         <GiftSection onShowToast={showToast} weddingData={weddingData} />
-        <Footer />
+        <Footer weddingData={weddingData} />
       </main>
 
       {/* Toast Feedback */}

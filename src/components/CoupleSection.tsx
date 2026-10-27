@@ -1,4 +1,5 @@
 import { WeddingData } from "@/types";
+import { getTheme } from "@/lib/themes";
 
 interface CoupleSectionProps {
   weddingData?: WeddingData;
@@ -34,6 +35,7 @@ export default function CoupleSection({ weddingData, viewMode }: CoupleSectionPr
 
   const isMobile = viewMode === "mobile";
   const isTablet = viewMode === "tablet";
+  const theme = getTheme(weddingData?.themeId);
 
   const groomDisplayName = capitalizeWords(groom.fullName || groom.nickName);
   const brideDisplayName = capitalizeWords(bride.fullName || bride.nickName);
@@ -41,13 +43,21 @@ export default function CoupleSection({ weddingData, viewMode }: CoupleSectionPr
   return (
     <section id="couple" className={`${isMobile ? "py-12 px-4" : "py-24 px-6"} max-w-5xl mx-auto`}>
       <div className={`text-center ${isMobile ? "mb-8" : "mb-16"}`}>
-        <span className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-wedding-gold-dark font-semibold block mb-2">
+        <span
+          style={{ color: theme.colors.primaryDark }}
+          className="text-[11px] sm:text-xs uppercase tracking-[0.25em] font-semibold block mb-2"
+        >
           Mempelai yang Berbahagia
         </span>
-        <h2 className={`font-heading font-bold text-stone-800 ${isMobile ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"}`}>
+        <h2
+          style={{ color: theme.colors.textHeading }}
+          className={`font-heading font-bold ${isMobile ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"}`}
+        >
           Groom &amp; Bride
         </h2>
-        <div className="text-wedding-gold text-lg mt-2">❖</div>
+        <div style={{ color: theme.colors.primary }} className="text-lg mt-2">
+          {theme.ornament.symbol}
+        </div>
       </div>
 
       <div
@@ -61,12 +71,17 @@ export default function CoupleSection({ weddingData, viewMode }: CoupleSectionPr
       >
         {/* Groom Card */}
         <div
-          className={`bg-white rounded-2xl shadow-sm border border-[#EDE8E0] text-center w-full transition-all duration-300 ${
+          style={{
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.surfaceBorder,
+          }}
+          className={`rounded-2xl shadow-sm border text-center w-full transition-all duration-300 ${
             isMobile ? "max-w-[320px] p-6" : "max-w-sm p-8 hover:shadow-md hover:-translate-y-1"
           }`}
         >
           <div
-            className={`mx-auto rounded-full p-1.5 border-2 border-dashed border-wedding-gold overflow-hidden ${
+            style={{ borderColor: theme.colors.primary }}
+            className={`mx-auto rounded-full p-1.5 border-2 border-dashed overflow-hidden ${
               isMobile ? "w-32 h-32 mb-4" : "w-44 h-44 mb-6"
             }`}
           >
@@ -80,10 +95,16 @@ export default function CoupleSection({ weddingData, viewMode }: CoupleSectionPr
               className="w-full h-full object-cover rounded-full"
             />
           </div>
-          <h3 className={`font-heading font-bold text-stone-800 mb-1.5 ${isMobile ? "text-xl" : "text-2xl"}`}>
+          <h3
+            style={{ color: theme.colors.textHeading }}
+            className={`font-heading font-bold mb-1.5 ${isMobile ? "text-xl" : "text-2xl"}`}
+          >
             {groomDisplayName}
           </h3>
-          <p className="text-xs sm:text-sm text-stone-500 leading-relaxed mb-5">
+          <p
+            style={{ color: theme.colors.textBody }}
+            className="text-xs sm:text-sm leading-relaxed mb-5"
+          >
             {groom.parents}
           </p>
           {groom.instagram && (
@@ -92,7 +113,11 @@ export default function CoupleSection({ weddingData, viewMode }: CoupleSectionPr
                 href={`https://instagram.com/${groom.instagram.replace("@", "")}`}
                 target="_blank"
                 rel="noreferrer"
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-wedding-gold-light text-wedding-gold-dark flex items-center justify-center hover:bg-wedding-gold hover:text-white transition-colors"
+                style={{
+                  backgroundColor: theme.colors.primaryLight,
+                  color: theme.colors.primaryDark,
+                }}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-colors"
                 aria-label={`Instagram ${groomDisplayName}`}
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -105,7 +130,8 @@ export default function CoupleSection({ weddingData, viewMode }: CoupleSectionPr
 
         {/* Ampersand */}
         <div
-          className={`font-serif text-wedding-gold font-light ${
+          style={{ color: theme.colors.primary }}
+          className={`font-serif font-light ${
             isMobile ? "text-3xl my-1" : "text-5xl my-2 md:my-0"
           }`}
         >
@@ -114,12 +140,17 @@ export default function CoupleSection({ weddingData, viewMode }: CoupleSectionPr
 
         {/* Bride Card */}
         <div
-          className={`bg-white rounded-2xl shadow-sm border border-[#EDE8E0] text-center w-full transition-all duration-300 ${
+          style={{
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.surfaceBorder,
+          }}
+          className={`rounded-2xl shadow-sm border text-center w-full transition-all duration-300 ${
             isMobile ? "max-w-[320px] p-6" : "max-w-sm p-8 hover:shadow-md hover:-translate-y-1"
           }`}
         >
           <div
-            className={`mx-auto rounded-full p-1.5 border-2 border-dashed border-wedding-gold overflow-hidden ${
+            style={{ borderColor: theme.colors.primary }}
+            className={`mx-auto rounded-full p-1.5 border-2 border-dashed overflow-hidden ${
               isMobile ? "w-32 h-32 mb-4" : "w-44 h-44 mb-6"
             }`}
           >
@@ -133,10 +164,16 @@ export default function CoupleSection({ weddingData, viewMode }: CoupleSectionPr
               className="w-full h-full object-cover rounded-full"
             />
           </div>
-          <h3 className={`font-heading font-bold text-stone-800 mb-1.5 ${isMobile ? "text-xl" : "text-2xl"}`}>
+          <h3
+            style={{ color: theme.colors.textHeading }}
+            className={`font-heading font-bold mb-1.5 ${isMobile ? "text-xl" : "text-2xl"}`}
+          >
             {brideDisplayName}
           </h3>
-          <p className="text-xs sm:text-sm text-stone-500 leading-relaxed mb-5">
+          <p
+            style={{ color: theme.colors.textBody }}
+            className="text-xs sm:text-sm leading-relaxed mb-5"
+          >
             {bride.parents}
           </p>
           {bride.instagram && (
@@ -145,7 +182,11 @@ export default function CoupleSection({ weddingData, viewMode }: CoupleSectionPr
                 href={`https://instagram.com/${bride.instagram.replace("@", "")}`}
                 target="_blank"
                 rel="noreferrer"
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-wedding-gold-light text-wedding-gold-dark flex items-center justify-center hover:bg-wedding-gold hover:text-white transition-colors"
+                style={{
+                  backgroundColor: theme.colors.primaryLight,
+                  color: theme.colors.primaryDark,
+                }}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-colors"
                 aria-label={`Instagram ${brideDisplayName}`}
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">

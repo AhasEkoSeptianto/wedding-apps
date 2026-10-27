@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { WeddingData } from "@/types";
+import { getTheme } from "@/lib/themes";
+import { renderHtmlTemplate } from "@/lib/templateEngine";
 import HeroSection from "@/components/HeroSection";
 import QuoteSection from "@/components/QuoteSection";
 import CoupleSection from "@/components/CoupleSection";
@@ -42,7 +44,16 @@ export default function LiveDeviceCanvas({ data }: LiveDeviceCanvasProps) {
     }
   };
 
+  const theme = getTheme(data.themeId);
   const currentSlug = data.slug || "dimas-sarah";
+  const isCustomHtmlMode = data.designMode === "custom_html";
+
+  const compiledHtml = useMemo(() => {
+    if (!isCustomHtmlMode) return "";
+    return renderHtmlTemplate(data.customHtml || "", data, {
+      guestName: "Bapak / Ibu Tamu Terhormat",
+    });
+  }, [isCustomHtmlMode, data]);
 
   return (
     <div className="flex flex-col items-center w-full">
@@ -117,6 +128,23 @@ export default function LiveDeviceCanvas({ data }: LiveDeviceCanvasProps) {
             </span>
             <span>{!isOpened ? "Sampul Aktif" : "Buka Sampul"}</span>
           </button>
+
+          {/* Mode Indicator Badge */}
+          <span
+            className={`text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 border shadow-xs ${
+              isCustomHtmlMode
+                ? "bg-amber-50 text-amber-900 border-amber-300"
+                : "bg-emerald-50 text-emerald-900 border-emerald-300"
+            }`}
+            title={isCustomHtmlMode ? "Sedang menggunakan Template HTML Kustom" : "Sedang menggunakan Tema Visual Bawaan"}
+          >
+            <span className="material-symbols-outlined text-[14px]">
+              {isCustomHtmlMode ? "html" : "palette"}
+            </span>
+            <span className="hidden sm:inline">
+              {isCustomHtmlMode ? "Kustom HTML" : "Tema Visual"}
+            </span>
+          </span>
 
           <div className="h-4 w-px bg-surface-variant mx-1" />
 
@@ -201,38 +229,55 @@ export default function LiveDeviceCanvas({ data }: LiveDeviceCanvasProps) {
 
         {/* Device Viewport Canvas (100% Identical to /demo) */}
         <div
-          className={`relative w-full h-full bg-[#FAF7F2] overflow-y-auto scroll-smooth flex flex-col text-[#181C23] ${
+          className={`relative w-full h-full overflow-y-auto scroll-smooth flex flex-col ${
             deviceMode === "mobile"
               ? "rounded-[38px]"
               : deviceMode === "tablet"
               ? "rounded-[24px]"
               : "rounded-b-xl"
           }`}
+          style={{
+            backgroundColor: isCustomHtmlMode ? "#ffffff" : theme.colors.bg,
+            color: isCustomHtmlMode ? "inherit" : theme.colors.text,
+          }}
         >
-          {/* Cover Screen Overlay */}
-          <CoverOverlay
-            isOpen={isOpened}
-            onOpen={() => setIsOpened(true)}
-            weddingData={data}
-            isAbsolute={true}
-            viewMode={deviceMode}
-          />
+          {isCustomHtmlMode ? (
+            /* Render Full Custom HTML in Sandboxed Responsive iframe */
+            <iframe
+              srcDoc={compiledHtml}
+              title="Preview Undangan Kustom HTML"
+              className="w-full h-full border-0 bg-transparent"
+              sandbox="allow-scripts allow-same-origin allow-popups"
+            />
+          ) : (
+            /* Render Standard React Components with Visual Theme */
+            <>
+              {/* Cover Screen Overlay */}
+              <CoverOverlay
+                isOpen={isOpened}
+                onOpen={() => setIsOpened(true)}
+                weddingData={data}
+                isAbsolute={true}
+                viewMode={deviceMode}
+              />
 
-          {/* Floating Audio Controller */}
-          <MusicPlayer autoPlayTrigger={isOpened} isAbsolute={true} />
+              {/* Floating Audio Controller */}
+              <MusicPlayer autoPlayTrigger={isOpened} isAbsolute={true} />
 
-          {/* Complete Live Invitation Content */}
-          <main className={`transition-opacity duration-700 ${isOpened ? "opacity-100" : "opacity-90"}`}>
-            <HeroSection weddingData={data} viewMode={deviceMode} />
-            <QuoteSection weddingData={data} viewMode={deviceMode} />
-            <CoupleSection weddingData={data} viewMode={deviceMode} />
-            <StorySection weddingData={data} viewMode={deviceMode} />
-            <EventSection weddingData={data} viewMode={deviceMode} />
-            <GallerySection weddingData={data} viewMode={deviceMode} />
-            <RsvpSection onShowToast={showToast} weddingData={data} viewMode={deviceMode} />
-            <GiftSection onShowToast={showToast} weddingData={data} viewMode={deviceMode} />
-            <Footer />
-          </main>
+              {/* Complete Live Invitation Content */}
+              <main className={`transition-opacity duration-700 ${isOpened ? "opacity-100" : "opacity-90"}`}>
+                <HeroSection weddingData={data} viewMode={deviceMode} />
+                <QuoteSection weddingData={data} viewMode={deviceMode} />
+                <CoupleSection weddingData={data} viewMode={deviceMode} />
+                <StorySection weddingData={data} viewMode={deviceMode} />
+                <EventSection weddingData={data} viewMode={deviceMode} />
+                <GallerySection weddingData={data} viewMode={deviceMode} />
+                <RsvpSection onShowToast={showToast} weddingData={data} viewMode={deviceMode} />
+                <GiftSection onShowToast={showToast} weddingData={data} viewMode={deviceMode} />
+                <Footer weddingData={data} />
+              </main>
+            </>
+          )}
         </div>
 
         {/* Device Bottom Indicator: Mobile Home Bar */}

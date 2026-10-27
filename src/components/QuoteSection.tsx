@@ -1,4 +1,5 @@
 import { WeddingData } from "@/types";
+import { getTheme } from "@/lib/themes";
 
 interface QuoteSectionProps {
   weddingData?: WeddingData;
@@ -7,6 +8,7 @@ interface QuoteSectionProps {
 
 export default function QuoteSection({ weddingData, viewMode }: QuoteSectionProps) {
   const isMobile = viewMode === "mobile";
+  const theme = getTheme(weddingData?.themeId);
 
   const quoteText =
     weddingData?.quote?.text?.trim() ||
@@ -14,21 +16,32 @@ export default function QuoteSection({ weddingData, viewMode }: QuoteSectionProp
   const quoteSource = weddingData?.quote?.source?.trim() || "QS. Ar-Rum: 21";
 
   return (
-    <section className={`bg-white border-y border-[#EDE8E0] text-center ${isMobile ? "py-10 px-4" : "py-16 px-6"}`}>
+    <section
+      style={{
+        backgroundColor: theme.colors.surface,
+        borderColor: theme.colors.surfaceBorder,
+      }}
+      className={`border-y text-center transition-colors duration-500 ${isMobile ? "py-10 px-4" : "py-16 px-6"}`}
+    >
       <div className="max-w-2xl mx-auto">
-        <svg
-          className={`mx-auto text-wedding-gold/70 mb-3 sm:mb-4 ${isMobile ? "w-6 h-6" : "w-8 h-8"}`}
-          fill="currentColor"
-          viewBox="0 0 24 24"
+        <div
+          style={{ color: theme.colors.primary }}
+          className="text-2xl mb-2 select-none"
         >
-          <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-        </svg>
+          {theme.ornament.symbol}
+        </div>
 
-        <blockquote className={`font-serif italic text-stone-700 leading-relaxed mb-3 sm:mb-4 ${isMobile ? "text-sm sm:text-base" : "text-lg sm:text-2xl"}`}>
+        <blockquote
+          style={{ color: theme.colors.textHeading }}
+          className={`font-serif italic leading-relaxed mb-3 sm:mb-4 ${isMobile ? "text-sm sm:text-base" : "text-lg sm:text-2xl"}`}
+        >
           &ldquo;{quoteText}&rdquo;
         </blockquote>
 
-        <p className="text-[11px] sm:text-sm uppercase tracking-widest text-wedding-gold-dark font-semibold">
+        <p
+          style={{ color: theme.colors.primaryDark }}
+          className="text-[11px] sm:text-sm uppercase tracking-widest font-semibold"
+        >
           — {quoteSource}
         </p>
       </div>
