@@ -1,9 +1,29 @@
 export interface Wish {
   id: string;
+  slug?: string;
   name: string;
   attendance: 'attending' | 'not-attending';
   guests: number;
   message: string;
+  isLiked?: boolean;
+  likesCount?: number;
+  amount?: number;
+  bank?: string;
+  proofUrl?: string;
+  createdAt: string;
+}
+
+export interface GiftItem {
+  id: string;
+  slug?: string;
+  senderName: string;
+  bankTarget: string;
+  bankSender: string;
+  accountNumber?: string;
+  amount: number;
+  message?: string;
+  proofUrl?: string;
+  status: "confirmed" | "pending";
   createdAt: string;
 }
 

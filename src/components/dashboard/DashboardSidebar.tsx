@@ -16,13 +16,14 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
   const isOverview = pathname === "/dashboard";
   const isEditor = pathname === "/editor" || pathname === "/live-demo-editor";
   const isGuests = pathname === "/dashboard/guests";
+  const isGifts = pathname === "/dashboard/amplop-ucapan";
 
   const navItems = [
     { label: "Ikhtisar & RSVP", icon: "grid_view", href: "/dashboard", active: isOverview },
     { label: "Live Demo & Editor", icon: "edit_note", href: "/editor", active: isEditor },
     { label: "Katalog Template", icon: "auto_awesome_motion", href: "/" },
     { label: "Daftar Tamu", icon: "groups", href: "/dashboard/guests", active: isGuests },
-    { label: "Amplop & Ucapan", icon: "card_giftcard", href: "/dashboard#amplop-ucapan" },
+    { label: "Amplop & Ucapan", icon: "card_giftcard", href: "/dashboard/amplop-ucapan", active: isGifts },
     { label: "Paket Langganan", icon: "loyalty", href: "/paket-harga" },
   ];
 

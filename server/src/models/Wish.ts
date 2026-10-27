@@ -1,15 +1,28 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IWish extends Document {
+  slug: string;
   name: string;
   attendance: "attending" | "not-attending";
   guests: number;
   message: string;
+  isLiked: boolean;
+  likesCount: number;
+  amount?: number;
+  bank?: string;
+  proofUrl?: string;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const WishSchema = new Schema<IWish>(
   {
+    slug: {
+      type: String,
+      default: "dimas-sarah",
+      index: true,
+      trim: true,
+    },
     name: {
       type: String,
       required: [true, "Nama tamu wajib diisi"],
@@ -32,6 +45,28 @@ const WishSchema = new Schema<IWish>(
       required: [true, "Ucapan / doa wajib diisi"],
       trim: true,
     },
+    isLiked: {
+      type: Boolean,
+      default: false,
+    },
+    likesCount: {
+      type: Number,
+      default: 0,
+    },
+    amount: {
+      type: Number,
+      default: 0,
+    },
+    bank: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    proofUrl: {
+      type: String,
+      default: "",
+      trim: true,
+    },
   },
   {
     timestamps: true,
@@ -48,4 +83,3 @@ const WishSchema = new Schema<IWish>(
 );
 
 export const Wish = mongoose.model<IWish>("Wish", WishSchema);
-

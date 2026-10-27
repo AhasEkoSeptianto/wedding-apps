@@ -40,9 +40,11 @@ export default function RsvpSection({ onShowToast, weddingData, viewMode }: Rsvp
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const targetSlug = weddingData?.slug || "dimas-sarah";
+
   useEffect(() => {
     // Attempt fetching from Express backend with MongoDB
-    api.getWishes()
+    api.getWishes(targetSlug)
       .then((res) => {
         if (res.data && res.data.length > 0) {
           setWishes(res.data);
@@ -51,7 +53,7 @@ export default function RsvpSection({ onShowToast, weddingData, viewMode }: Rsvp
       .catch(() => {
         // Fallback to localStorage
         try {
-          const saved = localStorage.getItem("wedding_wishes_next");
+          const saved = localStorage.getItem(`wedding_wishes_${targetSlug}`);
           if (saved) {
             const parsed = JSON.parse(saved);
             queueMicrotask(() => {
@@ -62,7 +64,7 @@ export default function RsvpSection({ onShowToast, weddingData, viewMode }: Rsvp
           console.error(e);
         }
       });
-  }, []);
+  }, [targetSlug]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,6 +76,7 @@ export default function RsvpSection({ onShowToast, weddingData, viewMode }: Rsvp
     setIsSubmitting(true);
     const newWish: Wish = {
       id: Date.now().toString(),
+      slug: targetSlug,
       name: name.trim(),
       attendance,
       guests,
@@ -84,13 +87,14 @@ export default function RsvpSection({ onShowToast, weddingData, viewMode }: Rsvp
     const updated = [newWish, ...wishes];
     setWishes(updated);
     try {
-      localStorage.setItem("wedding_wishes_next", JSON.stringify(updated));
+      localStorage.setItem(`wedding_wishes_${targetSlug}`, JSON.stringify(updated));
     } catch (err) {
       console.error(err);
     }
 
     // Persist to Express / MongoDB backend
     api.createWish({
+      slug: targetSlug,
       name: name.trim(),
       attendance,
       guests,
@@ -156,7 +160,7 @@ export default function RsvpSection({ onShowToast, weddingData, viewMode }: Rsvp
           }}
         >
           <h3
-            className="font-heading text-lg sm:text-xl font-bold mb-4 sm:mb-6 pb-3 border-b"
+            className="font-heading text-lg sm:xl font-bold mb-4 sm:mb-6 pb-3 border-b"
             style={{ color: theme.colors.text, borderColor: theme.colors.border }}
           >
             Attendance Confirmation

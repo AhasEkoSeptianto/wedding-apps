@@ -2,9 +2,17 @@ import { Request, Response, NextFunction } from "express";
 import { Wish } from "../models/Wish.js";
 
 // GET /api/wishes
-export async function getWishes(_req: Request, res: Response, next: NextFunction): Promise<void> {
+export async function getWishes(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const wishes = await Wish.find().sort({ createdAt: -1 });
+    const { slug } = req.query;
+    const filter: Record<string, unknown> = {};
+
+    if (slug) {
+      filter.$or = [{ slug }, { slug: { $exists: false } }, { slug: "" }];
+    }
+
+    const wishes = await Wish.find(filter).sort({ createdAt: -1 });
+
     res.json({
       success: true,
       count: wishes.length,
@@ -18,7 +26,7 @@ export async function getWishes(_req: Request, res: Response, next: NextFunction
 // POST /api/wishes
 export async function createWish(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { name, attendance, guests, message } = req.body;
+    const { slug, name, attendance, guests, message, amount, bank, proofUrl } = req.body;
 
     if (!name || !message) {
       res.status(400).json({
@@ -36,16 +44,48 @@ export async function createWish(req: Request, res: Response, next: NextFunction
         : 1;
 
     const newWish = await Wish.create({
-      name,
+      slug: slug || "dimas-sarah",
+      name: name.trim(),
       attendance: attendance || "attending",
       guests: guestCount,
-      message,
+      message: message.trim(),
+      amount: amount ? Number(amount) : 0,
+      bank: bank || "",
+      proofUrl: proofUrl || "",
     });
 
     res.status(201).json({
       success: true,
       message: "Doa dan ucapan berhasil dikirim!",
       data: newWish,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+// PATCH /api/wishes/:id/like
+export async function toggleLikeWish(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id } = req.params;
+    const wish = await Wish.findById(id);
+
+    if (!wish) {
+      res.status(404).json({
+        success: false,
+        message: "Ucapan tidak ditemukan.",
+      });
+      return;
+    }
+
+    wish.isLiked = !wish.isLiked;
+    wish.likesCount = wish.isLiked ? (wish.likesCount || 0) + 1 : Math.max(0, (wish.likesCount || 1) - 1);
+    await wish.save();
+
+    res.json({
+      success: true,
+      message: wish.isLiked ? "Ucapan disukai" : "Batal menyukai ucapan",
+      data: wish,
     });
   } catch (error) {
     next(error);
@@ -74,4 +114,3 @@ export async function deleteWish(req: Request, res: Response, next: NextFunction
     next(error);
   }
 }
-

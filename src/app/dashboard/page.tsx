@@ -129,7 +129,7 @@ function DashboardContent() {
             {/* Right Column: QR Widget & Wishes Feed */}
             <aside className="lg:col-span-4 space-y-6">
               <ReceptionQRWidget onShowToast={showToast} />
-              <WishesLiveFeed onShowToast={showToast} />
+              <WishesLiveFeed onShowToast={showToast} slug={targetSlug} />
             </aside>
           </div>
         </main>

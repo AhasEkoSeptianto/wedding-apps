@@ -3,10 +3,26 @@ import { WeddingData } from "@/types";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 export interface WishPayload {
+  slug?: string;
   name: string;
   attendance: "attending" | "not-attending";
   guests: number;
   message: string;
+  amount?: number;
+  bank?: string;
+  proofUrl?: string;
+}
+
+export interface GiftPayload {
+  slug?: string;
+  senderName: string;
+  bankTarget?: string;
+  bankSender?: string;
+  accountNumber?: string;
+  amount: number;
+  message?: string;
+  proofUrl?: string;
+  status?: "confirmed" | "pending";
 }
 
 export interface GuestPayload {
@@ -85,8 +101,9 @@ export const api = {
   },
 
   // Wishes & RSVP
-  getWishes: async () => {
-    const res = await fetch(`${API_BASE}/wishes`, { cache: "no-store" });
+  getWishes: async (slug?: string) => {
+    const url = slug ? `${API_BASE}/wishes?slug=${encodeURIComponent(slug)}` : `${API_BASE}/wishes`;
+    const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) throw new Error("Gagal mengambil data ucapan");
     return await res.json();
   },
@@ -101,12 +118,63 @@ export const api = {
     return await res.json();
   },
 
+  toggleLikeWish: async (id: string) => {
+    const res = await fetch(`${API_BASE}/wishes/${id}/like`, {
+      method: "PATCH",
+    });
+    if (!res.ok) throw new Error("Gagal menyukai ucapan");
+    return await res.json();
+  },
+
   deleteWish: async (id: string) => {
     const res = await fetch(`${API_BASE}/wishes/${id}`, {
       method: "DELETE",
     });
     if (!res.ok) throw new Error("Gagal menghapus ucapan");
     return await res.json();
+  },
+
+  // Amplop Digital (Gifts)
+  getGifts: async (params?: { slug?: string; status?: string; search?: string }) => {
+    const query = new URLSearchParams();
+    if (params?.slug) query.set("slug", params.slug);
+    if (params?.status) query.set("status", params.status);
+    if (params?.search) query.set("search", params.search);
+
+    const res = await fetch(`${API_BASE}/gifts?${query.toString()}`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Gagal mengambil daftar amplop digital");
+    return await res.json();
+  },
+
+  createGift: async (payload: GiftPayload) => {
+    const res = await fetch(`${API_BASE}/gifts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Gagal mencatat amplop digital");
+    return data;
+  },
+
+  updateGiftStatus: async (id: string, status: "confirmed" | "pending") => {
+    const res = await fetch(`${API_BASE}/gifts/${id}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Gagal memperbarui status amplop");
+    return data;
+  },
+
+  deleteGift: async (id: string) => {
+    const res = await fetch(`${API_BASE}/gifts/${id}`, {
+      method: "DELETE",
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Gagal menghapus amplop");
+    return data;
   },
 
   // Guests (Buku Tamu)
