@@ -3,7 +3,6 @@
 import { useRef, useState, useEffect } from "react";
 import { WeddingData, StoryItem, HtmlTemplate } from "@/types";
 import { api } from "@/lib/api";
-import { getAllThemes, getTheme, THEME_CATEGORIES } from "@/lib/themes";
 import {
   PRESET_HTML_TEMPLATES,
 } from "@/lib/templateEngine";
@@ -30,7 +29,6 @@ export default function EditorStudio({
   const [uploadingBride, setUploadingBride] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [themeCategoryFilter, setThemeCategoryFilter] = useState<string>("Semua");
 
   // HTML Templates fetched from Admin & MongoDB
   const [htmlTemplates, setHtmlTemplates] = useState<HtmlTemplate[]>([]);
@@ -77,12 +75,10 @@ export default function EditorStudio({
       .finally(() => setLoadingTemplates(false));
   }, []);
 
-  const currentTheme = getTheme(data.themeId);
-  const allThemes = getAllThemes();
-  const filteredThemes =
-    themeCategoryFilter === "Semua"
-      ? allThemes
-      : allThemes.filter((t) => t.category === themeCategoryFilter);
+  const activeHtmlTemplate =
+    htmlTemplates.find((t) => t.slug === data.themeId || t.id === data.themeId) ||
+    htmlTemplates[0] ||
+    PRESET_HTML_TEMPLATES[0];
 
   const handleFileUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -236,7 +232,7 @@ export default function EditorStudio({
       {/* Tab Navigation */}
       <div className="bg-surface-container-lowest rounded-xl p-1.5 shadow-sm overflow-x-auto flex gap-1 border border-outline-variant/20 scrollbar-none">
         {[
-          { id: "tema", label: "Desain Tema", icon: "palette" },
+          { id: "tema", label: "Desain Undangan", icon: "style" },
           { id: "pasangan", label: "Mempelai", icon: "favorite" },
           { id: "acara", label: "Acara", icon: "event" },
           { id: "galeri", label: "Galeri", icon: "photo_library" },
@@ -276,277 +272,114 @@ export default function EditorStudio({
         </div>
       )}
 
-      {/* Tab 0: Desain Tema */}
+      {/* Tab 0: Desain Undangan (Hanya Template HTML Pilihan Desainer dari Katalog) */}
       {activeTab === "tema" && (
-        <div className="flex flex-col gap-4">
-          {/* Mode Switcher: Tema Visual Bawaan vs Full Custom HTML */}
-          <div className="bg-surface-container p-1 rounded-xl flex items-center gap-1 border border-outline-variant/20">
-            <button
-              type="button"
-              onClick={() => onChange({ ...data, designMode: "standard" })}
-              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                (data.designMode || "standard") === "standard"
-                  ? "bg-surface-container-lowest text-on-surface shadow-xs"
-                  : "text-on-surface-variant hover:text-on-surface"
-              }`}
-            >
-              <span className="material-symbols-outlined text-[16px]">palette</span>
-              <span>Katalog Tema Visual (Bawaan)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const defaultTemplate = htmlTemplates[0] || PRESET_HTML_TEMPLATES[0];
-                onChange({
-                  ...data,
-                  designMode: "custom_html",
-                  customHtml: data.customHtml || defaultTemplate.html,
-                  themeId: data.themeId || defaultTemplate.slug || defaultTemplate.id,
-                });
-              }}
-              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                data.designMode === "custom_html"
-                  ? "bg-primary text-on-primary shadow-xs"
-                  : "text-on-surface-variant hover:text-on-surface"
-              }`}
-            >
-              <span className="material-symbols-outlined text-[16px]">html</span>
-              <span>Katalog Template HTML (Desainer)</span>
-            </button>
-          </div>
+        <div className="flex flex-col gap-5">
+          {/* Active Template Showcase Card */}
+          <div className="bg-surface-container-lowest rounded-2xl border border-primary/40 shadow-sm p-5 flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Desain Aktif Anda (Dipilih dari Katalog)</span>
+              </span>
+              <span className="text-xs text-on-surface-variant font-medium">
+                Kategori: <strong className="text-on-surface">{activeHtmlTemplate?.category || "Luxury"}</strong>
+              </span>
+            </div>
 
-          {/* Mode 1: Tema Visual Standar */}
-          {(data.designMode || "standard") === "standard" ? (
-            <>
-              {/* Active Theme Highlight Banner */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <div
-                className="p-5 rounded-2xl border shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all"
+                className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 border border-outline-variant/30 relative shadow-sm"
                 style={{
-                  backgroundColor: currentTheme.colors.surface,
-                  borderColor: currentTheme.colors.primary,
+                  backgroundColor: `${activeHtmlTemplate?.previewColor || "#c5a059"}20`,
                 }}
               >
-                <div className="flex items-center gap-3.5">
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 shadow-xs"
-                    style={{
-                      backgroundColor: `${currentTheme.colors.primary}18`,
-                      color: currentTheme.colors.primary,
-                      border: `1px solid ${currentTheme.colors.primary}40`,
-                    }}
-                  >
-                    {currentTheme.ornament.symbol}
+                {activeHtmlTemplate?.thumbnailUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={activeHtmlTemplate.thumbnailUrl}
+                    alt={activeHtmlTemplate.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-primary">
+                    <span className="material-symbols-outlined text-[32px]">style</span>
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                        Tema Aktif
-                      </span>
-                      <span className="text-xs text-on-surface-variant">
-                        {currentTheme.category}
-                      </span>
-                    </div>
-                    <h3 className="font-heading font-bold text-base text-on-surface">
-                      {currentTheme.name}
-                    </h3>
-                    <p className="text-xs text-on-surface-variant line-clamp-1 max-w-md">
-                      {currentTheme.description}
-                    </p>
-                  </div>
-                </div>
+                )}
+                <span
+                  className="absolute bottom-1.5 right-1.5 w-4 h-4 rounded-full border-2 border-white shadow-xs"
+                  style={{ backgroundColor: activeHtmlTemplate?.previewColor || "#c5a059" }}
+                  title="Warna Aksen Desain"
+                />
+              </div>
 
-                {/* Color Swatch Dots */}
-                <div className="flex items-center gap-3 shrink-0 self-end sm:self-auto">
-                  <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-surface-container border border-outline-variant/20">
-                    <span
-                      className="w-4 h-4 rounded-full border border-black/10"
-                      style={{ backgroundColor: currentTheme.colors.bg }}
-                      title="Warna Latar"
-                    />
-                    <span
-                      className="w-4 h-4 rounded-full border border-black/10"
-                      style={{ backgroundColor: currentTheme.colors.surface }}
-                      title="Warna Kartu"
-                    />
-                    <span
-                      className="w-4 h-4 rounded-full border border-black/10"
-                      style={{ backgroundColor: currentTheme.colors.primary }}
-                      title="Warna Utama"
-                    />
-                    <span
-                      className="w-4 h-4 rounded-full border border-black/10"
-                      style={{ backgroundColor: currentTheme.colors.accent }}
-                      title="Warna Aksen"
-                    />
-                  </div>
-                  <a
-                    href={`/demo?theme=${currentTheme.id}&slug=${data.slug || "dimas-sarah"}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-highest hover:bg-surface-container text-xs font-semibold text-on-surface transition-colors cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">open_in_new</span>
-                    <span>Full Preview</span>
-                  </a>
+              <div className="flex-1 space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-lg font-bold text-on-surface">
+                    {activeHtmlTemplate?.name || "Template Desainer"}
+                  </h3>
+                  {activeHtmlTemplate?.tierBadge && (
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-900 border border-amber-300">
+                      {activeHtmlTemplate.tierBadge}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">
+                  {activeHtmlTemplate?.description || "Template undangan HTML eksklusif dengan tata letak anggun dan tipografi mewah."}
+                </p>
+                <div className="pt-1 flex items-center gap-3 text-xs text-on-surface-variant flex-wrap">
+                  <span className="flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[15px] text-primary">brush</span>
+                    <span>Desainer: <strong className="text-on-surface">{activeHtmlTemplate?.designer || "Atelier JanjiSuci"}</strong></span>
+                  </span>
+                  <span>&bull;</span>
+                  <span className="flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[15px] text-emerald-600">verified</span>
+                    <span>Format HTML Murni</span>
+                  </span>
                 </div>
               </div>
 
-              {/* Category Filter Pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-                {THEME_CATEGORIES.map((cat) => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setThemeCategoryFilter(cat)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                      themeCategoryFilter === cat
-                        ? "bg-primary text-on-primary shadow-xs"
-                        : "bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container hover:text-on-surface border border-outline-variant/20"
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-
-              {/* Theme Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {filteredThemes.map((themeItem) => {
-                  const isSelected = (data.themeId || "royal-bloom") === themeItem.id;
-
-                  return (
-                    <div
-                      key={themeItem.id}
-                      className={`rounded-2xl overflow-hidden border transition-all flex flex-col bg-surface-container-lowest shadow-sm hover:shadow-md ${
-                        isSelected
-                          ? "ring-2 ring-primary border-primary"
-                          : "border-outline-variant/25 hover:border-outline-variant/60"
-                      }`}
-                    >
-                      {/* Thumbnail Banner */}
-                      <div className="relative h-40 w-full overflow-hidden bg-stone-100">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={themeItem.previewImage}
-                          alt={themeItem.name}
-                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                          loading="lazy"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-
-                        {/* Badge */}
-                        <span className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-black/60 text-white backdrop-blur-md border border-white/20">
-                          {themeItem.badge}
-                        </span>
-
-                        {/* Category */}
-                        <span className="absolute bottom-3 left-3 text-[11px] font-medium text-white/90 flex items-center gap-1">
-                          <span>{themeItem.ornament.symbol}</span>
-                          <span>{themeItem.category}</span>
-                        </span>
-                      </div>
-
-                      {/* Card Body */}
-                      <div className="p-4 flex flex-col flex-1 justify-between gap-3">
-                        <div>
-                          <div className="flex items-center justify-between gap-2 mb-1">
-                            <h4 className="font-heading font-bold text-sm text-on-surface truncate">
-                              {themeItem.name}
-                            </h4>
-                            {/* Swatches */}
-                            <div className="flex items-center gap-1">
-                              <span
-                                className="w-3 h-3 rounded-full border border-black/10"
-                                style={{ backgroundColor: themeItem.colors.bg }}
-                              />
-                              <span
-                                className="w-3 h-3 rounded-full border border-black/10"
-                                style={{ backgroundColor: themeItem.colors.primary }}
-                              />
-                              <span
-                                className="w-3 h-3 rounded-full border border-black/10"
-                                style={{ backgroundColor: themeItem.colors.accent }}
-                              />
-                            </div>
-                          </div>
-                          <p className="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">
-                            {themeItem.description}
-                          </p>
-                        </div>
-
-                        {/* Action Button */}
-                        <div className="pt-2 border-t border-outline-variant/15 flex items-center justify-between gap-2">
-                          <a
-                            href={`/demo?theme=${themeItem.id}&slug=${data.slug || "dimas-sarah"}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[11px] font-semibold text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1"
-                          >
-                            <span className="material-symbols-outlined text-[14px]">visibility</span>
-                            <span>Preview</span>
-                          </a>
-
-                          <button
-                            type="button"
-                            onClick={() => onChange({ ...data, themeId: themeItem.id })}
-                            disabled={isSelected}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer ${
-                              isSelected
-                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-default"
-                                : "bg-primary text-on-primary hover:bg-primary-container shadow-xs active:scale-95"
-                            }`}
-                          >
-                            {isSelected ? (
-                              <>
-                                <span className="material-symbols-outlined text-[14px]">check_circle</span>
-                                <span>Sedang Digunakan</span>
-                              </>
-                            ) : (
-                              <>
-                                <span className="material-symbols-outlined text-[14px]">palette</span>
-                                <span>Terapkan Desain</span>
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          ) : (
-            /* Mode 2: Katalog Template HTML Pilihan Desainer (Khusus Client: Hanya Pilih dari Katalog) */
-            <div className="flex flex-col gap-4">
-              {/* Client Info Banner */}
-              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500 text-stone-950 flex items-center justify-center shrink-0 shadow-sm font-bold">
-                    <span className="material-symbols-outlined text-[20px]">style</span>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-on-surface">
-                      Katalog Desain Template HTML Eksklusif
-                    </h3>
-                    <p className="text-xs text-on-surface-variant leading-relaxed">
-                      Koleksi template HTML dirancang dan dikelola secara eksklusif oleh staf desainer JanjiSuci melalui Panel Administrasi. Anda cukup memilih template yang Anda sukai; seluruh nama pasangan, jadwal acara, galeri foto, dan amplop digital Anda otomatis terpasang dengan rapi.
-                    </p>
-                  </div>
-                </div>
-
+              <div className="flex flex-col gap-2 shrink-0 self-stretch sm:self-auto justify-center">
                 <a
                   href={`/demo?slug=${data.slug || "dimas-sarah"}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3.5 py-1.5 rounded-lg bg-primary text-on-primary text-xs font-semibold hover:bg-primary-container transition-colors flex items-center gap-1.5 shrink-0 self-end sm:self-auto shadow-xs"
+                  className="px-4 py-2 rounded-xl bg-surface-container-highest hover:bg-surface-container text-on-surface text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer border border-outline-variant/30"
                 >
                   <span className="material-symbols-outlined text-[16px]">open_in_new</span>
                   <span>Buka Preview Full</span>
                 </a>
               </div>
+            </div>
+          </div>
 
-              {/* Category Filter Pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          {/* Catalog Explanation & Switcher */}
+          <div className="space-y-3 pt-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h4 className="font-bold text-sm text-on-surface flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[18px] text-primary">auto_awesome_motion</span>
+                  <span>Ganti Desain dari Katalog Tim Desainer</span>
+                </h4>
+                <p className="text-xs text-on-surface-variant leading-relaxed">
+                  Pilihan desain yang tersedia dikurasi oleh staf desainer JanjiSuci. Pilih template yang Anda inginkan dari katalog di bawah ini:
+                </p>
+              </div>
+
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-semibold text-primary hover:text-primary-container inline-flex items-center gap-1 self-start sm:self-auto shrink-0"
+              >
+                <span>Lihat Album Lengkap di Beranda</span>
+                <span className="material-symbols-outlined text-[14px]">arrow_outward</span>
+              </a>
+            </div>
+
+            {/* Category Filter Pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
                 {["Semua", "Luxury", "Floral", "Modern", "Tradisional", "Rustic"].map((cat) => (
                   <button
                     key={cat}
@@ -658,8 +491,7 @@ export default function EditorStudio({
                 </div>
               )}
             </div>
-          )}
-        </div>
+          </div>
       )}
 
       {/* Tab 1: Mempelai */}

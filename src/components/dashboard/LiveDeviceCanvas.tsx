@@ -47,14 +47,13 @@ export default function LiveDeviceCanvas({ data }: LiveDeviceCanvasProps) {
 
   const theme = getTheme(data.themeId);
   const currentSlug = data.slug || "dimas-sarah";
-  const isCustomHtmlMode = data.designMode === "custom_html";
+  const isCustomHtmlMode = true;
 
   const compiledHtml = useMemo(() => {
-    if (!isCustomHtmlMode) return "";
     return renderHtmlTemplate(data.customHtml || "", data, {
       guestName: "Bapak / Ibu Tamu Terhormat",
     });
-  }, [isCustomHtmlMode, data]);
+  }, [data]);
 
   return (
     <div className="flex flex-col items-center w-full">
@@ -132,18 +131,14 @@ export default function LiveDeviceCanvas({ data }: LiveDeviceCanvasProps) {
 
           {/* Mode Indicator Badge */}
           <span
-            className={`text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 border shadow-xs ${
-              isCustomHtmlMode
-                ? "bg-amber-50 text-amber-900 border-amber-300"
-                : "bg-emerald-50 text-emerald-900 border-emerald-300"
-            }`}
-            title={isCustomHtmlMode ? "Sedang menggunakan Template HTML Pilihan Desainer" : "Sedang menggunakan Tema Visual Bawaan"}
+            className="text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 border shadow-xs bg-amber-50 text-amber-900 border-amber-300"
+            title="Sedang menggunakan Template HTML Pilihan Desainer dari Katalog"
           >
             <span className="material-symbols-outlined text-[14px]">
-              {isCustomHtmlMode ? "html" : "palette"}
+              style
             </span>
             <span className="hidden sm:inline">
-              {isCustomHtmlMode ? "Template HTML" : "Tema Visual"}
+              Template Desainer
             </span>
           </span>
 

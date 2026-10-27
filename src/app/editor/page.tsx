@@ -8,9 +8,10 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import EditorStudio from "@/components/dashboard/EditorStudio";
 import LiveDeviceCanvas from "@/components/dashboard/LiveDeviceCanvas";
 import { DEFAULT_WEDDING_DATA } from "@/lib/defaultWedding";
-import { WeddingData } from "@/types";
+import { WeddingData, HtmlTemplate } from "@/types";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { PRESET_HTML_TEMPLATES } from "@/lib/templateEngine";
 
 function EditorStudioContent() {
   const { user } = useAuth();
@@ -19,10 +20,16 @@ function EditorStudioContent() {
   const themeParam = searchParams.get("theme");
   const slug = slugParam || user?.weddingSlug || "dimas-sarah";
 
-  const [data, setData] = useState<WeddingData>(() => ({
-    ...DEFAULT_WEDDING_DATA,
-    themeId: themeParam || DEFAULT_WEDDING_DATA.themeId || "royal-bloom",
-  }));
+  const [data, setData] = useState<WeddingData>(() => {
+    const initialTheme = themeParam || DEFAULT_WEDDING_DATA.themeId || "royal-gold-majesty";
+    const matched = PRESET_HTML_TEMPLATES.find((p) => p.id === initialTheme);
+    return {
+      ...DEFAULT_WEDDING_DATA,
+      themeId: initialTheme,
+      designMode: "custom_html",
+      customHtml: matched ? matched.html : DEFAULT_WEDDING_DATA.customHtml,
+    };
+  });
   const [activeTab, setActiveTab] = useState<"tema" | "pasangan" | "acara" | "galeri" | "fitur" | "rsvp">(
     themeParam ? "tema" : "pasangan"
   );
@@ -34,25 +41,69 @@ function EditorStudioContent() {
   // Load latest wedding data from database on mount or when slug changes
   useEffect(() => {
     let isCurrent = true;
+
+    // If themeParam was selected from catalog, find that template HTML
+    const applyThemeParam = async (currentData: WeddingData) => {
+      if (!themeParam) return currentData;
+      try {
+        const res = await api.getTemplates();
+        const found = (res.data || []).find((t) => t.slug === themeParam || t.id === themeParam);
+        if (found && found.html) {
+          return {
+            ...currentData,
+            themeId: found.slug || found.id,
+            designMode: "custom_html" as const,
+            customHtml: found.html,
+          };
+        }
+      } catch (e) {
+        console.warn("Could not fetch template for themeParam:", e);
+      }
+      const matched = PRESET_HTML_TEMPLATES.find((p) => p.id === themeParam);
+      if (matched) {
+        return {
+          ...currentData,
+          themeId: matched.id,
+          designMode: "custom_html" as const,
+          customHtml: matched.html,
+        };
+      }
+      return currentData;
+    };
+
     api
       .getWedding(slug)
-      .then((res) => {
-        if (isCurrent && res.success && res.data) {
-          setData({
+      .then(async (res) => {
+        if (!isCurrent) return;
+        if (res.success && res.data) {
+          let merged: WeddingData = {
             ...DEFAULT_WEDDING_DATA,
             ...res.data,
-            themeId: themeParam || res.data.themeId || "royal-bloom",
-            designMode: res.data.designMode || DEFAULT_WEDDING_DATA.designMode || "standard",
+            themeId: themeParam || res.data.themeId || "royal-gold-majesty",
+            designMode: "custom_html",
             customHtml: res.data.customHtml || DEFAULT_WEDDING_DATA.customHtml,
             gallery: res.data.gallery || [],
             stories: res.data.stories !== undefined ? res.data.stories : (DEFAULT_WEDDING_DATA.stories || []),
-          });
-          const now = new Date();
-          setLastSync(now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }));
+          };
+          if (themeParam) {
+            merged = await applyThemeParam(merged);
+          }
+          if (isCurrent) {
+            setData(merged);
+            const now = new Date();
+            setLastSync(now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }));
+          }
+        } else if (themeParam) {
+          const updated = await applyThemeParam(DEFAULT_WEDDING_DATA);
+          if (isCurrent) setData(updated);
         }
       })
-      .catch((err) => {
+      .catch(async (err) => {
         console.warn("Could not load wedding data from server, using defaults:", err);
+        if (themeParam) {
+          const updated = await applyThemeParam(DEFAULT_WEDDING_DATA);
+          if (isCurrent) setData(updated);
+        }
       });
 
     return () => {

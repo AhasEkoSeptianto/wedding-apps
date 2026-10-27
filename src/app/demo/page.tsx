@@ -8,7 +8,7 @@ import { api } from "@/lib/api";
 import { DEFAULT_WEDDING_DATA } from "@/lib/defaultWedding";
 import { WeddingData } from "@/types";
 import { getTheme } from "@/lib/themes";
-import { renderHtmlTemplate } from "@/lib/templateEngine";
+import { renderHtmlTemplate, PRESET_HTML_TEMPLATES } from "@/lib/templateEngine";
 import CoverOverlay from "@/components/CoverOverlay";
 import MusicPlayer from "@/components/MusicPlayer";
 import HeroSection from "@/components/HeroSection";
@@ -37,27 +37,62 @@ function DemoContent() {
 
   useEffect(() => {
     let isMounted = true;
+    const applyThemeParam = async (currentData: WeddingData) => {
+      if (!themeParam) return currentData;
+      try {
+        const res = await api.getTemplates();
+        const found = (res.data || []).find((t) => t.slug === themeParam || t.id === themeParam);
+        if (found && found.html) {
+          return {
+            ...currentData,
+            themeId: found.slug || found.id,
+            designMode: "custom_html" as const,
+            customHtml: found.html,
+          };
+        }
+      } catch (e) {
+        console.warn("Could not fetch template for themeParam:", e);
+      }
+      const matched = PRESET_HTML_TEMPLATES.find((p) => p.id === themeParam);
+      if (matched) {
+        return {
+          ...currentData,
+          themeId: matched.id,
+          designMode: "custom_html" as const,
+          customHtml: matched.html,
+        };
+      }
+      return currentData;
+    };
+
     api
       .getWedding(targetSlug)
-      .then((res) => {
-        if (isMounted && res.success && res.data) {
-          setWeddingData({
+      .then(async (res) => {
+        if (!isMounted) return;
+        if (res.success && res.data) {
+          let merged: WeddingData = {
             ...DEFAULT_WEDDING_DATA,
             ...res.data,
-            themeId: themeParam || res.data.themeId || "royal-bloom",
-            designMode: res.data.designMode || DEFAULT_WEDDING_DATA.designMode || "standard",
+            themeId: themeParam || res.data.themeId || "royal-gold-majesty",
+            designMode: "custom_html",
             customHtml: res.data.customHtml || DEFAULT_WEDDING_DATA.customHtml,
             gallery: res.data.gallery || [],
             stories: res.data.stories !== undefined ? res.data.stories : (DEFAULT_WEDDING_DATA.stories || []),
-          });
+          };
+          if (themeParam) {
+            merged = await applyThemeParam(merged);
+          }
+          if (isMounted) setWeddingData(merged);
         } else if (themeParam) {
-          setWeddingData((prev) => ({ ...prev, themeId: themeParam }));
+          const updated = await applyThemeParam(DEFAULT_WEDDING_DATA);
+          if (isMounted) setWeddingData(updated);
         }
       })
-      .catch((err) => {
+      .catch(async (err) => {
         console.warn("Using default wedding data due to fetch error:", err);
         if (themeParam) {
-          setWeddingData((prev) => ({ ...prev, themeId: themeParam }));
+          const updated = await applyThemeParam(DEFAULT_WEDDING_DATA);
+          if (isMounted) setWeddingData(updated);
         }
       });
 
@@ -71,7 +106,7 @@ function DemoContent() {
   };
 
   const currentTheme = getTheme(weddingData.themeId);
-  const isCustomHtmlMode = weddingData.designMode === "custom_html";
+  const isCustomHtmlMode = true;
 
   const groomNick = weddingData.groom.nickName || weddingData.groom.fullName.split(" ")[0] || "Dimas";
   const brideNick = weddingData.bride.nickName || weddingData.bride.fullName.split(" ")[0] || "Sarah";
