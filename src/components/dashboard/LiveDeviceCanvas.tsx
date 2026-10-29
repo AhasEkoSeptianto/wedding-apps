@@ -46,7 +46,7 @@ export default function LiveDeviceCanvas({ data }: LiveDeviceCanvasProps) {
   };
 
   const theme = getTheme(data.themeId);
-  const currentSlug = data.slug || "dimas-sarah";
+  const currentSlug = data.slug || "dimas&sarah";
   const isCustomHtmlMode = true;
 
   const compiledHtml = useMemo(() => {
@@ -206,7 +206,7 @@ export default function LiveDeviceCanvas({ data }: LiveDeviceCanvasProps) {
             {/* Address Bar */}
             <div className="flex-1 max-w-md mx-4 bg-stone-800/80 rounded-md px-3 py-1 flex items-center gap-2 text-stone-300 text-[11px] font-mono border border-stone-700/50">
               <span className="material-symbols-outlined text-[14px] text-emerald-400">lock</span>
-              <span className="truncate">https://janjisuci.com/demo?slug={currentSlug}</span>
+              <span className="truncate">https://janjisuci.com/{currentSlug}</span>
             </div>
 
             {/* Browser actions */}

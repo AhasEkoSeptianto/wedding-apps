@@ -6,6 +6,7 @@ import { api } from "@/lib/api";
 import {
   PRESET_HTML_TEMPLATES,
 } from "@/lib/templateEngine";
+import { getWeddingLivePath, getWeddingLiveUrl, formatCoupleSlug } from "@/lib/slug";
 export type { WeddingData };
 
 interface EditorStudioProps {
@@ -132,16 +133,30 @@ export default function EditorStudio({
   };
 
   const updateGroom = (field: string, val: string) => {
+    const updatedGroom = { ...data.groom, [field]: val };
+    const shouldUpdateSlug = field === "nickName" && val.trim().length > 0;
+    const newSlug = shouldUpdateSlug
+      ? formatCoupleSlug(val, data.bride.nickName || data.bride.fullName)
+      : (data.slug || "dimas&sarah");
+
     onChange({
       ...data,
-      groom: { ...data.groom, [field]: val },
+      slug: newSlug,
+      groom: updatedGroom,
     });
   };
 
   const updateBride = (field: string, val: string) => {
+    const updatedBride = { ...data.bride, [field]: val };
+    const shouldUpdateSlug = field === "nickName" && val.trim().length > 0;
+    const newSlug = shouldUpdateSlug
+      ? formatCoupleSlug(data.groom.nickName || data.groom.fullName, val)
+      : (data.slug || "dimas&sarah");
+
     onChange({
       ...data,
-      bride: { ...data.bride, [field]: val },
+      slug: newSlug,
+      bride: updatedBride,
     });
   };
 
@@ -342,13 +357,13 @@ export default function EditorStudio({
 
               <div className="flex flex-col gap-2 shrink-0 self-stretch sm:self-auto justify-center">
                 <a
-                  href={`/demo?slug=${data.slug || "dimas-sarah"}`}
+                  href={getWeddingLivePath(data.slug || "dimas&sarah")}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-4 py-2 rounded-xl bg-surface-container-highest hover:bg-surface-container text-on-surface text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer border border-outline-variant/30"
                 >
                   <span className="material-symbols-outlined text-[16px]">open_in_new</span>
-                  <span>Buka Preview Full</span>
+                  <span>Buka Preview Full (/{data.slug || "dimas&sarah"})</span>
                 </a>
               </div>
             </div>
@@ -497,6 +512,55 @@ export default function EditorStudio({
       {/* Tab 1: Mempelai */}
       {activeTab === "pasangan" && (
         <div className="flex flex-col gap-4">
+          {/* Subdomain & Link Live Card */}
+          <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-300/40 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-700 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[22px]">link</span>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 block">
+                  Link Undangan / Subdomain Live
+                </span>
+                <span className="text-xs sm:text-sm font-bold text-on-surface font-mono flex items-center gap-1 mt-0.5">
+                  <span className="text-on-surface-variant font-normal">janjisuci.com/</span>
+                  <input
+                    type="text"
+                    value={data.slug || "dimas&sarah"}
+                    onChange={(e) => {
+                      const clean = e.target.value.toLowerCase().replace(/[^a-z0-9&]/g, "");
+                      onChange({ ...data, slug: clean });
+                    }}
+                    placeholder="namapria&namawanita"
+                    className="bg-surface-container-lowest px-2 py-0.5 rounded border border-amber-300/60 text-xs font-mono font-bold text-amber-950 focus:outline-none focus:ring-1 focus:ring-primary w-36"
+                  />
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <a
+                href={getWeddingLivePath(data.slug || "dimas&sarah")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary text-xs font-semibold flex items-center gap-1 transition-colors"
+              >
+                <span className="material-symbols-outlined text-[15px]">open_in_new</span>
+                <span>Buka Live</span>
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(getWeddingLiveUrl(data.slug || "dimas&sarah"));
+                  alert(`Link live undangan (janjisuci.com/${data.slug || "dimas&sarah"}) berhasil disalin!`);
+                }}
+                className="px-3 py-1.5 rounded-lg bg-surface-container-lowest border border-outline-variant/30 hover:bg-surface-container text-on-surface text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[15px]">content_copy</span>
+                <span>Salin Link</span>
+              </button>
+            </div>
+          </div>
+
           {/* Groom Card */}
           <div className="bg-surface-container-lowest p-5 rounded-xl shadow-sm flex flex-col gap-4 border border-outline-variant/20">
             <div className="flex items-center justify-between">

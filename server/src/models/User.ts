@@ -42,7 +42,7 @@ const UserSchema = new Schema<IUser>(
     weddingSlug: {
       type: String,
       trim: true,
-      default: "dimas-sarah",
+      default: "dimas&sarah",
     },
     role: {
       type: String,

@@ -41,13 +41,19 @@ export async function register(req: Request, res: Response, next: NextFunction):
       return;
     }
 
-    // Determine slug
-    const cleanSlug = (weddingSlug || name)
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "") || "undangan-kami";
+    // Determine slug: format as namapria&namawanita
+    const rawSlug: string = (weddingSlug || name).toLowerCase().trim();
+    let cleanSlug = "dimas&sarah";
+    if (rawSlug.includes("&")) {
+      const parts = rawSlug.split("&").map((p: string) => p.trim().replace(/[^a-z0-9]/g, "")).filter(Boolean);
+      cleanSlug = parts.length >= 2 ? `${parts[0]}&${parts[1]}` : (parts[0] || "dimas&sarah");
+    } else if (rawSlug.includes("-")) {
+      const parts = rawSlug.split("-").map((p: string) => p.trim().replace(/[^a-z0-9]/g, "")).filter(Boolean);
+      cleanSlug = parts.length >= 2 ? `${parts[0]}&${parts[1]}` : (parts[0] || "dimas&sarah");
+    } else {
+      const words = rawSlug.split(/\s+/).map((p: string) => p.replace(/[^a-z0-9]/g, "")).filter(Boolean);
+      cleanSlug = words.length >= 2 ? `${words[0]}&${words[1]}` : (words[0] || "dimas&sarah");
+    }
 
     const user = await User.create({
       name,

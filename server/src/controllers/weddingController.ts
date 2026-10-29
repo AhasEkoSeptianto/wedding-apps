@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { Wedding } from "../models/Wedding.js";
 
-const DEFAULT_SLUG = "dimas-sarah";
+const DEFAULT_SLUG = "dimas&sarah";
+const LEGACY_DEFAULT_SLUG = "dimas-sarah";
 
 // Default seed data matching EditorStudio
 const INITIAL_WEDDING_DATA = {
@@ -77,11 +78,16 @@ const INITIAL_WEDDING_DATA = {
 // GET /api/wedding/:slug
 export async function getWedding(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const slug = req.params.slug || DEFAULT_SLUG;
-    let wedding = await Wedding.findOne({ slug });
+    const rawSlug = req.params.slug || DEFAULT_SLUG;
+    const slug = decodeURIComponent(rawSlug).trim();
+    const altSlug = slug.includes("&") ? slug.replace(/&/g, "-") : slug.replace(/-/g, "&");
+
+    let wedding = await Wedding.findOne({
+      $or: [{ slug }, { slug: altSlug }],
+    });
 
     // Auto-create default if not exists
-    if (!wedding && slug === DEFAULT_SLUG) {
+    if (!wedding && (slug === DEFAULT_SLUG || slug === LEGACY_DEFAULT_SLUG || altSlug === DEFAULT_SLUG)) {
       wedding = await Wedding.create(INITIAL_WEDDING_DATA);
     }
 
@@ -105,12 +111,16 @@ export async function getWedding(req: Request, res: Response, next: NextFunction
 // PUT /api/wedding/:slug
 export async function upsertWedding(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const slug = req.params.slug || DEFAULT_SLUG;
+    const rawSlug = req.params.slug || DEFAULT_SLUG;
+    const slug = decodeURIComponent(rawSlug).trim();
+    const altSlug = slug.includes("&") ? slug.replace(/&/g, "-") : slug.replace(/-/g, "&");
     const updateData = req.body;
 
+    const targetSlug = updateData.slug ? decodeURIComponent(String(updateData.slug)).trim() : slug;
+
     const wedding = await Wedding.findOneAndUpdate(
-      { slug },
-      { ...updateData, slug },
+      { $or: [{ slug }, { slug: altSlug }] },
+      { ...updateData, slug: targetSlug },
       { new: true, upsert: true, runValidators: true }
     );
 

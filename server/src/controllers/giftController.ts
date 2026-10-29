@@ -8,7 +8,9 @@ export async function getGifts(req: Request, res: Response, next: NextFunction):
     const filter: Record<string, unknown> = {};
 
     if (slug) {
-      filter.$or = [{ slug }, { slug: { $exists: false } }, { slug: "" }];
+      const s = decodeURIComponent(String(slug)).trim();
+      const alt = s.includes("&") ? s.replace(/&/g, "-") : s.replace(/-/g, "&");
+      filter.$or = [{ slug: s }, { slug: alt }, { slug: { $exists: false } }, { slug: "" }];
     }
 
     if (status && status !== "all") {
@@ -34,7 +36,11 @@ export async function getGifts(req: Request, res: Response, next: NextFunction):
     const gifts = await Gift.find(filter).sort({ createdAt: -1 });
 
     // Aggregate summary
-    const allGifts = await Gift.find(slug ? { $or: [{ slug }, { slug: { $exists: false } }, { slug: "" }] } : {});
+    const s = slug ? decodeURIComponent(String(slug)).trim() : "";
+    const alt = s.includes("&") ? s.replace(/&/g, "-") : s.replace(/-/g, "&");
+    const allGifts = await Gift.find(
+      s ? { $or: [{ slug: s }, { slug: alt }, { slug: { $exists: false } }, { slug: "" }] } : {}
+    );
     const totalAmount = allGifts.reduce((acc, curr) => acc + (curr.amount || 0), 0);
     const confirmedAmount = allGifts
       .filter((g) => g.status === "confirmed")
@@ -89,8 +95,9 @@ export async function createGift(req: Request, res: Response, next: NextFunction
       return;
     }
 
+    const safeSlug = slug ? decodeURIComponent(String(slug)).trim() : "dimas&sarah";
     const newGift = await Gift.create({
-      slug: slug || "dimas-sarah",
+      slug: safeSlug,
       senderName: senderName.trim(),
       bankTarget: bankTarget || "BCA",
       bankSender: bankSender ? bankSender.trim() : "",

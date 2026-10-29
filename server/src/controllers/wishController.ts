@@ -8,7 +8,9 @@ export async function getWishes(req: Request, res: Response, next: NextFunction)
     const filter: Record<string, unknown> = {};
 
     if (slug) {
-      filter.$or = [{ slug }, { slug: { $exists: false } }, { slug: "" }];
+      const s = decodeURIComponent(String(slug)).trim();
+      const alt = s.includes("&") ? s.replace(/&/g, "-") : s.replace(/-/g, "&");
+      filter.$or = [{ slug: s }, { slug: alt }, { slug: { $exists: false } }, { slug: "" }];
     }
 
     const wishes = await Wish.find(filter).sort({ createdAt: -1 });
@@ -43,8 +45,9 @@ export async function createWish(req: Request, res: Response, next: NextFunction
         ? 0
         : 1;
 
+    const s = slug ? decodeURIComponent(String(slug)).trim() : "dimas&sarah";
     const newWish = await Wish.create({
-      slug: slug || "dimas-sarah",
+      slug: s,
       name: name.trim(),
       attendance: attendance || "attending",
       guests: guestCount,

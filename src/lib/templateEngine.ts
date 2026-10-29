@@ -213,13 +213,48 @@ export const AVAILABLE_PLACEHOLDERS: PlaceholderInfo[] = [
     example: "20 Agustus 2026",
   },
 
-  // Komponen Dinamis
+  // Komponen Dinamis & Galeri
   {
     tag: "{{gallery_grid}}",
-    label: "Komponen Galeri Foto",
+    label: "Komponen Galeri Foto Lengkap",
     category: "Komponen Dinamis",
-    description: "HTML otomatis berisikan grid foto galeri Cloudinary",
+    description: "HTML otomatis berisikan grid foto galeri prewedding yang diunggah client",
     example: "<div class='gallery-grid'>...</div>",
+  },
+  {
+    tag: "{{gallery_photo_1}}",
+    label: "Foto Galeri 1",
+    category: "Komponen Dinamis",
+    description: "URL langsung foto prewedding pertama client",
+    example: "https://images.unsplash.com/photo-1519741497674-611481863552?w=800",
+  },
+  {
+    tag: "{{gallery_photo_2}}",
+    label: "Foto Galeri 2",
+    category: "Komponen Dinamis",
+    description: "URL langsung foto prewedding kedua client",
+    example: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800",
+  },
+  {
+    tag: "{{gallery_photo_3}}",
+    label: "Foto Galeri 3",
+    category: "Komponen Dinamis",
+    description: "URL langsung foto prewedding ketiga client",
+    example: "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=800",
+  },
+  {
+    tag: "{{gallery_photo_4}}",
+    label: "Foto Galeri 4",
+    category: "Komponen Dinamis",
+    description: "URL langsung foto prewedding keempat client",
+    example: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=800",
+  },
+  {
+    tag: "{{gallery_json}}",
+    label: "Galeri Foto JSON (Untuk Script Lightbox)",
+    category: "Komponen Dinamis",
+    description: "Array JSON berisi daftar URL foto galeri prewedding untuk script JavaScript",
+    example: '["https://...1", "https://...2"]',
   },
   {
     tag: "{{stories_timeline}}",
@@ -408,6 +443,16 @@ export function renderHtmlTemplate(
     (data.events.resepsi.venue || "") + " " + (data.events.resepsi.address || "")
   )}`;
 
+  const defaultGalleryFallbacks = [
+    "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80",
+  ];
+
+  const rawGallery = (data.gallery || []).filter((u) => Boolean(u && u.trim()));
+  const galleryList = rawGallery.length > 0 ? rawGallery : defaultGalleryFallbacks;
+
   const replacements: Record<string, string> = {
     "{{couple_names}}": coupleNames,
     "{{couple_full_names}}": coupleFullNames,
@@ -446,7 +491,16 @@ export function renderHtmlTemplate(
     "{{wedding_slug}}": data.slug || "dimas-sarah",
     "{{music_title}}": data.music.title || "Romantic Wedding Melody",
     // Dynamic generated components
-    "{{gallery_grid}}": generateGalleryHtml(data.gallery),
+    "{{gallery_grid}}": generateGalleryHtml(galleryList),
+    "{{gallery_photo_1}}": galleryList[0] || "",
+    "{{gallery_photo_2}}": galleryList[1] || galleryList[0] || "",
+    "{{gallery_photo_3}}": galleryList[2] || galleryList[0] || "",
+    "{{gallery_photo_4}}": galleryList[3] || galleryList[1] || "",
+    "{{gallery_photo_5}}": galleryList[4] || galleryList[2] || "",
+    "{{gallery_photo_6}}": galleryList[5] || galleryList[3] || "",
+    "{{gallery_photo_7}}": galleryList[6] || galleryList[0] || "",
+    "{{gallery_photo_8}}": galleryList[7] || galleryList[1] || "",
+    "{{gallery_json}}": JSON.stringify(galleryList),
     "{{stories_timeline}}": generateStoriesHtml(data.stories),
     "{{countdown_widget}}": generateCountdownHtml(data.events.akad.date),
     "{{bank_accounts_widget}}": generateBankAccountsHtml(data.gift),

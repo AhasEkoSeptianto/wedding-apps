@@ -321,17 +321,17 @@ export const api = {
   },
 
   // Wedding Studio Data
-  getWedding: async (slug: string = "dimas-sarah") => {
-    const res = await fetch(`${API_BASE}/wedding/${slug}`, { cache: "no-store" });
+  getWedding: async (slug: string = "dimas&sarah") => {
+    const res = await fetch(`${API_BASE}/wedding/${encodeURIComponent(slug)}`, { cache: "no-store" });
     if (!res.ok) throw new Error("Gagal mengambil data undangan");
     return await res.json();
   },
 
   updateWedding: async (
-    slug: string = "dimas-sarah",
+    slug: string = "dimas&sarah",
     data: Partial<WeddingData> | WeddingData | Record<string, unknown>
   ) => {
-    const res = await fetch(`${API_BASE}/wedding/${slug}`, {
+    const res = await fetch(`${API_BASE}/wedding/${encodeURIComponent(slug)}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),

@@ -63,7 +63,7 @@ export default function OverviewHero({
         <div className="space-y-2 max-w-2xl">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container/50 text-secondary text-xs font-semibold uppercase tracking-wider">
             <span className="material-symbols-outlined text-[16px]">celebration</span>
-            <span>Ikhtisar Undangan Digital {slug ? `• /demo?slug=${slug}` : ""}</span>
+            <span>Ikhtisar Undangan Digital {slug ? `• /${slug}` : ""}</span>
           </div>
 
           <h1 className="font-serif text-2xl sm:text-4xl font-bold text-on-surface">

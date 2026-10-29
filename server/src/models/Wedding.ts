@@ -69,7 +69,7 @@ const WeddingSchema = new Schema<IWedding>(
       required: true,
       unique: true,
       index: true,
-      default: "dimas-sarah",
+      default: "dimas&sarah",
     },
     title: {
       type: String,

@@ -1,0 +1,54 @@
+to google stict:
+
+Buatkan desain undangan pernikahan digital online (mobile-first responsif, elegan, modern, dan mewah) dalam 1 berkas HTML lengkap dengan Tailwind CSS CDN (https://cdn.tailwindcss.com) dan Google Fonts.
+
+PENTING — ATURAN INTEGRASI DATA DINAMIS:
+Jangan melakukan hardcode pada nama pengantin, tanggal, alamat, rekening, maupun foto-foto. Seluruh data WAJIB menggunakan variabel template kurung kurawal ganda {{tag}} persis seperti daftar di bawah ini agar otomatis terhubung dengan database aplikasi:
+
+1. DATA MEMPELAI:
+- {{couple_names}} : Nama panggilan kedua mempelai (cth: Dimas & Sarah)
+- {{couple_full_names}} : Nama lengkap & gelar kedua mempelai
+- {{groom_name}} : Nama lengkap mempelai pria
+- {{groom_nickname}} : Nama panggilan pria
+- {{groom_parents}} : Nama orang tua mempelai pria
+- {{groom_instagram}} : Akun Instagram pria
+- {{groom_photo}} : URL foto pria (gunakan di atribut src img)
+- {{bride_name}} : Nama lengkap mempelai wanita
+- {{bride_nickname}} : Nama panggilan wanita
+- {{bride_parents}} : Nama orang tua mempelai wanita
+- {{bride_instagram}} : Akun Instagram wanita
+- {{bride_photo}} : URL foto wanita (gunakan di atribut src img)
+
+2. DATA ACARA & NAVIGASI:
+- {{akad_date}} : Tanggal Akad Nikah
+- {{akad_time}} : Waktu pelaksanaan Akad
+- {{akad_venue}} : Tempat / Masjid Akad
+- {{akad_address}} : Alamat lengkap Akad
+- {{akad_maps_url}} : URL Google Maps Akad (gunakan di href link tombol navigasi)
+- {{resepsi_date}} : Tanggal Resepsi
+- {{resepsi_time}} : Waktu pelaksanaan Resepsi
+- {{resepsi_venue}} : Tempat / Ballroom Resepsi
+- {{resepsi_address}} : Alamat lengkap Resepsi
+- {{resepsi_maps_url}} : URL Google Maps Resepsi (gunakan di href link tombol navigasi)
+
+3. KUTIPAN & TAMU:
+- {{guest_name}} : Nama tamu terundang
+- {{quote_text}} : Teks ayat suci atau kata mutiara
+- {{quote_source}} : Sumber kutipan / surat
+
+4. GALERI PREWEDDING:
+Gunakan tag URL foto prewedding dinamis pada atribut src gambar:
+- Foto 1: {{gallery_photo_1}}
+- Foto 2: {{gallery_photo_2}}
+- Foto 3: {{gallery_photo_3}}
+- Foto 4: {{gallery_photo_4}}
+Atau cukup tempatkan tag {{gallery_grid}} untuk komponen galeri bawaan.
+
+5. FITUR TAMBAHAN:
+- {{countdown_widget}} : Widget hitung mundur waktu acara
+- {{bank_accounts_widget}} : Kartu rekening digital / amplop hadiah beserta tombol salin nomor rekening
+
+FITUR INTERAKTIF:
+- Desain mobile-first yang nyaman di-scroll.
+- Bagian Cover/Sampul pembuka yang memiliki tombol "Buka Undangan" untuk memicu musik dan membuka halaman utama.
+- Berikan output kode HTML utuh yang siap pakai tanpa potongan tag.

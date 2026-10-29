@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { api, GuestPayload } from "@/lib/api";
 import { GuestItem, WeddingData } from "@/types";
+import { getWeddingLiveUrl, formatCoupleSlug } from "@/lib/slug";
 
 interface GuestTableProps {
   onShowToast: (msg: string) => void;
@@ -266,13 +267,11 @@ export default function GuestTable({
 
   // Send WhatsApp invite to specific guest
   const handleSendWhatsApp = (guest: GuestItem) => {
-    const origin =
-      typeof window !== "undefined" ? window.location.origin : "https://janjisuci.com";
-    const guestParam = encodeURIComponent(guest.name);
-    const guestUrl = `${origin}/demo?slug=${slug}&to=${guestParam}`;
-
     const groom = weddingData?.groom.nickName || "Dimas";
     const bride = weddingData?.bride.nickName || "Sarah";
+    const activeSlug = slug || weddingData?.slug || formatCoupleSlug(groom, bride);
+    const guestUrl = getWeddingLiveUrl(activeSlug, guest.name);
+
     const date =
       weddingData?.events.resepsi.date ||
       weddingData?.events.akad.date ||

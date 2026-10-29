@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { WeddingData } from "@/types";
+import { getWeddingLiveUrl, formatCoupleSlug } from "@/lib/slug";
 
 interface GuestLinkGeneratorProps {
   onShowToast: (message: string) => void;
@@ -12,7 +13,7 @@ interface GuestLinkGeneratorProps {
 export default function GuestLinkGenerator({
   onShowToast,
   weddingData,
-  slug = "dimas-sarah",
+  slug,
 }: GuestLinkGeneratorProps) {
   const [guestName, setGuestName] = useState("Bpk. Bambang Suryo & Partner");
   const [category, setCategory] = useState("VIP");
@@ -26,6 +27,8 @@ export default function GuestLinkGenerator({
     weddingData?.bride.fullName.split(",")[0].trim().split(" ")[0] ||
     "Sarah";
 
+  const activeSlug = slug || weddingData?.slug || formatCoupleSlug(groomNick, brideNick);
+
   const weddingDate =
     weddingData?.events.resepsi.date ||
     weddingData?.events.akad.date ||
@@ -36,9 +39,7 @@ export default function GuestLinkGenerator({
     "Grand Ballroom";
 
   const getFormattedUrl = () => {
-    const origin = typeof window !== "undefined" ? window.location.origin : "https://janjisuci.com";
-    const nameParam = encodeURIComponent(guestName.trim() || "Tamu Undangan");
-    return `${origin}/demo?slug=${slug}&to=${nameParam}`;
+    return getWeddingLiveUrl(activeSlug, guestName);
   };
 
   const getWhatsAppMessage = () => {
@@ -75,9 +76,9 @@ export default function GuestLinkGenerator({
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-on-surface-variant">Format URL:</span>
+          <span className="text-xs text-on-surface-variant">Format URL Subdomain/Path:</span>
           <code className="px-2.5 py-1 rounded-md bg-surface-container font-mono text-[12px] text-primary">
-            janjisuci.com/demo?to=...
+            janjisuci.com/{activeSlug}?to=...
           </code>
         </div>
       </div>

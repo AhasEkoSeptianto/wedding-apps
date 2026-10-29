@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
@@ -35,8 +35,11 @@ export default function AdminDashboardPage() {
   const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // New Album URL Input State
-  const [albumUrlInput, setAlbumUrlInput] = useState("");
+  // Upload Refs & State for Cover & Album (Pure file upload, no link input)
+  const thumbnailFileInputRef = useRef<HTMLInputElement>(null);
+  const albumFileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const [uploadingAlbum, setUploadingAlbum] = useState(false);
 
   // Template Form State
   const [formData, setFormData] = useState<HtmlTemplatePayload>({
@@ -179,7 +182,6 @@ export default function AdminDashboardPage() {
       isActive: true,
       isPreset: false,
     });
-    setAlbumUrlInput("");
     setEditorTab("code");
     setIsEditorModalOpen(true);
   };
@@ -203,7 +205,6 @@ export default function AdminDashboardPage() {
       isActive: template.isActive !== undefined ? template.isActive : true,
       isPreset: Boolean(template.isPreset),
     });
-    setAlbumUrlInput("");
     setEditorTab("code");
     setIsEditorModalOpen(true);
   };
@@ -225,15 +226,60 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Add photo to album
-  const handleAddAlbumPhoto = () => {
-    if (!albumUrlInput.trim()) return;
-    const current = formData.previewAlbum || [];
-    setFormData({
-      ...formData,
-      previewAlbum: [...current, albumUrlInput.trim()],
-    });
-    setAlbumUrlInput("");
+  // Upload Single Cover Thumbnail File to Cloudinary
+  const handleUploadThumbnail = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingThumbnail(true);
+    try {
+      const res = await api.uploadImage(file, "templates");
+      if (res && res.url) {
+        setFormData((prev) => ({
+          ...prev,
+          thumbnailUrl: res.url,
+        }));
+        showToast("Thumbnail sampul berhasil diunggah!");
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal mengunggah thumbnail";
+      alert(msg);
+    } finally {
+      setUploadingThumbnail(false);
+      if (e.target) e.target.value = "";
+    }
+  };
+
+  // Upload Multiple Mockup Album Files to Cloudinary
+  const handleUploadAlbumFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingAlbum(true);
+    try {
+      const uploadedUrls: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const res = await api.uploadImage(files[i], "templates");
+        if (res && res.url) {
+          uploadedUrls.push(res.url);
+        }
+      }
+      setFormData((prev) => {
+        const current = prev.previewAlbum || [];
+        return {
+          ...prev,
+          previewAlbum: [...current, ...uploadedUrls],
+          thumbnailUrl: prev.thumbnailUrl || uploadedUrls[0] || "",
+        };
+      });
+      showToast(`Berhasil mengunggah ${uploadedUrls.length} foto mockup ke album!`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal mengunggah foto mockup";
+      alert(msg);
+    } finally {
+      setUploadingAlbum(false);
+      if (e.target) e.target.value = "";
+    }
   };
 
   // Remove photo from album
@@ -264,7 +310,6 @@ export default function AdminDashboardPage() {
       isActive: true,
       isPreset: false,
     });
-    setAlbumUrlInput("");
     setEditorTab("code");
     setIsEditorModalOpen(true);
     showToast(`Menduplikasi template "${template.name}". Sesuaikan lalu simpan.`);
@@ -991,35 +1036,98 @@ export default function AdminDashboardPage() {
               {editorTab === "album" && (
                 <div className="flex-1 bg-stone-950 p-6 overflow-y-auto space-y-6">
                   <div className="max-w-3xl mx-auto space-y-6">
-                    {/* Thumbnail Utama */}
+                    {/* Thumbnail Utama (Upload File Saja) */}
                     <div className="p-5 rounded-2xl bg-stone-900 border border-stone-800 space-y-3">
-                      <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[18px] text-amber-400">image</span>
-                        <span>Thumbnail Sampul Depan (Card Cover)</span>
-                      </h4>
-                      <p className="text-xs text-stone-400">
-                        Foto utama yang tampil pada kartu desain di katalog beranda.
-                      </p>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            <span className="material-symbols-outlined text-[18px] text-amber-400">image</span>
+                            <span>Thumbnail Sampul Depan (Card Cover)</span>
+                          </h4>
+                          <p className="text-xs text-stone-400 mt-0.5">
+                            Foto utama yang tampil pada kartu desain di katalog beranda publik.
+                          </p>
+                        </div>
+                        {formData.thumbnailUrl && (
+                          <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[12px]">check_circle</span>
+                            <span>Sampul Terpasang</span>
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Hidden File Input for Thumbnail */}
                       <input
-                        type="url"
-                        placeholder="https://images.unsplash.com/... atau URL Cloudinary"
-                        value={formData.thumbnailUrl}
-                        onChange={(e) => setFormData({ ...formData, thumbnailUrl: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-stone-950 border border-stone-800 text-xs text-white focus:outline-none focus:border-amber-400 font-mono"
+                        ref={thumbnailFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleUploadThumbnail}
                       />
-                      {formData.thumbnailUrl && (
-                        <div className="w-32 h-20 rounded-xl overflow-hidden border border-stone-700">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={formData.thumbnailUrl}
-                            alt="Cover Preview"
-                            className="w-full h-full object-cover"
-                          />
+
+                      {/* Upload Box or Image Card */}
+                      {!formData.thumbnailUrl ? (
+                        <div
+                          onClick={() => thumbnailFileInputRef.current?.click()}
+                          className="border-2 border-dashed border-stone-800 hover:border-amber-400/70 hover:bg-stone-950/60 rounded-2xl p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 group"
+                        >
+                          <div className="w-12 h-12 rounded-full bg-amber-400/10 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <span className={`material-symbols-outlined text-[26px] ${uploadingThumbnail ? "animate-spin" : ""}`}>
+                              {uploadingThumbnail ? "sync" : "cloud_upload"}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-xs font-bold text-white block">
+                              {uploadingThumbnail ? "Mengunggah Thumbnail ke Cloudinary..." : "Klik untuk Upload Foto Sampul"}
+                            </span>
+                            <span className="text-[11px] text-stone-500 block mt-0.5">
+                              Format: JPG, PNG, WebP (Maks 10MB) &bull; Otomatis disimpan di Cloudinary Storage
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-3 bg-stone-950 rounded-xl border border-stone-800">
+                          <div className="relative w-40 h-28 rounded-xl overflow-hidden border border-stone-700 bg-stone-900 shrink-0">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={formData.thumbnailUrl}
+                              alt="Cover Preview"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+
+                          <div className="flex-1 space-y-2">
+                            <div className="text-xs text-stone-300 font-medium">
+                              Foto sampul aktif berhasil diunggah ke Cloudinary.
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                disabled={uploadingThumbnail}
+                                onClick={() => thumbnailFileInputRef.current?.click()}
+                                className="px-3.5 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                              >
+                                <span className={`material-symbols-outlined text-[15px] ${uploadingThumbnail ? "animate-spin" : ""}`}>
+                                  {uploadingThumbnail ? "sync" : "upload"}
+                                </span>
+                                <span>{uploadingThumbnail ? "Mengunggah..." : "Ganti Foto Sampul"}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => setFormData({ ...formData, thumbnailUrl: "" })}
+                                className="px-3 py-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-950/40 text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
+                              >
+                                <span className="material-symbols-outlined text-[15px]">delete</span>
+                                <span>Hapus</span>
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
 
-                    {/* Album Foto Mockup Tambahan */}
+                    {/* Album Foto Mockup Tambahan (Upload File Saja) */}
                     <div className="p-5 rounded-2xl bg-stone-900 border border-stone-800 space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
@@ -1028,50 +1136,53 @@ export default function AdminDashboardPage() {
                             <span>Album Foto Mockup &amp; Showcase Desain</span>
                           </h4>
                           <p className="text-xs text-stone-400 mt-0.5">
-                            Tambahkan foto-foto pratinjau mockup (misal: mockup smartphone, detail ornamen, schedule) untuk ditampilkan di modal album beranda.
+                            Unggah foto-foto mockup untuk ditampilkan di modal preview album pada beranda publik.
                           </p>
                         </div>
-                        <span className="text-xs text-amber-400 font-bold font-mono">
-                          {formData.previewAlbum?.length || 0} Foto di Album
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-amber-400 font-bold font-mono">
+                            {formData.previewAlbum?.length || 0} Foto di Album
+                          </span>
+                        </div>
                       </div>
 
-                      {/* Input Add New Photo */}
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="url"
-                          placeholder="Masukkan URL foto mockup..."
-                          value={albumUrlInput}
-                          onChange={(e) => setAlbumUrlInput(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              handleAddAlbumPhoto();
-                            }
-                          }}
-                          className="flex-1 px-3.5 py-2 rounded-xl bg-stone-950 border border-stone-800 text-xs text-white focus:outline-none focus:border-amber-400 font-mono"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleAddAlbumPhoto}
-                          className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-stone-950 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
-                        >
-                          <span className="material-symbols-outlined text-[16px]">add</span>
-                          <span>Tambah</span>
-                        </button>
+                      {/* Hidden File Input for Mockup Album (Multiple Upload) */}
+                      <input
+                        ref={albumFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="hidden"
+                        onChange={handleUploadAlbumFiles}
+                      />
+
+                      {/* Upload Dropzone Box */}
+                      <div
+                        onClick={() => albumFileInputRef.current?.click()}
+                        className="border-2 border-dashed border-stone-800 hover:border-amber-400/70 hover:bg-stone-950/60 rounded-2xl p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 group"
+                      >
+                        <div className="w-12 h-12 rounded-full bg-amber-400/10 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <span className={`material-symbols-outlined text-[26px] ${uploadingAlbum ? "animate-spin" : ""}`}>
+                            {uploadingAlbum ? "sync" : "add_photo_alternate"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-xs font-bold text-white block">
+                            {uploadingAlbum ? "Mengunggah foto-foto mockup ke Cloudinary..." : "Klik untuk Upload Foto Mockup (Bisa Pilih Banyak Foto Sekaligus)"}
+                          </span>
+                          <span className="text-[11px] text-stone-500 block mt-0.5">
+                            Mendukung multi-select file &bull; Format: JPG, PNG, WebP &bull; Otomatis masuk ke album template
+                          </span>
+                        </div>
                       </div>
 
                       {/* Album Grid Chips */}
-                      {(formData.previewAlbum || []).length === 0 ? (
-                        <div className="p-8 text-center bg-stone-950/60 rounded-xl border border-dashed border-stone-800 text-stone-500 text-xs">
-                          Belum ada foto album mockup. Masukkan URL gambar di atas lalu klik Tambah.
-                        </div>
-                      ) : (
+                      {(formData.previewAlbum || []).length > 0 && (
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
                           {formData.previewAlbum?.map((url, idx) => (
                             <div
                               key={idx}
-                              className="group relative h-28 rounded-xl overflow-hidden border border-stone-800 bg-stone-950"
+                              className="group relative h-28 rounded-xl overflow-hidden border border-stone-800 bg-stone-950 shadow-sm"
                             >
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
@@ -1079,14 +1190,25 @@ export default function AdminDashboardPage() {
                                 alt={`Album Mockup ${idx + 1}`}
                                 className="w-full h-full object-cover"
                               />
-                              <div className="absolute inset-0 bg-stone-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                              <div className="absolute inset-0 bg-stone-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-2">
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveAlbumPhoto(idx)}
-                                  className="w-8 h-8 rounded-full bg-red-600 hover:bg-red-500 text-white flex items-center justify-center transition-colors cursor-pointer"
+                                  className="w-7 h-7 rounded-full bg-red-600 hover:bg-red-500 text-white flex items-center justify-center transition-colors cursor-pointer shadow"
                                   title="Hapus foto dari album"
                                 >
-                                  <span className="material-symbols-outlined text-[16px]">delete</span>
+                                  <span className="material-symbols-outlined text-[15px]">delete</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setFormData({ ...formData, thumbnailUrl: url });
+                                    showToast(`Foto #${idx + 1} dijadikan sebagai Thumbnail Sampul!`);
+                                  }}
+                                  className="text-[10px] font-semibold text-amber-300 hover:text-amber-200 bg-stone-900/90 px-2 py-0.5 rounded border border-amber-400/40 cursor-pointer"
+                                  title="Jadikan sebagai thumbnail sampul utama"
+                                >
+                                  Jadikan Sampul
                                 </button>
                               </div>
                               <span className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded bg-stone-950/80 text-[10px] text-stone-300 font-mono">
@@ -1094,6 +1216,15 @@ export default function AdminDashboardPage() {
                               </span>
                             </div>
                           ))}
+
+                          {/* Extra Quick Upload Tile */}
+                          <div
+                            onClick={() => albumFileInputRef.current?.click()}
+                            className="h-28 rounded-xl border-2 border-dashed border-stone-800 hover:border-amber-400/50 hover:bg-stone-950/60 flex flex-col items-center justify-center gap-1 text-stone-400 hover:text-white cursor-pointer transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-[20px]">add</span>
+                            <span className="text-[11px] font-semibold">Upload Lagi</span>
+                          </div>
                         </div>
                       )}
                     </div>

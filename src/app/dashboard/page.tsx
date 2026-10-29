@@ -14,12 +14,13 @@ import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
 import { DEFAULT_WEDDING_DATA } from "@/lib/defaultWedding";
 import { WeddingData } from "@/types";
+import { getWeddingLiveUrl, formatCoupleSlug } from "@/lib/slug";
 
 function DashboardContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const slugParam = searchParams.get("slug");
-  const targetSlug = slugParam || user?.weddingSlug || "dimas-sarah";
+  const targetSlug = slugParam || user?.weddingSlug || "dimas&sarah";
 
   const [weddingData, setWeddingData] = useState<WeddingData>(DEFAULT_WEDDING_DATA);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -69,11 +70,9 @@ function DashboardContent() {
     "Grand Ballroom";
 
   const handleQuickWhatsApp = () => {
-    const origin =
-      typeof window !== "undefined" ? window.location.origin : "https://janjisuci.com";
-    const demoUrl = `${origin}/demo?slug=${targetSlug}`;
+    const liveUrl = getWeddingLiveUrl(targetSlug);
     const defaultMsg = encodeURIComponent(
-      `Halo! Kami ingin mengundang Anda ke pernikahan kami: ${groomNick} & ${brideNick} pada ${eventDate} bertempat di ${venue}.\n\nBuka link undangan resmi: ${demoUrl}`
+      `Halo! Kami ingin mengundang Anda ke pernikahan kami: ${groomNick} & ${brideNick} pada ${eventDate} bertempat di ${venue}.\n\nBuka link undangan resmi: ${liveUrl}`
     );
     window.open(`https://api.whatsapp.com/send?text=${defaultMsg}`, "_blank");
   };

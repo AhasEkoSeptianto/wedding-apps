@@ -12,13 +12,14 @@ import { WeddingData, HtmlTemplate } from "@/types";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { PRESET_HTML_TEMPLATES } from "@/lib/templateEngine";
+import { getWeddingLiveUrl, getWeddingLivePath, formatCoupleSlug } from "@/lib/slug";
 
 function EditorStudioContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const slugParam = searchParams.get("slug");
   const themeParam = searchParams.get("theme");
-  const slug = slugParam || user?.weddingSlug || "dimas-sarah";
+  const slug = slugParam || user?.weddingSlug || "dimas&sarah";
 
   const [data, setData] = useState<WeddingData>(() => {
     const initialTheme = themeParam || DEFAULT_WEDDING_DATA.themeId || "royal-gold-majesty";
@@ -119,10 +120,10 @@ function EditorStudioContent() {
   };
 
   const handleShareLink = () => {
-    const demoUrl = `${window.location.origin}/demo?slug=${slug}`;
+    const liveUrl = getWeddingLiveUrl(slug);
     navigator.clipboard
-      .writeText(demoUrl)
-      .then(() => showToast("Link Demo Undangan berhasil disalin!"))
+      .writeText(liveUrl)
+      .then(() => showToast(`Link undangan resmi (${liveUrl}) berhasil disalin!`))
       .catch(() => showToast("Gagal menyalin link"));
   };
 
@@ -189,7 +190,7 @@ function EditorStudioContent() {
                   )}
                 </div>
                 <p className="text-xs text-on-surface-variant flex items-center gap-2 mt-0.5">
-                  <span>Slug: <strong className="text-on-surface font-mono">{slug}</strong></span>
+                  <span>Subdomain/Path: <strong className="text-on-surface font-mono">/{slug}</strong></span>
                   <span>•</span>
                   <span>Disinkronkan: {lastSync}</span>
                 </p>
@@ -200,13 +201,13 @@ function EditorStudioContent() {
             <div className="flex items-center gap-2 flex-wrap self-end lg:self-auto">
               {/* Buka Live Preview / Demo */}
               <Link
-                href={`/demo?slug=${slug}${data.themeId ? `&theme=${data.themeId}` : ""}`}
+                href={`${getWeddingLivePath(slug)}${data.themeId ? `?theme=${data.themeId}` : ""}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-colors border border-outline-variant/20 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px] text-primary">visibility</span>
-                <span>Live Demo</span>
+                <span>Live Demo (/{slug})</span>
               </Link>
 
               {/* Bagikan Link Demo */}

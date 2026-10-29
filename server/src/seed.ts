@@ -83,7 +83,7 @@ const INITIAL_GUESTS = [
 
 const INITIAL_WISHES = [
   {
-    slug: "dimas-sarah",
+    slug: "dimas&sarah",
     name: "Clara & Jonathan",
     attendance: "attending",
     guests: 2,
@@ -94,7 +94,7 @@ const INITIAL_WISHES = [
     bank: "BCA",
   },
   {
-    slug: "dimas-sarah",
+    slug: "dimas&sarah",
     name: "Hendra Gunawan",
     attendance: "attending",
     guests: 1,
@@ -105,7 +105,7 @@ const INITIAL_WISHES = [
     bank: "QRIS",
   },
   {
-    slug: "dimas-sarah",
+    slug: "dimas&sarah",
     name: "Bpk. Rahmat Hidayat",
     attendance: "attending",
     guests: 2,
@@ -116,7 +116,7 @@ const INITIAL_WISHES = [
     bank: "BCA",
   },
   {
-    slug: "dimas-sarah",
+    slug: "dimas&sarah",
     name: "Maya Anggraini",
     attendance: "not-attending",
     guests: 1,
@@ -130,7 +130,7 @@ const INITIAL_WISHES = [
 
 const INITIAL_GIFTS = [
   {
-    slug: "dimas-sarah",
+    slug: "dimas&sarah",
     senderName: "Bpk. Rahmat Hidayat & Istri",
     bankTarget: "BCA",
     bankSender: "BCA",
@@ -141,7 +141,7 @@ const INITIAL_GIFTS = [
     status: "confirmed",
   },
   {
-    slug: "dimas-sarah",
+    slug: "dimas&sarah",
     senderName: "Clara & Jonathan",
     bankTarget: "BCA",
     bankSender: "BCA",
@@ -150,7 +150,7 @@ const INITIAL_GIFTS = [
     status: "confirmed",
   },
   {
-    slug: "dimas-sarah",
+    slug: "dimas&sarah",
     senderName: "Alumni Teknik Informatika 2015",
     bankTarget: "Mandiri",
     bankSender: "BCA",
@@ -159,7 +159,7 @@ const INITIAL_GIFTS = [
     status: "confirmed",
   },
   {
-    slug: "dimas-sarah",
+    slug: "dimas&sarah",
     senderName: "Dr. Siti Nurhaliza, Sp.A",
     bankTarget: "BCA",
     bankSender: "BNI",
@@ -168,7 +168,7 @@ const INITIAL_GIFTS = [
     status: "confirmed",
   },
   {
-    slug: "dimas-sarah",
+    slug: "dimas&sarah",
     senderName: "Hendra Gunawan",
     bankTarget: "QRIS",
     bankSender: "GoPay",
@@ -177,7 +177,7 @@ const INITIAL_GIFTS = [
     status: "confirmed",
   },
   {
-    slug: "dimas-sarah",
+    slug: "dimas&sarah",
     senderName: "Rudi Hartono (Kolega Kantor)",
     bankTarget: "Mandiri",
     bankSender: "Bank Jago",

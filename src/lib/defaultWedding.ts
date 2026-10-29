@@ -3,7 +3,7 @@ import { PRESET_HTML_TEMPLATES } from "@/lib/templateEngine";
 
 export const DEFAULT_WEDDING_DATA: WeddingData = {
   title: "Pernikahan Dimas & Sarah",
-  slug: "dimas-sarah",
+  slug: "dimas&sarah",
   themeId: "royal-gold-majesty",
   designMode: "custom_html",
   customHtml: PRESET_HTML_TEMPLATES[0].html,
@@ -51,7 +51,12 @@ export const DEFAULT_WEDDING_DATA: WeddingData = {
     bca: "8830-1928-11 a.n Sarah Anindita",
     mandiri: "1370-0012-9901 a.n Dimas Prasetyo",
   },
-  gallery: [],
+  gallery: [
+    "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80",
+  ],
   stories: [
     {
       year: "2019",
