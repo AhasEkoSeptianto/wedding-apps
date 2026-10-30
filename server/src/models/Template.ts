@@ -7,6 +7,8 @@ export interface ITemplate extends Document {
   description: string;
   previewColor: string;
   thumbnailUrl?: string;
+  coverPhotoUrl?: string;
+  bannerPhotoUrl?: string;
   previewAlbum?: string[];
   price?: string;
   designer?: string;
@@ -50,6 +52,16 @@ const TemplateSchema = new Schema<ITemplate>(
       default: "#b38742",
     },
     thumbnailUrl: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    coverPhotoUrl: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    bannerPhotoUrl: {
       type: String,
       trim: true,
       default: "",

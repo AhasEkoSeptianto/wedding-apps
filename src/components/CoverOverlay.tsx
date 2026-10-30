@@ -52,6 +52,12 @@ export default function CoverOverlay({
   const groomName = capitalizeWords(rawGroom);
   const brideName = capitalizeWords(rawBride);
 
+  const coverImage =
+    weddingData?.coverPhotoUrl ||
+    weddingData?.bannerPhotoUrl ||
+    weddingData?.groom.photoUrl ||
+    "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1600&q=80";
+
   const isMobile = viewMode === "mobile";
 
   return (
@@ -64,7 +70,7 @@ export default function CoverOverlay({
           : "translate-y-0 opacity-100"
       }`}
       style={{
-        backgroundImage: `linear-gradient(rgba(18, 18, 18, 0.72), rgba(18, 18, 18, 0.85)), url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1600&q=80')`,
+        backgroundImage: `linear-gradient(rgba(18, 18, 18, 0.72), rgba(18, 18, 18, 0.85)), url('${coverImage}')`,
       }}
     >
       <div className={`w-full mx-auto text-white ${isMobile ? "max-w-xs" : "max-w-md"}`}>

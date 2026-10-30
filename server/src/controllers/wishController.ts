@@ -41,15 +41,25 @@ export async function createWish(req: Request, res: Response, next: NextFunction
     const guestCount =
       typeof guests !== "undefined"
         ? Math.max(0, Number(guests))
-        : attendance === "not-attending"
+        : attendance === "not-attending" || attendance === "Tidak Hadir"
         ? 0
         : 1;
+
+    let mappedAttendance: "attending" | "not-attending" = "attending";
+    if (
+      attendance === "not-attending" ||
+      attendance === "Tidak Hadir" ||
+      attendance === "tidak_hadir" ||
+      attendance === "absent"
+    ) {
+      mappedAttendance = "not-attending";
+    }
 
     const s = slug ? decodeURIComponent(String(slug)).trim() : "dimas&sarah";
     const newWish = await Wish.create({
       slug: s,
       name: name.trim(),
-      attendance: attendance || "attending",
+      attendance: mappedAttendance,
       guests: guestCount,
       message: message.trim(),
       amount: amount ? Number(amount) : 0,

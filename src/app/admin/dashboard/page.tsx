@@ -35,10 +35,14 @@ export default function AdminDashboardPage() {
   const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Upload Refs & State for Cover & Album (Pure file upload, no link input)
+  // Upload Refs & State for Cover, Banner, Thumbnail & Album (Pure file upload, no link input)
   const thumbnailFileInputRef = useRef<HTMLInputElement>(null);
+  const coverFileInputRef = useRef<HTMLInputElement>(null);
+  const bannerFileInputRef = useRef<HTMLInputElement>(null);
   const albumFileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
   const [uploadingAlbum, setUploadingAlbum] = useState(false);
 
   // Template Form State
@@ -49,6 +53,8 @@ export default function AdminDashboardPage() {
     description: "",
     previewColor: "#c5a059",
     thumbnailUrl: "",
+    coverPhotoUrl: "",
+    bannerPhotoUrl: "",
     previewAlbum: [],
     price: "Rp 149.000",
     designer: "Atelier JanjiSuci",
@@ -90,7 +96,9 @@ export default function AdminDashboardPage() {
           category: p.category,
           description: p.description,
           previewColor: p.previewColor,
-          thumbnailUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+          thumbnailUrl: p.thumbnailUrl || "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+          coverPhotoUrl: p.coverPhotoUrl || DEFAULT_WEDDING_DATA.coverPhotoUrl || "",
+          bannerPhotoUrl: p.bannerPhotoUrl || DEFAULT_WEDDING_DATA.bannerPhotoUrl || "",
           previewAlbum: [
             "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
             "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
@@ -114,7 +122,9 @@ export default function AdminDashboardPage() {
         category: p.category,
         description: p.description,
         previewColor: p.previewColor,
-        thumbnailUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+        thumbnailUrl: p.thumbnailUrl || "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+        coverPhotoUrl: p.coverPhotoUrl || DEFAULT_WEDDING_DATA.coverPhotoUrl || "",
+        bannerPhotoUrl: p.bannerPhotoUrl || DEFAULT_WEDDING_DATA.bannerPhotoUrl || "",
         previewAlbum: [
           "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
         ],
@@ -173,6 +183,8 @@ export default function AdminDashboardPage() {
       description: "",
       previewColor: "#c5a059",
       thumbnailUrl: "",
+      coverPhotoUrl: PRESET_HTML_TEMPLATES[0].coverPhotoUrl || DEFAULT_WEDDING_DATA.coverPhotoUrl || "",
+      bannerPhotoUrl: PRESET_HTML_TEMPLATES[0].bannerPhotoUrl || DEFAULT_WEDDING_DATA.bannerPhotoUrl || "",
       previewAlbum: [],
       price: "Rp 149.000",
       designer: "Atelier JanjiSuci",
@@ -196,6 +208,8 @@ export default function AdminDashboardPage() {
       description: template.description || "",
       previewColor: template.previewColor || "#b38742",
       thumbnailUrl: template.thumbnailUrl || "",
+      coverPhotoUrl: template.coverPhotoUrl || "",
+      bannerPhotoUrl: template.bannerPhotoUrl || "",
       previewAlbum: Array.isArray(template.previewAlbum) ? template.previewAlbum : [],
       price: template.price || "Rp 149.000",
       designer: template.designer || "Atelier JanjiSuci",
@@ -246,6 +260,55 @@ export default function AdminDashboardPage() {
       alert(msg);
     } finally {
       setUploadingThumbnail(false);
+      if (e.target) e.target.value = "";
+    }
+  };
+
+  // Upload Foto Sampul Pembuka (Cover Gate Photo) to Cloudinary
+  const handleUploadCover = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingCover(true);
+    try {
+      const res = await api.uploadImage(file, "templates/covers");
+      if (res && res.url) {
+        setFormData((prev) => ({
+          ...prev,
+          coverPhotoUrl: res.url,
+          thumbnailUrl: prev.thumbnailUrl || res.url,
+        }));
+        showToast("Foto sampul pembuka template berhasil diunggah!");
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal mengunggah foto sampul";
+      alert(msg);
+    } finally {
+      setUploadingCover(false);
+      if (e.target) e.target.value = "";
+    }
+  };
+
+  // Upload Foto Banner Hero Pasangan (Banner Header Photo) to Cloudinary
+  const handleUploadBanner = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingBanner(true);
+    try {
+      const res = await api.uploadImage(file, "templates/banners");
+      if (res && res.url) {
+        setFormData((prev) => ({
+          ...prev,
+          bannerPhotoUrl: res.url,
+        }));
+        showToast("Foto banner hero pasangan berhasil diunggah!");
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal mengunggah foto banner";
+      alert(msg);
+    } finally {
+      setUploadingBanner(false);
       if (e.target) e.target.value = "";
     }
   };
@@ -301,6 +364,8 @@ export default function AdminDashboardPage() {
       description: template.description || "",
       previewColor: template.previewColor || "#b38742",
       thumbnailUrl: template.thumbnailUrl || "",
+      coverPhotoUrl: template.coverPhotoUrl || "",
+      bannerPhotoUrl: template.bannerPhotoUrl || "",
       previewAlbum: template.previewAlbum || [],
       price: template.price || "Rp 149.000",
       designer: template.designer || "Atelier JanjiSuci",
@@ -389,15 +454,25 @@ export default function AdminDashboardPage() {
 
   // Preview compiled HTML for editor
   const compiledEditorHtml = useMemo(() => {
-    return renderHtmlTemplate(formData.html || "", SAMPLE_WEDDING_DATA, {
+    const sampleDataWithTemplateAssets: WeddingData = {
+      ...SAMPLE_WEDDING_DATA,
+      coverPhotoUrl: formData.coverPhotoUrl || SAMPLE_WEDDING_DATA.coverPhotoUrl,
+      bannerPhotoUrl: formData.bannerPhotoUrl || SAMPLE_WEDDING_DATA.bannerPhotoUrl,
+    };
+    return renderHtmlTemplate(formData.html || "", sampleDataWithTemplateAssets, {
       guestName: "Bapak / Ibu Tamu Terhormat",
     });
-  }, [formData.html]);
+  }, [formData.html, formData.coverPhotoUrl, formData.bannerPhotoUrl]);
 
   // Preview compiled HTML for preview modal
   const compiledModalPreviewHtml = useMemo(() => {
     if (!previewTemplate) return "";
-    return renderHtmlTemplate(previewTemplate.html || "", SAMPLE_WEDDING_DATA, {
+    const sampleDataWithTemplateAssets: WeddingData = {
+      ...SAMPLE_WEDDING_DATA,
+      coverPhotoUrl: previewTemplate.coverPhotoUrl || SAMPLE_WEDDING_DATA.coverPhotoUrl,
+      bannerPhotoUrl: previewTemplate.bannerPhotoUrl || SAMPLE_WEDDING_DATA.bannerPhotoUrl,
+    };
+    return renderHtmlTemplate(previewTemplate.html || "", sampleDataWithTemplateAssets, {
       guestName: "Bapak / Ibu Tamu Terhormat",
     });
   }, [previewTemplate]);
@@ -680,13 +755,29 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
 
-                  {/* Album Photo Count Pill */}
-                  {(template.previewAlbum || []).length > 0 && (
-                    <span className="absolute bottom-2 left-4 px-2 py-0.5 rounded-md bg-stone-950/80 backdrop-blur-sm text-stone-300 text-[10px] font-medium flex items-center gap-1 border border-stone-800 z-10">
-                      <span className="material-symbols-outlined text-[12px]">collections</span>
-                      <span>{(template.previewAlbum || []).length} Foto Album</span>
-                    </span>
-                  )}
+                  {/* Asset Indicator Pills */}
+                  <div className="absolute bottom-2 left-4 right-4 flex items-center justify-between pointer-events-none z-10">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {(template.previewAlbum || []).length > 0 && (
+                        <span className="px-2 py-0.5 rounded-md bg-stone-950/80 backdrop-blur-sm text-stone-300 text-[10px] font-medium flex items-center gap-1 border border-stone-800">
+                          <span className="material-symbols-outlined text-[12px]">collections</span>
+                          <span>{(template.previewAlbum || []).length} Album</span>
+                        </span>
+                      )}
+                      {template.coverPhotoUrl && (
+                        <span className="px-2 py-0.5 rounded-md bg-stone-950/80 backdrop-blur-sm text-amber-300 text-[10px] font-medium flex items-center gap-1 border border-stone-800" title="Foto Sampul Pembuka Bawaan Terpasang">
+                          <span className="material-symbols-outlined text-[12px]">mail_lock</span>
+                          <span>Sampul</span>
+                        </span>
+                      )}
+                      {template.bannerPhotoUrl && (
+                        <span className="px-2 py-0.5 rounded-md bg-stone-950/80 backdrop-blur-sm text-emerald-300 text-[10px] font-medium flex items-center gap-1 border border-stone-800" title="Foto Banner Hero Pasangan Bawaan Terpasang">
+                          <span className="material-symbols-outlined text-[12px]">panorama</span>
+                          <span>Banner</span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Body Content */}
@@ -826,8 +917,8 @@ export default function AdminDashboardPage() {
                         : "text-stone-400 hover:text-white"
                     }`}
                   >
-                    <span className="material-symbols-outlined text-[15px]">collections</span>
-                    <span>Album Mockup ({formData.previewAlbum?.length || 0})</span>
+                    <span className="material-symbols-outlined text-[15px]">photo_library</span>
+                    <span>Sampul, Banner &amp; Mockup</span>
                   </button>
 
                   <button
@@ -1036,6 +1127,196 @@ export default function AdminDashboardPage() {
               {editorTab === "album" && (
                 <div className="flex-1 bg-stone-950 p-6 overflow-y-auto space-y-6">
                   <div className="max-w-3xl mx-auto space-y-6">
+                    {/* 1. Foto Sampul Depan Undangan (Cover Gate Card) */}
+                    <div className="p-5 rounded-2xl bg-stone-900 border border-stone-800 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                              <span className="material-symbols-outlined text-[18px] text-amber-400">mail_lock</span>
+                              <span>Foto Sampul Depan Undangan (Cover Gate Card)</span>
+                            </h4>
+                            <span className="px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400 border border-amber-400/30 text-[10px] font-mono font-bold">
+                              {"{{cover_photo}}"}
+                            </span>
+                          </div>
+                          <p className="text-xs text-stone-400 mt-1">
+                            Foto utama pada kartu amplop/gerbang pembuka sebelum tamu mengklik tombol &ldquo;Buka Undangan&rdquo;.
+                          </p>
+                        </div>
+                        {formData.coverPhotoUrl && (
+                          <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[12px]">check_circle</span>
+                            <span>Sampul Terpasang</span>
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Hidden File Input for Cover Gate */}
+                      <input
+                        ref={coverFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleUploadCover}
+                      />
+
+                      {!formData.coverPhotoUrl ? (
+                        <div
+                          onClick={() => coverFileInputRef.current?.click()}
+                          className="border-2 border-dashed border-stone-800 hover:border-amber-400/70 hover:bg-stone-950/60 rounded-2xl p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 group"
+                        >
+                          <div className="w-12 h-12 rounded-full bg-amber-400/10 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <span className={`material-symbols-outlined text-[26px] ${uploadingCover ? "animate-spin" : ""}`}>
+                              {uploadingCover ? "sync" : "cloud_upload"}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-xs font-bold text-white block">
+                              {uploadingCover ? "Mengunggah Foto Sampul ke Cloudinary..." : "Klik untuk Upload Foto Sampul Pembuka"}
+                            </span>
+                            <span className="text-[11px] text-stone-500 block mt-0.5">
+                              Format: JPG, PNG, WebP (Maks 10MB) &bull; Otomatis menggantikan tag {"{{cover_photo}}"}
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-3 bg-stone-950 rounded-xl border border-stone-800">
+                          <div className="relative w-40 h-28 rounded-xl overflow-hidden border border-stone-700 bg-stone-900 shrink-0">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={formData.coverPhotoUrl}
+                              alt="Cover Gate Preview"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+
+                          <div className="flex-1 space-y-2">
+                            <div className="text-xs text-stone-300 font-medium">
+                              Foto sampul pembuka aktif berhasil diunggah ke Cloudinary.
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                disabled={uploadingCover}
+                                onClick={() => coverFileInputRef.current?.click()}
+                                className="px-3.5 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                              >
+                                <span className={`material-symbols-outlined text-[15px] ${uploadingCover ? "animate-spin" : ""}`}>
+                                  {uploadingCover ? "sync" : "upload"}
+                                </span>
+                                <span>{uploadingCover ? "Mengunggah..." : "Ganti Foto Sampul"}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => setFormData({ ...formData, coverPhotoUrl: "" })}
+                                className="px-3 py-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-950/40 text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
+                              >
+                                <span className="material-symbols-outlined text-[15px]">delete</span>
+                                <span>Reset</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 2. Foto Banner Hero Pasangan (Hero Header) */}
+                    <div className="p-5 rounded-2xl bg-stone-900 border border-stone-800 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                              <span className="material-symbols-outlined text-[18px] text-emerald-400">panorama</span>
+                              <span>Foto Banner Hero Pasangan (Header Utama)</span>
+                            </h4>
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-400/10 text-emerald-400 border border-emerald-400/30 text-[10px] font-mono font-bold">
+                              {"{{banner_photo}}"}
+                            </span>
+                          </div>
+                          <p className="text-xs text-stone-400 mt-1">
+                            Foto lanskap kedua mempelai yang menjadi latar belakang hero section setelah undangan dibuka.
+                          </p>
+                        </div>
+                        {formData.bannerPhotoUrl && (
+                          <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[12px]">check_circle</span>
+                            <span>Banner Terpasang</span>
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Hidden File Input for Banner Hero */}
+                      <input
+                        ref={bannerFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleUploadBanner}
+                      />
+
+                      {!formData.bannerPhotoUrl ? (
+                        <div
+                          onClick={() => bannerFileInputRef.current?.click()}
+                          className="border-2 border-dashed border-stone-800 hover:border-emerald-400/70 hover:bg-stone-950/60 rounded-2xl p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 group"
+                        >
+                          <div className="w-12 h-12 rounded-full bg-emerald-400/10 text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <span className={`material-symbols-outlined text-[26px] ${uploadingBanner ? "animate-spin" : ""}`}>
+                              {uploadingBanner ? "sync" : "cloud_upload"}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-xs font-bold text-white block">
+                              {uploadingBanner ? "Mengunggah Banner ke Cloudinary..." : "Klik untuk Upload Foto Banner Pasangan"}
+                            </span>
+                            <span className="text-[11px] text-stone-500 block mt-0.5">
+                              Format lanskap rekomendasi: 1600x900px &bull; Otomatis menggantikan tag {"{{banner_photo}}"}
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-3 bg-stone-950 rounded-xl border border-stone-800">
+                          <div className="relative w-40 h-28 rounded-xl overflow-hidden border border-stone-700 bg-stone-900 shrink-0">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={formData.bannerPhotoUrl}
+                              alt="Banner Hero Preview"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+
+                          <div className="flex-1 space-y-2">
+                            <div className="text-xs text-stone-300 font-medium">
+                              Foto banner hero pasangan berhasil diunggah ke Cloudinary.
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                disabled={uploadingBanner}
+                                onClick={() => bannerFileInputRef.current?.click()}
+                                className="px-3.5 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                              >
+                                <span className={`material-symbols-outlined text-[15px] ${uploadingBanner ? "animate-spin" : ""}`}>
+                                  {uploadingBanner ? "sync" : "upload"}
+                                </span>
+                                <span>{uploadingBanner ? "Mengunggah..." : "Ganti Foto Banner"}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => setFormData({ ...formData, bannerPhotoUrl: "" })}
+                                className="px-3 py-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-950/40 text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
+                              >
+                                <span className="material-symbols-outlined text-[15px]">delete</span>
+                                <span>Reset</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
                     {/* Thumbnail Utama (Upload File Saja) */}
                     <div className="p-5 rounded-2xl bg-stone-900 border border-stone-800 space-y-3">
                       <div className="flex items-center justify-between">
@@ -1311,7 +1592,11 @@ export default function AdminDashboardPage() {
                     <CoverOverlay
                       isOpen={editorCoverOpen}
                       onOpen={() => setEditorCoverOpen(true)}
-                      weddingData={SAMPLE_WEDDING_DATA}
+                      weddingData={{
+                        ...SAMPLE_WEDDING_DATA,
+                        coverPhotoUrl: formData.coverPhotoUrl || SAMPLE_WEDDING_DATA.coverPhotoUrl,
+                        bannerPhotoUrl: formData.bannerPhotoUrl || SAMPLE_WEDDING_DATA.bannerPhotoUrl,
+                      }}
                       isAbsolute={true}
                       viewMode={previewDevice}
                     />
@@ -1321,7 +1606,7 @@ export default function AdminDashboardPage() {
                         srcDoc={compiledEditorHtml}
                         title="Test Live Preview"
                         className="w-full h-full border-0"
-                        sandbox="allow-scripts allow-same-origin"
+                        sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals"
                       />
                     </div>
                   </div>
@@ -1503,7 +1788,11 @@ export default function AdminDashboardPage() {
                     <CoverOverlay
                       isOpen={previewCoverOpen}
                       onOpen={() => setPreviewCoverOpen(true)}
-                      weddingData={SAMPLE_WEDDING_DATA}
+                      weddingData={{
+                        ...SAMPLE_WEDDING_DATA,
+                        coverPhotoUrl: previewTemplate.coverPhotoUrl || SAMPLE_WEDDING_DATA.coverPhotoUrl,
+                        bannerPhotoUrl: previewTemplate.bannerPhotoUrl || SAMPLE_WEDDING_DATA.bannerPhotoUrl,
+                      }}
                       isAbsolute={true}
                       viewMode="mobile"
                     />
@@ -1513,7 +1802,7 @@ export default function AdminDashboardPage() {
                         srcDoc={compiledModalPreviewHtml}
                         title={previewTemplate.name}
                         className="w-full h-full border-0"
-                        sandbox="allow-scripts allow-same-origin"
+                        sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals"
                       />
                     </div>
                   </div>

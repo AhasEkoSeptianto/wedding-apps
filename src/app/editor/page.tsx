@@ -55,6 +55,8 @@ function EditorStudioContent() {
             themeId: found.slug || found.id,
             designMode: "custom_html" as const,
             customHtml: found.html,
+            coverPhotoUrl: found.coverPhotoUrl || currentData.coverPhotoUrl,
+            bannerPhotoUrl: found.bannerPhotoUrl || currentData.bannerPhotoUrl,
           };
         }
       } catch (e) {
@@ -67,6 +69,8 @@ function EditorStudioContent() {
           themeId: matched.id,
           designMode: "custom_html" as const,
           customHtml: matched.html,
+          coverPhotoUrl: matched.coverPhotoUrl || currentData.coverPhotoUrl,
+          bannerPhotoUrl: matched.bannerPhotoUrl || currentData.bannerPhotoUrl,
         };
       }
       return currentData;

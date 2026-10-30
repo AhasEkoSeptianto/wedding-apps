@@ -50,6 +50,8 @@ export default function TemplateCatalog({ searchQuery }: TemplateCatalogProps) {
               category: p.category,
               description: p.description,
               previewColor: p.previewColor,
+              coverPhotoUrl: p.coverPhotoUrl || DEFAULT_WEDDING_DATA.coverPhotoUrl,
+              bannerPhotoUrl: p.bannerPhotoUrl || DEFAULT_WEDDING_DATA.bannerPhotoUrl,
               thumbnailUrl:
                 p.id === "royal-gold-majesty"
                   ? "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80"
@@ -82,7 +84,9 @@ export default function TemplateCatalog({ searchQuery }: TemplateCatalogProps) {
             category: p.category,
             description: p.description,
             previewColor: p.previewColor,
-            thumbnailUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+            thumbnailUrl: p.thumbnailUrl || "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+            coverPhotoUrl: p.coverPhotoUrl || DEFAULT_WEDDING_DATA.coverPhotoUrl,
+            bannerPhotoUrl: p.bannerPhotoUrl || DEFAULT_WEDDING_DATA.bannerPhotoUrl,
             previewAlbum: [
               "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
             ],
@@ -149,7 +153,12 @@ export default function TemplateCatalog({ searchQuery }: TemplateCatalogProps) {
   // Compiled HTML for interactive preview in modal
   const compiledModalHtml = useMemo(() => {
     if (!activeModalTemplate) return "";
-    return renderHtmlTemplate(activeModalTemplate.html || "", SAMPLE_WEDDING_DATA, {
+    const sampleDataWithTemplateAssets: WeddingData = {
+      ...SAMPLE_WEDDING_DATA,
+      coverPhotoUrl: activeModalTemplate.coverPhotoUrl || SAMPLE_WEDDING_DATA.coverPhotoUrl,
+      bannerPhotoUrl: activeModalTemplate.bannerPhotoUrl || SAMPLE_WEDDING_DATA.bannerPhotoUrl,
+    };
+    return renderHtmlTemplate(activeModalTemplate.html || "", sampleDataWithTemplateAssets, {
       guestName: "Bapak / Ibu Tamu Terhormat",
     });
   }, [activeModalTemplate]);
@@ -609,7 +618,11 @@ export default function TemplateCatalog({ searchQuery }: TemplateCatalogProps) {
                     <CoverOverlay
                       isOpen={isCoverOpen}
                       onOpen={() => setIsCoverOpen(true)}
-                      weddingData={SAMPLE_WEDDING_DATA}
+                      weddingData={{
+                        ...SAMPLE_WEDDING_DATA,
+                        coverPhotoUrl: activeModalTemplate?.coverPhotoUrl || SAMPLE_WEDDING_DATA.coverPhotoUrl,
+                        bannerPhotoUrl: activeModalTemplate?.bannerPhotoUrl || SAMPLE_WEDDING_DATA.bannerPhotoUrl,
+                      }}
                       isAbsolute={true}
                       viewMode={interactiveDevice}
                     />
@@ -619,7 +632,7 @@ export default function TemplateCatalog({ searchQuery }: TemplateCatalogProps) {
                         srcDoc={compiledModalHtml}
                         title={activeModalTemplate.name}
                         className="w-full h-full border-0"
-                        sandbox="allow-scripts allow-same-origin allow-popups"
+                        sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals"
                       />
                     </div>
                   </div>

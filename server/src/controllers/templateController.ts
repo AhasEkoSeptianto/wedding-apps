@@ -78,6 +78,8 @@ export async function createTemplate(req: AuthRequest, res: Response, next: Next
       description,
       previewColor,
       thumbnailUrl,
+      coverPhotoUrl,
+      bannerPhotoUrl,
       previewAlbum,
       price,
       designer,
@@ -119,6 +121,8 @@ export async function createTemplate(req: AuthRequest, res: Response, next: Next
       description: description || "",
       previewColor: previewColor || "#b38742",
       thumbnailUrl: thumbnailUrl || "",
+      coverPhotoUrl: coverPhotoUrl || "",
+      bannerPhotoUrl: bannerPhotoUrl || "",
       previewAlbum: Array.isArray(previewAlbum) ? previewAlbum : [],
       price: price || "Rp 149.000",
       designer: designer || "Atelier JanjiSuci",
@@ -150,6 +154,8 @@ export async function updateTemplate(req: AuthRequest, res: Response, next: Next
       description,
       previewColor,
       thumbnailUrl,
+      coverPhotoUrl,
+      bannerPhotoUrl,
       previewAlbum,
       price,
       designer,
@@ -195,6 +201,8 @@ export async function updateTemplate(req: AuthRequest, res: Response, next: Next
     if (description !== undefined) template.description = description;
     if (previewColor !== undefined) template.previewColor = previewColor;
     if (thumbnailUrl !== undefined) template.thumbnailUrl = thumbnailUrl;
+    if (coverPhotoUrl !== undefined) template.coverPhotoUrl = coverPhotoUrl;
+    if (bannerPhotoUrl !== undefined) template.bannerPhotoUrl = bannerPhotoUrl;
     if (previewAlbum !== undefined) template.previewAlbum = Array.isArray(previewAlbum) ? previewAlbum : [];
     if (price !== undefined) template.price = price;
     if (designer !== undefined) template.designer = designer;

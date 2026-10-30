@@ -25,10 +25,14 @@ export default function EditorStudio({
   const groomInputRef = useRef<HTMLInputElement>(null);
   const brideInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const [uploadingGroom, setUploadingGroom] = useState(false);
   const [uploadingBride, setUploadingBride] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   // HTML Templates fetched from Admin & MongoDB
@@ -83,7 +87,7 @@ export default function EditorStudio({
 
   const handleFileUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    target: "groom" | "bride" | "gallery"
+    target: "groom" | "bride" | "gallery" | "cover" | "banner"
   ) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -94,6 +98,8 @@ export default function EditorStudio({
       if (target === "groom") setUploadingGroom(true);
       if (target === "bride") setUploadingBride(true);
       if (target === "gallery") setUploadingGallery(true);
+      if (target === "cover") setUploadingCover(true);
+      if (target === "banner") setUploadingBanner(true);
 
       if (target === "gallery") {
         const uploadedUrls: string[] = [];
@@ -108,16 +114,27 @@ export default function EditorStudio({
         });
       } else {
         const file = files[0];
-        const res = await api.uploadImage(file, target);
+        const folder = target === "cover" || target === "banner" ? "couples" : target;
+        const res = await api.uploadImage(file, folder);
         if (target === "groom") {
           onChange({
             ...data,
             groom: { ...data.groom, photoUrl: res.url },
           });
-        } else {
+        } else if (target === "bride") {
           onChange({
             ...data,
             bride: { ...data.bride, photoUrl: res.url },
+          });
+        } else if (target === "cover") {
+          onChange({
+            ...data,
+            coverPhotoUrl: res.url,
+          });
+        } else if (target === "banner") {
+          onChange({
+            ...data,
+            bannerPhotoUrl: res.url,
           });
         }
       }
@@ -128,6 +145,8 @@ export default function EditorStudio({
       if (target === "groom") setUploadingGroom(false);
       if (target === "bride") setUploadingBride(false);
       if (target === "gallery") setUploadingGallery(false);
+      if (target === "cover") setUploadingCover(false);
+      if (target === "banner") setUploadingBanner(false);
       e.target.value = "";
     }
   };
@@ -557,6 +576,157 @@ export default function EditorStudio({
               >
                 <span className="material-symbols-outlined text-[15px]">content_copy</span>
                 <span>Salin Link</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Cover & Banner Photos Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Foto Sampul Depan / Gate Overlay Card */}
+            <div className="bg-surface-container-lowest p-5 rounded-xl shadow-sm flex flex-col gap-3 border border-outline-variant/20">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                  <h2 className="text-sm font-bold text-on-surface">Foto Sampul Pembuka</h2>
+                </div>
+                <span className="text-[10px] font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
+                  Sampul / Cover
+                </span>
+              </div>
+              <p className="text-[11px] text-on-surface-variant leading-relaxed">
+                Foto yang tampil di kartu gerbang pembuka sebelum tamu menekan tombol <strong>Buka Undangan</strong>.
+              </p>
+
+              <input
+                ref={coverInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleFileUpload(e, "cover")}
+              />
+
+              <div className="relative aspect-[3/4] max-h-56 rounded-xl overflow-hidden bg-stone-900 border border-outline-variant/30 flex items-center justify-center group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={
+                    data.coverPhotoUrl ||
+                    "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80"
+                  }
+                  alt="Foto Sampul Depan"
+                  className={`w-full h-full object-cover transition-opacity ${uploadingCover ? "opacity-30" : ""}`}
+                />
+                {uploadingCover && (
+                  <div className="absolute inset-0 bg-stone-950/60 flex flex-col items-center justify-center text-white gap-2">
+                    <span className="material-symbols-outlined text-[26px] animate-spin text-amber-400">sync</span>
+                    <span className="text-xs font-semibold">Mengunggah ke Cloudinary...</span>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-stone-950/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    disabled={uploadingCover}
+                    onClick={() => coverInputRef.current?.click()}
+                    className="px-3 py-1.5 rounded-lg bg-white text-stone-950 text-xs font-bold shadow hover:bg-stone-100 transition-colors cursor-pointer"
+                  >
+                    Ganti Sampul
+                  </button>
+                  {data.coverPhotoUrl && (
+                    <button
+                      type="button"
+                      onClick={() => onChange({ ...data, coverPhotoUrl: "" })}
+                      className="px-2.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow transition-colors cursor-pointer"
+                      title="Reset ke Sampul Default"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                disabled={uploadingCover}
+                onClick={() => coverInputRef.current?.click()}
+                className="w-full py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                <span className={`material-symbols-outlined text-[16px] ${uploadingCover ? "animate-spin" : "cloud_upload"}`}>
+                  {uploadingCover ? "sync" : "cloud_upload"}
+                </span>
+                <span>{uploadingCover ? "Mengunggah..." : "Upload Foto Sampul Baru"}</span>
+              </button>
+            </div>
+
+            {/* Foto Banner Hero Pasangan Card */}
+            <div className="bg-surface-container-lowest p-5 rounded-xl shadow-sm flex flex-col gap-3 border border-outline-variant/20">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                  <h2 className="text-sm font-bold text-on-surface">Foto Banner Hero Pasangan</h2>
+                </div>
+                <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
+                  Hero Header
+                </span>
+              </div>
+              <p className="text-[11px] text-on-surface-variant leading-relaxed">
+                Foto lanskap kedua mempelai yang menjadi latar belakang hero utama setelah undangan terbuka.
+              </p>
+
+              <input
+                ref={bannerInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleFileUpload(e, "banner")}
+              />
+
+              <div className="relative aspect-[3/4] max-h-56 rounded-xl overflow-hidden bg-stone-900 border border-outline-variant/30 flex items-center justify-center group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={
+                    data.bannerPhotoUrl ||
+                    "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=1600&q=80"
+                  }
+                  alt="Foto Banner Pasangan"
+                  className={`w-full h-full object-cover transition-opacity ${uploadingBanner ? "opacity-30" : ""}`}
+                />
+                {uploadingBanner && (
+                  <div className="absolute inset-0 bg-stone-950/60 flex flex-col items-center justify-center text-white gap-2">
+                    <span className="material-symbols-outlined text-[26px] animate-spin text-emerald-400">sync</span>
+                    <span className="text-xs font-semibold">Mengunggah ke Cloudinary...</span>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-stone-950/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    disabled={uploadingBanner}
+                    onClick={() => bannerInputRef.current?.click()}
+                    className="px-3 py-1.5 rounded-lg bg-white text-stone-950 text-xs font-bold shadow hover:bg-stone-100 transition-colors cursor-pointer"
+                  >
+                    Ganti Banner
+                  </button>
+                  {data.bannerPhotoUrl && (
+                    <button
+                      type="button"
+                      onClick={() => onChange({ ...data, bannerPhotoUrl: "" })}
+                      className="px-2.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow transition-colors cursor-pointer"
+                      title="Reset ke Banner Default"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                disabled={uploadingBanner}
+                onClick={() => bannerInputRef.current?.click()}
+                className="w-full py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                <span className={`material-symbols-outlined text-[16px] ${uploadingBanner ? "animate-spin" : "cloud_upload"}`}>
+                  {uploadingBanner ? "sync" : "cloud_upload"}
+                </span>
+                <span>{uploadingBanner ? "Mengunggah..." : "Upload Foto Banner Baru"}</span>
               </button>
             </div>
           </div>

@@ -38,17 +38,25 @@ export default function GallerySection({ weddingData, viewMode }: GallerySection
 
       {hasPhotos ? (
         <div
-          className={`grid gap-3 sm:gap-5 ${
-            isMobile
-              ? "grid-cols-2"
-              : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+          className={`gap-4 sm:gap-6 ${
+            galleryList.length === 1
+              ? "max-w-md mx-auto"
+              : galleryList.length === 2
+              ? "max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 justify-center"
+              : isMobile
+              ? "grid grid-cols-2"
+              : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
           }`}
         >
           {galleryList.map((url, idx) => (
             <div
               key={idx}
               className={`overflow-hidden shadow-sm group ${
-                isMobile ? "rounded-xl h-44" : "rounded-2xl h-64 sm:h-72"
+                galleryList.length === 1
+                  ? "rounded-2xl h-80 sm:h-96"
+                  : isMobile
+                  ? "rounded-xl h-44"
+                  : "rounded-2xl h-64 sm:h-72"
               }`}
               style={{
                 backgroundColor: theme.colors.surface,

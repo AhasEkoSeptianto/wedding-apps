@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { Wedding } from "../models/Wedding.js";
+import { Template } from "../models/Template.js";
 
 const DEFAULT_SLUG = "dimas&sarah";
 const LEGACY_DEFAULT_SLUG = "dimas-sarah";
@@ -11,6 +12,10 @@ const INITIAL_WEDDING_DATA = {
   themeId: "royal-bloom",
   designMode: "standard",
   customHtml: "",
+  coverPhotoUrl:
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuANVhaGqV68XA5DcEWcz6y9fnNioN4v5VCHS40ZDHeG8gQFJ23cZ8OjYjZVw5sX5JlDaUMqOd_y4aoLCxdGpbXbDuVPMrsfMnY4PHFRU2aiECcgvC_khC_P46fyh3_Nqhm2jb5I0MrEUCoGUdJVGhBpTBXuRWhDXvlJkO-a6lx-AVtpoLqOyI5b78K2eMFA23y5qqZPsrNZDk2ZZZR3LBppdxAJ0zLpQbm1EwMOOmE",
+  bannerPhotoUrl:
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuA9QvSaAxwsl9VZ_oVb2J6e2SAuKf2-hp6byA1Qw_k3_7sIYAW6lS50b69aUH_LBBD8KsFNjlcQ0xIthfCBBAmkCzfr4yma6kAqvUfQLFv99vXmB-Vpd-n5nGYsK8wUi7UTgrT-fMwMrvTHWhJ16J2eL06gtgxJsfz_REi8BgVUpEqOLSgnbmkPD7gGK696n3J3BXziepGRCzNQb7nsGQLxsf69n4xQ9dJTwhr8afU",
   groom: {
     fullName: "Dimas Prasetyo, S.T.",
     nickName: "Dimas",
@@ -87,11 +92,32 @@ export async function getWedding(req: Request, res: Response, next: NextFunction
     });
 
     // Auto-create default if not exists
-    if (!wedding && (slug === DEFAULT_SLUG || slug === LEGACY_DEFAULT_SLUG || altSlug === DEFAULT_SLUG)) {
+    if (!wedding && (slug === DEFAULT_SLUG || slug === LEGACY_DEFAULT_SLUG || altSlug === DEFAULT_SLUG || slug === "demo")) {
       wedding = await Wedding.create(INITIAL_WEDDING_DATA);
     }
 
     if (!wedding) {
+      // Check if this slug matches an HTML Template (allowing /slug to serve template demo directly!)
+      const matchedTemplate = await Template.findOne({
+        $or: [{ slug }, { slug: altSlug }],
+      });
+
+      if (matchedTemplate) {
+        res.json({
+          success: true,
+          data: {
+            ...INITIAL_WEDDING_DATA,
+            slug: matchedTemplate.slug,
+            themeId: matchedTemplate.slug,
+            designMode: "custom_html",
+            customHtml: matchedTemplate.html,
+            coverPhotoUrl: matchedTemplate.coverPhotoUrl || INITIAL_WEDDING_DATA.coverPhotoUrl,
+            bannerPhotoUrl: matchedTemplate.bannerPhotoUrl || INITIAL_WEDDING_DATA.bannerPhotoUrl,
+          },
+        });
+        return;
+      }
+
       res.status(404).json({
         success: false,
         message: "Data undangan pernikahan tidak ditemukan.",

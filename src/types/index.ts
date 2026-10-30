@@ -62,6 +62,8 @@ export interface HtmlTemplate {
   description: string;
   previewColor: string;
   thumbnailUrl?: string;
+  coverPhotoUrl?: string; // Foto sampul pembuka bawaan template
+  bannerPhotoUrl?: string; // Foto banner hero pasangan bawaan template
   previewAlbum?: string[];
   price?: string;
   designer?: string;
@@ -80,6 +82,8 @@ export interface WeddingData {
   themeId?: string;
   designMode?: "standard" | "custom_html";
   customHtml?: string;
+  coverPhotoUrl?: string; // Foto sampul pembuka / gate card
+  bannerPhotoUrl?: string; // Foto banner hero pasangan utama
   groom: {
     fullName: string;
     nickName: string;

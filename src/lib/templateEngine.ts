@@ -1,4 +1,5 @@
 import { WeddingData } from "@/types";
+import { ROYAL_GOLD_MAJESTY_HTML } from "@/lib/templates/royalGoldMajesty";
 
 export interface PlaceholderInfo {
   tag: string;
@@ -93,6 +94,20 @@ export const AVAILABLE_PLACEHOLDERS: PlaceholderInfo[] = [
     category: "Mempelai",
     description: "URL foto mempelai wanita (Cloudinary)",
     example: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    tag: "{{cover_photo}}",
+    label: "Foto Sampul Pembuka (Cover Gate)",
+    category: "Mempelai",
+    description: "URL foto sampul depan kartu pembuka undangan sebelum tombol Buka Undangan diklik",
+    example: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+  },
+  {
+    tag: "{{banner_photo}}",
+    label: "Foto Banner Hero Pasangan",
+    category: "Mempelai",
+    description: "URL foto banner lanskap / header utama kedua mempelai",
+    example: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=1600&q=80",
   },
 
   // Acara & Lokasi
@@ -271,6 +286,27 @@ export const AVAILABLE_PLACEHOLDERS: PlaceholderInfo[] = [
     example: "<div class='countdown'>...</div>",
   },
   {
+    tag: "{{countdown_target_iso}}",
+    label: "Target Hitung Mundur (ISO Timestamp)",
+    category: "Komponen Dinamis",
+    description: "Timestamp ISO target waktu akad/resepsi untuk script JS (cth: 2026-08-24T09:00:00.000Z)",
+    example: "2026-08-24T09:00:00.000Z",
+  },
+  {
+    tag: "{{wedding_slug}}",
+    label: "Slug URL Undangan",
+    category: "Komponen Dinamis",
+    description: "Slug identitas undangan pernikahan untuk link & parameter (cth: dimas&sarah)",
+    example: "dimas&sarah",
+  },
+  {
+    tag: "{{api_base_url}}",
+    label: "URL Endpoint REST API",
+    category: "Komponen Dinamis",
+    description: "Alamat base REST API backend untuk submit RSVP/Ucapan (cth: http://localhost:5000/api)",
+    example: "http://localhost:5000/api",
+  },
+  {
     tag: "{{bank_accounts_widget}}",
     label: "Komponen Amplop Digital",
     category: "Komponen Dinamis",
@@ -301,18 +337,44 @@ export function generateGalleryHtml(gallery?: string[]): string {
     `.trim();
   }
 
-  const items = photos
-    .map(
-      (url, i) => `
-      <div class="gallery-item" style="overflow:hidden; border-radius: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); height: 260px; background: #eee;">
-        <img src="${escapeHtml(url)}" alt="Foto Galeri ${i + 1}" style="width:100%; height:100%; object-fit:cover; transition: transform 0.4s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" loading="lazy" />
+  const createItem = (url: string, i: number, height: string = "260px") => `
+    <div class="gallery-item cursor-pointer" onclick="if(typeof openLightbox==='function')openLightbox(this)" style="overflow:hidden; border-radius: 16px; box-shadow: 0 4px 18px rgba(0,0,0,0.06); height: ${height}; background: #eee; position:relative;">
+      <img src="${escapeHtml(url)}" alt="Foto Galeri ${i + 1}" style="width:100%; height:100%; object-fit:cover; transition: transform 0.5s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" loading="lazy" />
+    </div>
+  `.trim();
+
+  // 1 Foto: Posisikan di tengah (Centered Single Showcase)
+  if (photos.length === 1) {
+    return `
+      <div style="display:flex; justify-content:center; align-items:center; width:100%; max-width:440px; margin:0 auto;">
+        <div style="width:100%;">
+          ${createItem(photos[0], 0, "340px")}
+        </div>
       </div>
-    `.trim()
-    )
+    `.trim();
+  }
+
+  // 2 Foto: Posisikan di tengah berjejer seimbang (Centered Pair Layout - Tidak deret 2 di kiri saja)
+  if (photos.length === 2) {
+    return `
+      <div style="display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:20px; width:100%; max-width:760px; margin:0 auto;">
+        <div style="flex:1 1 280px; max-width:360px; width:100%;">
+          ${createItem(photos[0], 0, "290px")}
+        </div>
+        <div style="flex:1 1 280px; max-width:360px; width:100%;">
+          ${createItem(photos[1], 1, "290px")}
+        </div>
+      </div>
+    `.trim();
+  }
+
+  // 3 Foto atau lebih: Responsive Grid
+  const items = photos
+    .map((url, i) => createItem(url, i, "260px"))
     .join("\n");
 
   return `
-    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px;">
+    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; justify-content:center;">
       ${items}
     </div>
   `.trim();
@@ -365,9 +427,56 @@ export function generateBankAccountsHtml(gift?: { bca: string; mandiri: string }
   `.trim();
 }
 
+// Helper to parse Indonesian or standard date string into an ISO date string
+export function parseDateToIso(rawDate?: string): string {
+  if (!rawDate || !rawDate.trim()) {
+    // Default fallback to 120 days in future
+    return new Date(Date.now() + 120 * 24 * 60 * 60 * 1000).toISOString();
+  }
+
+  // 1. Direct parse attempt
+  const direct = new Date(rawDate);
+  if (!isNaN(direct.getTime()) && direct.getFullYear() > 2020) {
+    return direct.toISOString();
+  }
+
+  // 2. Indonesian Month Regex parser (e.g. "Sabtu, 24 Agustus 2026", "24 Agustus 2026")
+  const months: Record<string, string> = {
+    januari: "01", jan: "01",
+    februari: "02", feb: "02",
+    maret: "03", mar: "03",
+    april: "04", apr: "04",
+    mei: "05",
+    juni: "06", jun: "06",
+    juli: "07", jul: "07",
+    agustus: "08", agu: "08", ags: "08",
+    september: "09", sep: "09",
+    oktober: "10", okt: "10",
+    november: "11", nov: "11",
+    desember: "12", des: "12",
+  };
+
+  const match = rawDate.match(/(\d{1,2})\s+([a-zA-Z]+)\s+(\d{4})/);
+  if (match) {
+    const day = match[1].padStart(2, "0");
+    const monthName = match[2].toLowerCase();
+    const year = match[3];
+    const monthNum = months[monthName];
+    if (monthNum) {
+      const parsed = new Date(`${year}-${monthNum}-${day}T09:00:00+07:00`);
+      if (!isNaN(parsed.getTime())) {
+        return parsed.toISOString();
+      }
+    }
+  }
+
+  // Fallback to future date
+  return new Date(Date.now() + 120 * 24 * 60 * 60 * 1000).toISOString();
+}
+
 // Generate interactive countdown script & HTML widget
 export function generateCountdownHtml(targetDate: string): string {
-  const safeDate = targetDate || "2026-10-24";
+  const safeIso = parseDateToIso(targetDate);
 
   return `
     <div id="countdown-timer" style="display:flex; justify-content:center; gap:10px; margin: 24px 0;">
@@ -390,8 +499,8 @@ export function generateCountdownHtml(targetDate: string): string {
     </div>
     <script>
       (function() {
-        var target = new Date("${safeDate}").getTime();
-        if (isNaN(target)) target = new Date("2026-10-24T09:00:00").getTime();
+        var target = new Date("${safeIso}").getTime();
+        if (isNaN(target)) target = new Date(Date.now() + 90 * 86400000).getTime();
         function updateCd() {
           var now = new Date().getTime();
           var diff = target - now;
@@ -453,6 +562,14 @@ export function renderHtmlTemplate(
   const rawGallery = (data.gallery || []).filter((u) => Boolean(u && u.trim()));
   const galleryList = rawGallery.length > 0 ? rawGallery : defaultGalleryFallbacks;
 
+  const defaultCover =
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuANVhaGqV68XA5DcEWcz6y9fnNioN4v5VCHS40ZDHeG8gQFJ23cZ8OjYjZVw5sX5JlDaUMqOd_y4aoLCxdGpbXbDuVPMrsfMnY4PHFRU2aiECcgvC_khC_P46fyh3_Nqhm2jb5I0MrEUCoGUdJVGhBpTBXuRWhDXvlJkO-a6lx-AVtpoLqOyI5b78K2eMFA23y5qqZPsrNZDk2ZZZR3LBppdxAJ0zLpQbm1EwMOOmE";
+  const defaultBanner =
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuA9QvSaAxwsl9VZ_oVb2J6e2SAuKf2-hp6byA1Qw_k3_7sIYAW6lS50b69aUH_LBBD8KsFNjlcQ0xIthfCBBAmkCzfr4yma6kAqvUfQLFv99vXmB-Vpd-n5nGYsK8wUi7UTgrT-fMwMrvTHWhJ16J2eL06gtgxJsfz_REi8BgVUpEqOLSgnbmkPD7gGK696n3J3BXziepGRCzNQb7nsGQLxsf69n4xQ9dJTwhr8afU";
+
+  const coverPhoto = data.coverPhotoUrl || defaultCover;
+  const bannerPhoto = data.bannerPhotoUrl || defaultBanner;
+
   const replacements: Record<string, string> = {
     "{{couple_names}}": coupleNames,
     "{{couple_full_names}}": coupleFullNames,
@@ -470,6 +587,13 @@ export function renderHtmlTemplate(
     "{{bride_photo}}":
       data.bride.photoUrl ||
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=600&q=80",
+    "{{cover_photo}}": coverPhoto,
+    "{{sampul_photo}}": coverPhoto,
+    "{{welcome_photo}}": coverPhoto,
+    "{{banner_photo}}": bannerPhoto,
+    "{{cover_banner}}": bannerPhoto,
+    "{{hero_image}}": bannerPhoto,
+    "{{couple_banner}}": bannerPhoto,
     "{{quote_text}}":
       data.quote.text ||
       "Dan di antara tanda-tanda kebesaran-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri...",
@@ -488,7 +612,9 @@ export function renderHtmlTemplate(
     "{{gift_bca}}": data.gift.bca || "8830-1928-11 a.n Sarah Anindita",
     "{{gift_mandiri}}": data.gift.mandiri || "1370-0012-9901 a.n Dimas Prasetyo",
     "{{rsvp_deadline}}": data.rsvp.deadline || "20 Agustus 2026",
-    "{{wedding_slug}}": data.slug || "dimas-sarah",
+    "{{wedding_slug}}": data.slug || "dimas&sarah",
+    "{{api_base_url}}": process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
+    "{{countdown_target_iso}}": parseDateToIso(data.events.akad.date),
     "{{music_title}}": data.music.title || "Romantic Wedding Melody",
     // Dynamic generated components
     "{{gallery_grid}}": generateGalleryHtml(galleryList),
@@ -508,8 +634,9 @@ export function renderHtmlTemplate(
 
   let output = templateHtml;
   for (const [tag, val] of Object.entries(replacements)) {
-    // Replace all occurrences of tag globally
-    output = output.split(tag).join(val);
+    // Case-insensitive global replacement (so {{AKAD_DATE}}, {{akad_date}}, {{BANNER_PHOTO}} etc. are all replaced!)
+    const escapedTag = tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    output = output.replace(new RegExp(escapedTag, "gi"), () => val);
   }
 
   return output;
@@ -525,6 +652,9 @@ export interface PresetHtmlTemplate {
   category: string;
   description: string;
   previewColor: string;
+  thumbnailUrl?: string;
+  coverPhotoUrl?: string;
+  bannerPhotoUrl?: string;
   html: string;
 }
 
@@ -535,276 +665,10 @@ export const PRESET_HTML_TEMPLATES: PresetHtmlTemplate[] = [
     category: "Luxury",
     description: "Template aristokrat klasik dengan garis emas mewah, tipografi anggun, dan ornamen kartu pernikahan modern.",
     previewColor: "#c5a059",
-    html: `<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Wedding of {{couple_names}}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Montserrat', sans-serif;
-      background-color: #faf7f2;
-      color: #2b2622;
-      line-height: 1.6;
-    }
-    .font-serif { font-family: 'Cormorant Garamond', serif; }
-    .gold-accent { color: #c5a059; }
-    .gold-border { border-color: #ebdcc5; }
-    
-    .container {
-      max-width: 680px;
-      margin: 0 auto;
-      padding: 24px 20px;
-    }
-    
-    /* Cover Screen */
-    .hero-section {
-      min-height: 90vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 60px 20px;
-      background: radial-gradient(circle at center, #ffffff 0%, #faf5ec 100%);
-      border-radius: 28px;
-      border: 1px solid #eadbca;
-      box-shadow: 0 10px 40px rgba(197,160,89,0.08);
-      margin-bottom: 30px;
-      position: relative;
-      overflow: hidden;
-    }
-    .hero-section::before {
-      content: "";
-      position: absolute;
-      top: 15px; left: 15px; right: 15px; bottom: 15px;
-      border: 1px solid rgba(197,160,89,0.3);
-      border-radius: 20px;
-      pointer-events: none;
-    }
-    .hero-tag {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 4px;
-      color: #c5a059;
-      font-weight: 600;
-      margin-bottom: 12px;
-    }
-    .hero-title {
-      font-size: 46px;
-      font-weight: 700;
-      color: #1a1512;
-      line-height: 1.1;
-      margin-bottom: 14px;
-    }
-    .guest-pill {
-      background: rgba(255,255,255,0.9);
-      border: 1px solid #e8dac5;
-      padding: 14px 24px;
-      border-radius: 18px;
-      margin: 20px 0;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    }
-
-    /* Section Card */
-    .card {
-      background: #ffffff;
-      border-radius: 22px;
-      border: 1px solid #ebdcc5;
-      padding: 36px 26px;
-      margin-bottom: 26px;
-      box-shadow: 0 6px 25px rgba(0,0,0,0.03);
-      text-align: center;
-    }
-    .card-title {
-      font-size: 28px;
-      font-weight: 700;
-      color: #1a1512;
-      margin-bottom: 6px;
-    }
-    .card-divider {
-      color: #c5a059;
-      font-size: 20px;
-      margin-bottom: 18px;
-    }
-
-    /* Couple Photos */
-    .couple-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-      margin-top: 20px;
-    }
-    @media(min-width: 520px) {
-      .couple-grid { flex-direction: row; }
-    }
-    .person-card {
-      flex: 1;
-      background: #fdfbf7;
-      border: 1px solid #ebdcc5;
-      border-radius: 18px;
-      padding: 22px;
-      text-align: center;
-    }
-    .person-img {
-      width: 130px;
-      height: 130px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin: 0 auto 14px;
-      border: 4px solid #fff;
-      box-shadow: 0 6px 18px rgba(197,160,89,0.2);
-    }
-
-    /* Event Cards */
-    .event-box {
-      background: #faf6ef;
-      border: 1px solid #ebdcc5;
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 16px;
-      text-align: center;
-    }
-    .event-btn {
-      display: inline-block;
-      margin-top: 14px;
-      background: #c5a059;
-      color: #fff;
-      text-decoration: none;
-      padding: 9px 22px;
-      border-radius: 24px;
-      font-size: 12px;
-      font-weight: 600;
-      box-shadow: 0 3px 10px rgba(197,160,89,0.3);
-      transition: opacity 0.2s;
-    }
-    .event-btn:hover { opacity: 0.9; }
-
-    footer {
-      text-align: center;
-      padding: 40px 20px;
-      color: #8c827a;
-      font-size: 12px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <!-- Hero / Cover -->
-    <header class="hero-section">
-      <span class="hero-tag">The Wedding Celebration</span>
-      <h1 class="hero-title font-serif">{{couple_names}}</h1>
-      <p class="font-serif" style="font-size: 19px; color: #7a6e65; font-style: italic;">
-        Mengundang Anda untuk menjadi saksi ikatan suci kami
-      </p>
-
-      <div class="guest-pill">
-        <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #8c827a; display: block; margin-bottom: 4px;">Kepada Yth.</span>
-        <h3 class="font-serif" style="font-size: 22px; font-weight: 700; color: #1a1512;">{{guest_name}}</h3>
-      </div>
-
-      <!-- Countdown Timer Widget -->
-      {{countdown_widget}}
-    </header>
-
-    <!-- Holy Quote -->
-    <section class="card">
-      <div class="card-divider">❖</div>
-      <blockquote class="font-serif" style="font-size: 18px; font-style: italic; color: #40362f; max-width: 520px; margin: 0 auto 12px; line-height: 1.7;">
-        "{{quote_text}}"
-      </blockquote>
-      <span style="font-size: 12px; font-weight: 600; color: #c5a059; letter-spacing: 1px;">{{quote_source}}</span>
-    </section>
-
-    <!-- Couple Presentation -->
-    <section class="card">
-      <span class="hero-tag">Mempelai yang Berbahagia</span>
-      <h2 class="card-title font-serif">Bride &amp; Groom</h2>
-      <div class="card-divider">❖</div>
-
-      <div class="couple-grid">
-        <div class="person-card">
-          <img src="{{groom_photo}}" alt="{{groom_name}}" class="person-img" />
-          <h3 class="font-serif" style="font-size: 20px; font-weight: 700; color:#1a1512;">{{groom_name}}</h3>
-          <p style="font-size: 12px; color: #7a6e65; margin: 6px 0;">{{groom_parents}}</p>
-          <a href="https://instagram.com/{{groom_instagram}}" target="_blank" style="font-size: 11px; color:#c5a059; font-weight:600; text-decoration:none;">{{groom_instagram}}</a>
-        </div>
-        <div class="person-card">
-          <img src="{{bride_photo}}" alt="{{bride_name}}" class="person-img" />
-          <h3 class="font-serif" style="font-size: 20px; font-weight: 700; color:#1a1512;">{{bride_name}}</h3>
-          <p style="font-size: 12px; color: #7a6e65; margin: 6px 0;">{{bride_parents}}</p>
-          <a href="https://instagram.com/{{bride_instagram}}" target="_blank" style="font-size: 11px; color:#c5a059; font-weight:600; text-decoration:none;">{{bride_instagram}}</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- Love Story Timeline -->
-    <section class="card">
-      <span class="hero-tag">Our Journey</span>
-      <h2 class="card-title font-serif">Kisah Cinta Kami</h2>
-      <div class="card-divider">❖</div>
-      {{stories_timeline}}
-    </section>
-
-    <!-- Event Schedule -->
-    <section class="card">
-      <span class="hero-tag">Save The Date</span>
-      <h2 class="card-title font-serif">Waktu &amp; Tempat</h2>
-      <div class="card-divider">❖</div>
-
-      <!-- Akad -->
-      <div class="event-box">
-        <span style="font-size: 12px; font-weight: 700; color: #c5a059; text-transform: uppercase; letter-spacing: 1.5px; display: block; margin-bottom: 4px;">Akad Nikah</span>
-        <h4 class="font-serif" style="font-size: 22px; font-weight: 700;">{{akad_date}}</h4>
-        <p style="font-size: 14px; color: #7a6e65; font-weight: 600; margin: 4px 0 8px;">Pukul: {{akad_time}}</p>
-        <p style="font-size: 14px; font-weight: 700; color: #1a1512;">{{akad_venue}}</p>
-        <p style="font-size: 12px; color: #7a6e65;">{{akad_address}}</p>
-        <a href="{{akad_maps_url}}" target="_blank" class="event-btn">Buka Petunjuk Arah Google Maps</a>
-      </div>
-
-      <!-- Resepsi -->
-      <div class="event-box">
-        <span style="font-size: 12px; font-weight: 700; color: #c5a059; text-transform: uppercase; letter-spacing: 1.5px; display: block; margin-bottom: 4px;">Resepsi Pernikahan</span>
-        <h4 class="font-serif" style="font-size: 22px; font-weight: 700;">{{resepsi_date}}</h4>
-        <p style="font-size: 14px; color: #7a6e65; font-weight: 600; margin: 4px 0 8px;">Pukul: {{resepsi_time}}</p>
-        <p style="font-size: 14px; font-weight: 700; color: #1a1512;">{{resepsi_venue}}</p>
-        <p style="font-size: 12px; color: #7a6e65;">{{resepsi_address}}</p>
-        <a href="{{resepsi_maps_url}}" target="_blank" class="event-btn">Buka Petunjuk Arah Google Maps</a>
-      </div>
-    </section>
-
-    <!-- Photo Gallery -->
-    <section class="card">
-      <span class="hero-tag">Moments in Lens</span>
-      <h2 class="card-title font-serif">Galeri Prewedding</h2>
-      <div class="card-divider">❖</div>
-      {{gallery_grid}}
-    </section>
-
-    <!-- Digital Gift / Amplop Digital -->
-    <section class="card">
-      <span class="hero-tag">Tanda Kasih</span>
-      <h2 class="card-title font-serif">Wedding Gift</h2>
-      <div class="card-divider">❖</div>
-      <p style="font-size: 13px; color: #7a6e65; max-width: 480px; margin: 0 auto 20px;">
-        Doa restu Anda merupakan karunia terindah bagi kami. Bagi yang ingin memberikan tanda kasih secara cashless:
-      </p>
-      {{bank_accounts_widget}}
-    </section>
-
-    <!-- Footer -->
-    <footer>
-      <h3 class="font-serif" style="font-size: 24px; color: #c5a059; margin-bottom: 6px;">{{couple_names}}</h3>
-      <p>Terima kasih atas doa dan restu Anda pada hari bahagia kami.</p>
-    </footer>
-  </div>
-</body>
-</html>`,
+    thumbnailUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuANVhaGqV68XA5DcEWcz6y9fnNioN4v5VCHS40ZDHeG8gQFJ23cZ8OjYjZVw5sX5JlDaUMqOd_y4aoLCxdGpbXbDuVPMrsfMnY4PHFRU2aiECcgvC_khC_P46fyh3_Nqhm2jb5I0MrEUCoGUdJVGhBpTBXuRWhDXvlJkO-a6lx-AVtpoLqOyI5b78K2eMFA23y5qqZPsrNZDk2ZZZR3LBppdxAJ0zLpQbm1EwMOOmE",
+    coverPhotoUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuANVhaGqV68XA5DcEWcz6y9fnNioN4v5VCHS40ZDHeG8gQFJ23cZ8OjYjZVw5sX5JlDaUMqOd_y4aoLCxdGpbXbDuVPMrsfMnY4PHFRU2aiECcgvC_khC_P46fyh3_Nqhm2jb5I0MrEUCoGUdJVGhBpTBXuRWhDXvlJkO-a6lx-AVtpoLqOyI5b78K2eMFA23y5qqZPsrNZDk2ZZZR3LBppdxAJ0zLpQbm1EwMOOmE",
+    bannerPhotoUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuA9QvSaAxwsl9VZ_oVb2J6e2SAuKf2-hp6byA1Qw_k3_7sIYAW6lS50b69aUH_LBBD8KsFNjlcQ0xIthfCBBAmkCzfr4yma6kAqvUfQLFv99vXmB-Vpd-n5nGYsK8wUi7UTgrT-fMwMrvTHWhJ16J2eL06gtgxJsfz_REi8BgVUpEqOLSgnbmkPD7gGK696n3J3BXziepGRCzNQb7nsGQLxsf69n4xQ9dJTwhr8afU",
+    html: ROYAL_GOLD_MAJESTY_HTML,
   },
 
   {

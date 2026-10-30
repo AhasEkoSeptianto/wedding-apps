@@ -40,6 +40,7 @@ export default function WeddingInvitationView({ initialSlug }: WeddingInvitation
   const targetSlug = initialSlug || routeSlug || querySlug || user?.weddingSlug || "dimas&sarah";
 
   const [weddingData, setWeddingData] = useState<WeddingData>(DEFAULT_WEDDING_DATA);
+  const [isLoading, setIsLoading] = useState(true);
   // Default preview starts with cover/sampul active as requested
   const [isOpened, setIsOpened] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -59,6 +60,8 @@ export default function WeddingInvitationView({ initialSlug }: WeddingInvitation
             themeId: found.slug || found.id,
             designMode: "custom_html" as const,
             customHtml: found.html,
+            coverPhotoUrl: found.coverPhotoUrl || currentData.coverPhotoUrl,
+            bannerPhotoUrl: found.bannerPhotoUrl || currentData.bannerPhotoUrl,
           };
         }
       } catch (e) {
@@ -71,6 +74,8 @@ export default function WeddingInvitationView({ initialSlug }: WeddingInvitation
           themeId: matched.id,
           designMode: "custom_html" as const,
           customHtml: matched.html,
+          coverPhotoUrl: matched.coverPhotoUrl || currentData.coverPhotoUrl,
+          bannerPhotoUrl: matched.bannerPhotoUrl || currentData.bannerPhotoUrl,
         };
       }
       return currentData;
@@ -105,6 +110,9 @@ export default function WeddingInvitationView({ initialSlug }: WeddingInvitation
           const updated = await applyThemeParam(DEFAULT_WEDDING_DATA);
           if (isMounted) setWeddingData(updated);
         }
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
       });
 
     return () => {
@@ -133,6 +141,25 @@ export default function WeddingInvitationView({ initialSlug }: WeddingInvitation
   // Ignore static assets if mistakenly routed
   if (targetSlug === "favicon.ico" || targetSlug.startsWith("_")) {
     return null;
+  }
+
+  // Pre-load Screen: Wait until actual couple data is fetched to prevent default flash
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 z-50 bg-[#111913] flex flex-col items-center justify-center text-white">
+        <div className="relative flex flex-col items-center gap-4">
+          <div className="w-14 h-14 rounded-full border-2 border-[#d7bc89]/30 border-t-[#d7bc89] animate-spin" />
+          <div className="text-center space-y-1">
+            <span className="font-serif tracking-widest text-xs uppercase text-[#d7bc89] block">
+              JanjiSuci Atelier
+            </span>
+            <p className="text-xs text-stone-400 font-light">
+              Menyiapkan undangan pernikahan...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Mode 1: Custom HTML Template Full Screen
@@ -169,7 +196,7 @@ export default function WeddingInvitationView({ initialSlug }: WeddingInvitation
             srcDoc={compiledHtml}
             title={`Undangan ${groomNick} & ${brideNick}`}
             className="w-full min-h-screen border-0 block"
-            sandbox="allow-scripts allow-same-origin allow-popups"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals"
           />
         </div>
       </div>

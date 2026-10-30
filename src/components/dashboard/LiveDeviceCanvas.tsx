@@ -250,7 +250,7 @@ export default function LiveDeviceCanvas({ data }: LiveDeviceCanvasProps) {
                 srcDoc={compiledHtml}
                 title="Preview Undangan Template HTML"
                 className="w-full h-full border-0 bg-transparent"
-                sandbox="allow-scripts allow-same-origin allow-popups"
+                sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals"
               />
             </div>
           ) : (

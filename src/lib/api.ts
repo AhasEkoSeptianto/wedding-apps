@@ -64,6 +64,8 @@ export interface HtmlTemplatePayload {
   description?: string;
   previewColor?: string;
   thumbnailUrl?: string;
+  coverPhotoUrl?: string;
+  bannerPhotoUrl?: string;
   previewAlbum?: string[];
   price?: string;
   designer?: string;

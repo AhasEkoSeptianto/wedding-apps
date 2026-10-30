@@ -6,6 +6,8 @@ export interface IWedding extends Document {
   themeId?: string;
   designMode?: "standard" | "custom_html";
   customHtml?: string;
+  coverPhotoUrl?: string;
+  bannerPhotoUrl?: string;
   groom: {
     fullName: string;
     nickName: string;
@@ -85,6 +87,14 @@ const WeddingSchema = new Schema<IWedding>(
       default: "standard",
     },
     customHtml: {
+      type: String,
+      default: "",
+    },
+    coverPhotoUrl: {
+      type: String,
+      default: "",
+    },
+    bannerPhotoUrl: {
       type: String,
       default: "",
     },
