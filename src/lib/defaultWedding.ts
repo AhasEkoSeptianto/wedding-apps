@@ -4,13 +4,13 @@ import { PRESET_HTML_TEMPLATES } from "@/lib/templateEngine";
 export const DEFAULT_WEDDING_DATA: WeddingData = {
   title: "Pernikahan Dimas & Sarah",
   slug: "dimas&sarah",
-  themeId: "royal-gold-majesty",
+  themeId: "luxury",
   designMode: "custom_html",
   customHtml: PRESET_HTML_TEMPLATES[0].html,
   coverPhotoUrl:
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuANVhaGqV68XA5DcEWcz6y9fnNioN4v5VCHS40ZDHeG8gQFJ23cZ8OjYjZVw5sX5JlDaUMqOd_y4aoLCxdGpbXbDuVPMrsfMnY4PHFRU2aiECcgvC_khC_P46fyh3_Nqhm2jb5I0MrEUCoGUdJVGhBpTBXuRWhDXvlJkO-a6lx-AVtpoLqOyI5b78K2eMFA23y5qqZPsrNZDk2ZZZR3LBppdxAJ0zLpQbm1EwMOOmE",
+    "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405338/janjisuci/templatescovers/pzjqcjomaehz1f72ru4g.jpg",
   bannerPhotoUrl:
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuA9QvSaAxwsl9VZ_oVb2J6e2SAuKf2-hp6byA1Qw_k3_7sIYAW6lS50b69aUH_LBBD8KsFNjlcQ0xIthfCBBAmkCzfr4yma6kAqvUfQLFv99vXmB-Vpd-n5nGYsK8wUi7UTgrT-fMwMrvTHWhJ16J2eL06gtgxJsfz_REi8BgVUpEqOLSgnbmkPD7gGK696n3J3BXziepGRCzNQb7nsGQLxsf69n4xQ9dJTwhr8afU",
+    "https://res.cloudinary.com/bc8tk53v/image/upload/v1793265674/janjisuci/templatesbanners/mi3wowpithia0uimndbe.jpg",
   groom: {
     fullName: "Dimas Prasetyo, S.T.",
     nickName: "Dimas",

@@ -20,12 +20,12 @@ export default function HeaderNav() {
       <div className="h-20 w-full max-w-[1360px] mx-auto px-4 md:px-12 flex items-center justify-between gap-4">
         {/* Logo & Navigation Links */}
         <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2.5 group">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               alt="Logo JanjiSuci"
-              className="h-8 w-auto object-contain"
-              src="https://lh3.googleusercontent.com/aida/AEtjO1Wyr4h6Z3syVwA57Z6k-06bWVsXyZ9qSt30t4VY57-2tyIjyWF_HPQort7Pdl4UTAzhzAs8L0WDnnbjCkZ85VFrKEnMSOcPWQVN3LX_1195RCgup8xnL0-buDtS5ySW2hTdD3Uc9GUgf-VLR-DfeNozaEmWjfIobFpw6xOfVxtfLBfouCglBDV5jDqumNYWNtM1UQ0mZa7l1GFUZZ9IZleLBt4CUlKHbMXgq051cymoFh8qjnpLNaeMh4ye"
+              className="h-10 w-auto object-contain group-hover:scale-105 transition-transform"
+              src="/images/brand-logo.png"
             />
             <span className="text-2xl text-primary font-bold tracking-tight font-serif">
               JanjiSuci

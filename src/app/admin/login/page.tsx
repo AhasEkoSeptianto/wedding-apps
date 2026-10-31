@@ -49,9 +49,14 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md relative z-10">
         {/* Top Brand Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-stone-900 border border-stone-800 shadow-2xl text-amber-400 mb-4">
-            <span className="material-symbols-outlined text-[32px]">admin_panel_settings</span>
-          </div>
+          <Link href="/" className="inline-block group mb-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/brand-logo.png"
+              alt="Logo JanjiSuci"
+              className="w-16 h-16 object-contain mx-auto group-hover:scale-105 transition-transform"
+            />
+          </Link>
           <div className="flex items-center justify-center gap-2 mb-1">
             <span className="text-xs uppercase tracking-[0.25em] font-bold text-amber-400">
               Internal System

@@ -6,6 +6,7 @@ import { Guest } from "./models/Guest.js";
 import { Gift } from "./models/Gift.js";
 import { User } from "./models/User.js";
 import { Template } from "./models/Template.js";
+import { LUXURY_TEMPLATE_HTML } from "./templates/luxuryTemplate.js";
 
 // Fix Windows / local ISP DNS truncation on mongodb+srv SRV lookups
 try {
@@ -189,127 +190,48 @@ const INITIAL_GIFTS = [
 
 const INITIAL_TEMPLATES = [
   {
+    slug: "luxury",
+    name: "Luxury",
+    category: "Luxury",
+    description: "Template aristokrat klasik bernuansa emas mewah (Royal Gold Majesty) dengan ornamen kartu modern, tipografi anggun Playfair Display & Cinzel, galeri foto terpusat yang responsif, countdown timer interaktif, formulir RSVP & doa terhubung real-time, serta kartu amplop digital.",
+    previewColor: "#c5a059",
+    thumbnailUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405095/janjisuci/templates/frd4v8jt6cag6suew06e.png",
+    coverPhotoUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405338/janjisuci/templatescovers/pzjqcjomaehz1f72ru4g.jpg",
+    bannerPhotoUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793265674/janjisuci/templatesbanners/mi3wowpithia0uimndbe.jpg",
+    previewAlbum: [
+      "https://res.cloudinary.com/bc8tk53v/image/upload/v1793404963/janjisuci/templates/xujfu3qdryvi527ug0vf.png",
+      "https://res.cloudinary.com/bc8tk53v/image/upload/v1793404969/janjisuci/templates/awn2tlbifguobzqwdvpv.png",
+      "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405073/janjisuci/templates/xsj2e7qsdacl5qbq7v3c.png",
+    ],
+    price: "Rp 149.000",
+    designer: "Atelier JanjiSuci",
+    tier: "gold",
+    tierBadge: "Desain Pilihan",
+    isPreset: true,
+    isActive: true,
+    html: LUXURY_TEMPLATE_HTML,
+  },
+  {
     slug: "royal-gold-majesty",
     name: "The Royal Gold Majesty",
     category: "Luxury",
-    description: "Template aristokrat klasik dengan garis emas mewah, tipografi anggun, dan ornamen kartu pernikahan modern.",
+    description: "Template aristokrat klasik bernuansa emas mewah dengan ornamen kartu modern, tipografi anggun, dan integrasi RSVP.",
     previewColor: "#c5a059",
-    thumbnailUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80",
+    thumbnailUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405095/janjisuci/templates/frd4v8jt6cag6suew06e.png",
+    coverPhotoUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405338/janjisuci/templatescovers/pzjqcjomaehz1f72ru4g.jpg",
+    bannerPhotoUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793265674/janjisuci/templatesbanners/mi3wowpithia0uimndbe.jpg",
     previewAlbum: [
-      "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=1200&q=80",
+      "https://res.cloudinary.com/bc8tk53v/image/upload/v1793404963/janjisuci/templates/xujfu3qdryvi527ug0vf.png",
+      "https://res.cloudinary.com/bc8tk53v/image/upload/v1793404969/janjisuci/templates/awn2tlbifguobzqwdvpv.png",
+      "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405073/janjisuci/templates/xsj2e7qsdacl5qbq7v3c.png",
     ],
-    price: "Rp 249.000",
-    designer: "Atelier Janji",
-    tier: "vip",
-    tierBadge: "Paket VIP",
+    price: "Rp 149.000",
+    designer: "Atelier JanjiSuci",
+    tier: "gold",
+    tierBadge: "Desain Pilihan",
     isPreset: true,
     isActive: true,
-    html: `<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Wedding of {{couple_names}}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Montserrat', sans-serif; background-color: #faf7f2; color: #2b2622; line-height: 1.6; }
-    .font-serif { font-family: 'Cormorant Garamond', serif; }
-    .container { max-width: 680px; margin: 0 auto; padding: 24px 20px; }
-    .hero-section { min-height: 85vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 60px 20px; background: radial-gradient(circle at center, #ffffff 0%, #faf5ec 100%); border-radius: 28px; border: 1px solid #eadbca; box-shadow: 0 10px 40px rgba(197,160,89,0.08); margin-bottom: 30px; position: relative; }
-    .hero-tag { font-size: 11px; text-transform: uppercase; letter-spacing: 4px; color: #c5a059; font-weight: 600; margin-bottom: 12px; }
-    .hero-title { font-size: 46px; font-weight: 700; color: #1a1512; line-height: 1.1; margin-bottom: 14px; }
-    .card { background: #ffffff; border-radius: 22px; border: 1px solid #ebdcc5; padding: 36px 26px; margin-bottom: 26px; box-shadow: 0 6px 25px rgba(0,0,0,0.03); text-align: center; }
-    .card-title { font-size: 28px; font-weight: 700; color: #1a1512; margin-bottom: 6px; }
-    .card-divider { color: #c5a059; font-size: 20px; margin-bottom: 18px; }
-    .btn-gold { display: inline-block; background: #c5a059; color: #ffffff; padding: 10px 24px; border-radius: 30px; text-decoration: none; font-size: 13px; font-weight: 600; margin-top: 12px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <header class="hero-section">
-      <span class="hero-tag">The Wedding Of</span>
-      <h1 class="hero-title font-serif">{{couple_names}}</h1>
-      <p style="color: #7a6e65; font-size: 15px;">Kami mengundang Anda untuk merayakan cinta &amp; janji suci kami</p>
-      <div style="background: rgba(255,255,255,0.9); border: 1px solid #e8dac5; padding: 14px 24px; border-radius: 18px; margin: 20px 0;">
-        <span style="font-size: 11px; text-transform: uppercase; color: #8c7e75; letter-spacing: 2px; display: block;">Kepada Yth:</span>
-        <strong style="font-size: 19px; color: #1a1512;" class="font-serif">{{guest_name}}</strong>
-      </div>
-      {{countdown_widget}}
-    </header>
-
-    <section class="card">
-      <blockquote class="font-serif" style="font-size: 18px; font-style: italic; color: #c5a059; margin-bottom: 12px;">"{{quote_text}}"</blockquote>
-      <span style="font-size: 12px; font-weight: 600; color: #8c7e75; text-transform: uppercase; letter-spacing: 1px;">{{quote_source}}</span>
-    </section>
-
-    <section class="card">
-      <span class="hero-tag">Mempelai Bahagia</span>
-      <h2 class="card-title font-serif">Kedua Mempelai</h2>
-      <div class="card-divider">❖</div>
-      <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 16px;">
-        <div style="flex: 1; min-width: 250px; background: #fdfbf7; border: 1px solid #ebdcc5; border-radius: 18px; padding: 22px;">
-          <img src="{{groom_photo}}" alt="{{groom_name}}" style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; border: 3px solid #c5a059;" />
-          <h3 class="font-serif" style="font-size: 20px; font-weight: 700;">{{groom_name}}</h3>
-          <p style="font-size: 12px; color: #7a6e65; margin: 6px 0;">{{groom_parents}}</p>
-        </div>
-        <div style="flex: 1; min-width: 250px; background: #fdfbf7; border: 1px solid #ebdcc5; border-radius: 18px; padding: 22px;">
-          <img src="{{bride_photo}}" alt="{{bride_name}}" style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; border: 3px solid #c5a059;" />
-          <h3 class="font-serif" style="font-size: 20px; font-weight: 700;">{{bride_name}}</h3>
-          <p style="font-size: 12px; color: #7a6e65; margin: 6px 0;">{{bride_parents}}</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="card">
-      <span class="hero-tag">Waktu &amp; Lokasi Acara</span>
-      <h2 class="card-title font-serif">Save The Date</h2>
-      <div class="card-divider">❖</div>
-      <div style="background: #faf7f2; border: 1px solid #ebdcc5; border-radius: 18px; padding: 20px; margin-bottom: 18px;">
-        <span style="font-size: 12px; font-weight: 700; color: #c5a059; text-transform: uppercase;">Akad Nikah</span>
-        <h4 class="font-serif" style="font-size: 22px; font-weight: 700;">{{akad_date}}</h4>
-        <p style="font-size: 13px; color: #7a6e65; margin: 4px 0 8px;">Pukul: {{akad_time}}</p>
-        <p style="font-size: 14px; font-weight: 700;">{{akad_venue}}</p>
-        <p style="font-size: 12px; color: #7a6e65;">{{akad_address}}</p>
-        <a href="{{akad_maps_url}}" target="_blank" class="btn-gold">Google Maps</a>
-      </div>
-      <div style="background: #faf7f2; border: 1px solid #ebdcc5; border-radius: 18px; padding: 20px;">
-        <span style="font-size: 12px; font-weight: 700; color: #c5a059; text-transform: uppercase;">Resepsi Pernikahan</span>
-        <h4 class="font-serif" style="font-size: 22px; font-weight: 700;">{{resepsi_date}}</h4>
-        <p style="font-size: 13px; color: #7a6e65; margin: 4px 0 8px;">Pukul: {{resepsi_time}}</p>
-        <p style="font-size: 14px; font-weight: 700;">{{resepsi_venue}}</p>
-        <p style="font-size: 12px; color: #7a6e65;">{{resepsi_address}}</p>
-        <a href="{{resepsi_maps_url}}" target="_blank" class="btn-gold">Google Maps</a>
-      </div>
-    </section>
-
-    <section class="card">
-      <span class="hero-tag">Galeri Foto</span>
-      <h2 class="card-title font-serif">Kenangan Terindah</h2>
-      <div class="card-divider">❖</div>
-      {{gallery_grid}}
-    </section>
-
-    <section class="card">
-      <span class="hero-tag">Tanda Kasih</span>
-      <h2 class="card-title font-serif">Wedding Gift</h2>
-      <div class="card-divider">❖</div>
-      <p style="font-size: 13px; color: #7a6e65; margin-bottom: 20px;">Doa restu Anda merupakan karunia terindah bagi kami. Bagi yang ingin mengirimkan hadiah:</p>
-      {{bank_accounts_widget}}
-    </section>
-
-    <footer style="text-align: center; padding: 36px 12px; font-size: 12px; color: #8c7e75;">
-      <h3 class="font-serif" style="font-size: 24px; color: #c5a059; margin-bottom: 6px;">{{couple_names}}</h3>
-      <p>Terima kasih atas doa &amp; restu Anda pada hari bahagia kami.</p>
-    </footer>
-  </div>
-</body>
-</html>`,
+    html: LUXURY_TEMPLATE_HTML,
   },
   {
     slug: "botanical-sage-romance",

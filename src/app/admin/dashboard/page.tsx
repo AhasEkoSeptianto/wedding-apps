@@ -523,9 +523,12 @@ export default function AdminDashboardPage() {
       {/* Top Admin Navigation Header */}
       <header className="sticky top-0 z-40 bg-stone-900/90 backdrop-blur-md border-b border-stone-800 px-4 sm:px-8 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-amber-400 text-stone-950 font-black flex items-center justify-center shadow-md">
-            <span className="material-symbols-outlined text-[24px]">terminal</span>
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/brand-logo.png"
+            alt="Logo JanjiSuci"
+            className="w-10 h-10 object-contain shrink-0"
+          />
           <div>
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-base tracking-tight text-white">
@@ -1059,6 +1062,27 @@ export default function AdminDashboardPage() {
                     </button>
                   </div>
                 </div>
+              </div>
+
+              {/* Deskripsi & Konsep Desain Input */}
+              <div className="px-6 py-3 bg-stone-950/80 border-b border-stone-800 flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-semibold text-stone-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px] text-amber-400">auto_stories</span>
+                    <span>Deskripsi &amp; Konsep Desain</span>
+                    <span className="text-stone-500 font-normal font-sans text-[11px]">(Tampil di kartu katalog &amp; popup konsep)</span>
+                  </label>
+                  <span className="text-[11px] text-stone-400 font-light hidden sm:inline">
+                    Jelaskan filosofi, keunggulan estetika, dan tema visual desain ini
+                  </span>
+                </div>
+                <textarea
+                  rows={2}
+                  placeholder="Contoh: Template aristokrat klasik bernuansa emas mewah (Royal Gold Majesty) dengan ornamen kartu modern, tipografi anggun Playfair & Cinzel, galeri terpusat, dan integrasi RSVP real-time..."
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full px-3.5 py-2 rounded-xl bg-stone-900 border border-stone-800 text-xs text-stone-200 placeholder-stone-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 resize-none leading-relaxed transition-all"
+                />
               </div>
 
               {/* View 1: HTML Source Code Editor & Placeholder Palette */}

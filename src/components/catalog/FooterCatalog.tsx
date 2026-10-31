@@ -7,12 +7,12 @@ export default function FooterCatalog() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
           {/* Brand Col */}
           <div>
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2.5 mb-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt="Logo JanjiSuci"
-                className="h-7 w-auto object-contain"
-                src="https://lh3.googleusercontent.com/aida/AEtjO1Wyr4h6Z3syVwA57Z6k-06bWVsXyZ9qSt30t4VY57-2tyIjyWF_HPQort7Pdl4UTAzhzAs8L0WDnnbjCkZ85VFrKEnMSOcPWQVN3LX_1195RCgup8xnL0-buDtS5ySW2hTdD3Uc9GUgf-VLR-DfeNozaEmWjfIobFpw6xOfVxtfLBfouCglBDV5jDqumNYWNtM1UQ0mZa7l1GFUZZ9IZleLBt4CUlKHbMXgq051cymoFh8qjnpLNaeMh4ye"
+                className="h-9 w-auto object-contain"
+                src="/images/brand-logo.png"
               />
               <span className="text-xl text-primary font-serif font-bold">
                 JanjiSuci

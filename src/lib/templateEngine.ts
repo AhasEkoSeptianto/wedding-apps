@@ -208,17 +208,45 @@ export const AVAILABLE_PLACEHOLDERS: PlaceholderInfo[] = [
   },
   {
     tag: "{{gift_bca}}",
-    label: "Rekening BCA",
+    label: "Rekening BCA Lengkap",
     category: "Tamu & Hadiah",
-    description: "Nomor rekening bank BCA untuk amplop digital",
+    description: "Nomor rekening dan nama pemilik bank BCA",
     example: "8830-1928-11 a.n Sarah Anindita",
   },
   {
-    tag: "{{gift_mandiri}}",
-    label: "Rekening Mandiri",
+    tag: "{{bca_number}}",
+    label: "Nomor Rekening BCA (Hanya Angka)",
     category: "Tamu & Hadiah",
-    description: "Nomor rekening bank Mandiri",
+    description: "Nomor rekening bank BCA saja tanpa nama pemilik",
+    example: "8830-1928-11",
+  },
+  {
+    tag: "{{bca_name}}",
+    label: "Nama Pemilik Rekening BCA",
+    category: "Tamu & Hadiah",
+    description: "Nama pemilik rekening bank BCA",
+    example: "Sarah Anindita",
+  },
+  {
+    tag: "{{gift_mandiri}}",
+    label: "Rekening Mandiri Lengkap",
+    category: "Tamu & Hadiah",
+    description: "Nomor rekening dan nama pemilik bank Mandiri",
     example: "1370-0012-9901 a.n Dimas Prasetyo",
+  },
+  {
+    tag: "{{mandiri_number}}",
+    label: "Nomor Rekening Mandiri (Hanya Angka)",
+    category: "Tamu & Hadiah",
+    description: "Nomor rekening bank Mandiri saja tanpa nama pemilik",
+    example: "1370-0012-9901",
+  },
+  {
+    tag: "{{mandiri_name}}",
+    label: "Nama Pemilik Rekening Mandiri",
+    category: "Tamu & Hadiah",
+    description: "Nama pemilik rekening bank Mandiri",
+    example: "Dimas Prasetyo",
   },
   {
     tag: "{{rsvp_deadline}}",
@@ -611,6 +639,14 @@ export function renderHtmlTemplate(
     "{{guest_name}}": guest,
     "{{gift_bca}}": data.gift.bca || "8830-1928-11 a.n Sarah Anindita",
     "{{gift_mandiri}}": data.gift.mandiri || "1370-0012-9901 a.n Dimas Prasetyo",
+    "{{bca_number}}": (data.gift.bca || "8830-1928-11 a.n Sarah Anindita").split("a.n")[0].trim(),
+    "{{bca_name}}": (data.gift.bca || "").includes("a.n")
+      ? data.gift.bca.split("a.n")[1].trim()
+      : "Sarah Anindita",
+    "{{mandiri_number}}": (data.gift.mandiri || "1370-0012-9901 a.n Dimas Prasetyo").split("a.n")[0].trim(),
+    "{{mandiri_name}}": (data.gift.mandiri || "").includes("a.n")
+      ? data.gift.mandiri.split("a.n")[1].trim()
+      : "Dimas Prasetyo",
     "{{rsvp_deadline}}": data.rsvp.deadline || "20 Agustus 2026",
     "{{wedding_slug}}": data.slug || "dimas&sarah",
     "{{api_base_url}}": process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
@@ -636,7 +672,23 @@ export function renderHtmlTemplate(
   for (const [tag, val] of Object.entries(replacements)) {
     // Case-insensitive global replacement (so {{AKAD_DATE}}, {{akad_date}}, {{BANNER_PHOTO}} etc. are all replaced!)
     const escapedTag = tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    output = output.replace(new RegExp(escapedTag, "gi"), () => val);
+    
+    // Safety guard: If val contains HTML tags or scripts, never replace inside <script> or <style> tags
+    if (val.includes("<script") || val.includes("<div") || val.includes("</script>")) {
+      output = output.replace(
+        /(<script[\s\S]*?<\/script>)|(<style[\s\S]*?<\/style>)|(\{\{.*?\}\})/gi,
+        (match, scriptTag, styleTag, templateTag) => {
+          if (scriptTag) return scriptTag;
+          if (styleTag) return styleTag;
+          if (templateTag && templateTag.toLowerCase() === tag.toLowerCase()) {
+            return val;
+          }
+          return match;
+        }
+      );
+    } else {
+      output = output.replace(new RegExp(escapedTag, "gi"), () => val);
+    }
   }
 
   return output;
@@ -660,14 +712,25 @@ export interface PresetHtmlTemplate {
 
 export const PRESET_HTML_TEMPLATES: PresetHtmlTemplate[] = [
   {
+    id: "luxury",
+    name: "Luxury",
+    category: "Luxury",
+    description: "Template aristokrat klasik bernuansa emas mewah (Royal Gold Majesty) dengan ornamen kartu modern, tipografi anggun Playfair Display & Cinzel, galeri foto terpusat yang responsif, countdown timer interaktif, formulir RSVP & doa terhubung real-time, serta kartu amplop digital.",
+    previewColor: "#c5a059",
+    thumbnailUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405095/janjisuci/templates/frd4v8jt6cag6suew06e.png",
+    coverPhotoUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405338/janjisuci/templatescovers/pzjqcjomaehz1f72ru4g.jpg",
+    bannerPhotoUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793265674/janjisuci/templatesbanners/mi3wowpithia0uimndbe.jpg",
+    html: ROYAL_GOLD_MAJESTY_HTML,
+  },
+  {
     id: "royal-gold-majesty",
     name: "The Royal Gold Majesty",
     category: "Luxury",
     description: "Template aristokrat klasik dengan garis emas mewah, tipografi anggun, dan ornamen kartu pernikahan modern.",
     previewColor: "#c5a059",
-    thumbnailUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuANVhaGqV68XA5DcEWcz6y9fnNioN4v5VCHS40ZDHeG8gQFJ23cZ8OjYjZVw5sX5JlDaUMqOd_y4aoLCxdGpbXbDuVPMrsfMnY4PHFRU2aiECcgvC_khC_P46fyh3_Nqhm2jb5I0MrEUCoGUdJVGhBpTBXuRWhDXvlJkO-a6lx-AVtpoLqOyI5b78K2eMFA23y5qqZPsrNZDk2ZZZR3LBppdxAJ0zLpQbm1EwMOOmE",
-    coverPhotoUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuANVhaGqV68XA5DcEWcz6y9fnNioN4v5VCHS40ZDHeG8gQFJ23cZ8OjYjZVw5sX5JlDaUMqOd_y4aoLCxdGpbXbDuVPMrsfMnY4PHFRU2aiECcgvC_khC_P46fyh3_Nqhm2jb5I0MrEUCoGUdJVGhBpTBXuRWhDXvlJkO-a6lx-AVtpoLqOyI5b78K2eMFA23y5qqZPsrNZDk2ZZZR3LBppdxAJ0zLpQbm1EwMOOmE",
-    bannerPhotoUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuA9QvSaAxwsl9VZ_oVb2J6e2SAuKf2-hp6byA1Qw_k3_7sIYAW6lS50b69aUH_LBBD8KsFNjlcQ0xIthfCBBAmkCzfr4yma6kAqvUfQLFv99vXmB-Vpd-n5nGYsK8wUi7UTgrT-fMwMrvTHWhJ16J2eL06gtgxJsfz_REi8BgVUpEqOLSgnbmkPD7gGK696n3J3BXziepGRCzNQb7nsGQLxsf69n4xQ9dJTwhr8afU",
+    thumbnailUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405095/janjisuci/templates/frd4v8jt6cag6suew06e.png",
+    coverPhotoUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405338/janjisuci/templatescovers/pzjqcjomaehz1f72ru4g.jpg",
+    bannerPhotoUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793265674/janjisuci/templatesbanners/mi3wowpithia0uimndbe.jpg",
     html: ROYAL_GOLD_MAJESTY_HTML,
   },
 

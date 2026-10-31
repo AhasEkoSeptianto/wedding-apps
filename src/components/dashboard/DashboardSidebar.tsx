@@ -44,12 +44,12 @@ export default function DashboardSidebar({ isOpen = false, onClose }: DashboardS
       >
         {/* Brand Header */}
         <div className="h-20 px-6 flex items-center justify-between border-b border-outline-variant/30">
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               alt="Logo JanjiSuci"
-              className="h-8 w-auto object-contain"
-              src="https://lh3.googleusercontent.com/aida/AEtjO1Wyr4h6Z3syVwA57Z6k-06bWVsXyZ9qSt30t4VY57-2tyIjyWF_HPQort7Pdl4UTAzhzAs8L0WDnnbjCkZ85VFrKEnMSOcPWQVN3LX_1195RCgup8xnL0-buDtS5ySW2hTdD3Uc9GUgf-VLR-DfeNozaEmWjfIobFpw6xOfVxtfLBfouCglBDV5jDqumNYWNtM1UQ0mZa7l1GFUZZ9IZleLBt4CUlKHbMXgq051cymoFh8qjnpLNaeMh4ye"
+              className="h-10 w-auto object-contain"
+              src="/images/brand-logo.png"
             />
             <span className="text-xl text-primary tracking-tight font-serif font-bold">
               JanjiSuci

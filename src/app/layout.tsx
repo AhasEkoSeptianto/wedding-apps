@@ -17,12 +17,18 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: "JanjiSuci — Platform Undangan Pernikahan Digital Mewah",
   description: "Eksplorasi undangan digital bertaraf couture yang memadukan kehangatan estetika kertas bertekstur, sentuhan foil emas, dan kecanggihan teknologi interaktif modern.",
+  icons: {
+    icon: "/images/brand-logo.png",
+    apple: "/images/brand-logo.png",
+  },
   openGraph: {
     title: "JanjiSuci — Katalog Template Undangan Pernikahan Digital",
     description: "Temukan desain impian untuk hari bahagia Anda dengan 120+ pilihan template undangan eksklusif.",
     type: "website",
+    images: ["/images/brand-logo.png"],
   },
 };
 

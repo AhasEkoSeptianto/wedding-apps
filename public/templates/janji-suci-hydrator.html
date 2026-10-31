@@ -1,0 +1,369 @@
+<!-- ========================================================================= -->
+<!-- JANJISUCI SMART REUSABLE CLIENT-SIDE HYDRATOR ENGINE                     -->
+<!-- Versi: 2.1.0                                                             -->
+<!-- Fitur:                                                                   -->
+<!--   1. Otomatis mengisi tag {{tag}} di teks, atribut (src/href/style), dll -->
+<!--   2. Aman & tidak akan bentrok dengan server Next.js / Editor Studio     -->
+<!--   3. Berfungsi offline (file:/// Desktop) maupun online (API backend)    -->
+<!--   4. Mendukung ?to=NamaTamu dan ?slug=dimas&sarah                        -->
+<!--   5. Menyediakan helper global window.JanjiSuci (RSVP, Wishes, Timer)    -->
+<!-- ========================================================================= -->
+
+<!-- OPTIONAL: Preloader Halus (Mencegah tampilan {{tag}} berkedip saat pertama buka) -->
+<div id="templateBootstrapLoader" style="position:fixed;inset:0;z-index:99999;background:#0d1322;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.4s ease,visibility 0.4s;">
+  <div style="width:38px;height:38px;border:3px solid rgba(233,195,73,0.25);border-top-color:#e9c349;border-radius:50%;animation:jsSpinLoader 0.8s linear infinite;"></div>
+  <style>@keyframes jsSpinLoader{to{transform:rotate(360deg);}}</style>
+</div>
+
+<!-- SCRIPT HYDRATOR REUSABLE -->
+<script id="janjiSuciHydrator">
+  (function (window, document) {
+    "use strict";
+
+    // 1. DATASET DEFAULT FALLBACK (Digunakan jika dibuka offline / server belum aktif)
+    var DEFAULT_DATASET = {
+      couple_names: "Dimas & Sarah",
+      couple_full_names: "Dimas Prasetyo, S.T. & Sarah Anindita, M.Ds.",
+      groom_name: "Dimas Prasetyo, S.T.",
+      groom_nickname: "Dimas",
+      groom_parents: "Putra pertama dari Bpk. Bambang Wijaya & Ibu Sri Rahayu",
+      groom_instagram: "dimasprasetyo",
+      groom_photo: "https://lh3.googleusercontent.com/aida-public/AB6AXuCzUNvfN4JLmIEQ8Rl3ucmVP0-vib8bkuQ3IrTgVw8Qr5sjfCuCXP250Cgz911BcC7k2OJebkbkFG2QdPC2uPmB9JgO20ArGDvpU0gAuSbhYSI7-kXcn2tgNddrrMRwpjYWGzsz64YzuTcetJcaEqJJ6OK2uZbQ6mVajqzRW3u95-6UPI5E7g3WEY75DGTcZ_y5UEu_eA0ZcLAS5JKHy7r9_Lyg0m4Oqoi--PgbPYl8YDo-L0m9KgRLNQ",
+      bride_name: "Sarah Anindita, M.Ds.",
+      bride_nickname: "Sarah",
+      bride_parents: "Putri kedua dari Bpk. Ir. Hendra Kusuma & Ibu Ratna Dewi",
+      bride_instagram: "sarahanindita",
+      bride_photo: "https://lh3.googleusercontent.com/aida-public/AB6AXuDBqrJptRouC3sJfNXLjsofBuvakru1TeBprYoHukqDAMi6numwD_tbCIUj8gAmdv2RmqFwBb_l5JMoEvVo44VGvNdl3sKNhmAfevpxliVOYaJJWD_eKIOO0CiuiYkvBWAHCLhcxazK406U-fFG7DULwuD1nG7PYvz4ukXGopUFGbgkuinU9wNO5xAusEewWYWkgBN7NjgntxgHQ2Bn3UJ17VOD7tjWOJ3NnqU0qcG7XHbVUgy4mfmLmQ",
+      cover_photo: "https://lh3.googleusercontent.com/aida-public/AB6AXuANVhaGqV68XA5DcEWcz6y9fnNioN4v5VCHS40ZDHeG8gQFJ23cZ8OjYjZVw5sX5JlDaUMqOd_y4aoLCxdGpbXbDuVPMrsfMnY4PHFRU2aiECcgvC_khC_P46fyh3_Nqhm2jb5I0MrEUCoGUdJVGhBpTBXuRWhDXvlJkO-a6lx-AVtpoLqOyI5b78K2eMFA23y5qqZPsrNZDk2ZZZR3LBppdxAJ0zLpQbm1EwMOOmE",
+      banner_photo: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=1600&q=80",
+      quote_text: "Dan di antara tanda-tanda kebesaran-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang.",
+      quote_source: "QS. Ar-Rum: 21",
+      akad_date: "Sabtu, 24 Agustus 2026",
+      akad_time: "08.00 - 10.00 WIB",
+      akad_venue: "Masjid Agung Sunda Kelapa",
+      akad_address: "Jl. Taman Sunda Kelapa No.16, Menteng, Jakarta Pusat",
+      akad_maps_url: "https://maps.google.com/?q=Masjid+Agung+Sunda+Kelapa",
+      resepsi_date: "Sabtu, 24 Agustus 2026",
+      resepsi_time: "18.30 - 21.30 WIB",
+      resepsi_venue: "The Dharmawangsa Grand Ballroom",
+      resepsi_address: "Kebayoran Baru, Jakarta Selatan",
+      resepsi_maps_url: "https://maps.google.com/?q=The+Dharmawangsa+Jakarta",
+      guest_name: "Bapak / Ibu / Sahabat Terhormat",
+      gift_bca: "8830-1928-11 a.n Sarah Anindita",
+      bca_number: "8830-1928-11",
+      bca_name: "Sarah Anindita",
+      gift_mandiri: "1370-0012-9901 a.n Dimas Prasetyo",
+      mandiri_number: "1370-0012-9901",
+      mandiri_name: "Dimas Prasetyo",
+      rsvp_deadline: "20 Agustus 2026",
+      wedding_slug: "dimas&sarah",
+      api_base_url: "http://localhost:5000/api",
+      countdown_target_iso: "2026-08-24T09:00:00+07:00",
+      music_title: "Romantic Acoustic Wedding Melodies",
+      gallery_photo_1: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+      gallery_photo_2: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80",
+      gallery_photo_3: "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=800&q=80",
+      gallery_photo_4: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80",
+      gallery_json: "[]"
+    };
+
+    // Hilangkan preloader dengan animasi fade-out
+    function dismissLoader() {
+      var loader = document.getElementById("templateBootstrapLoader");
+      if (loader) {
+        loader.style.opacity = "0";
+        loader.style.visibility = "hidden";
+        setTimeout(function () {
+          if (loader && loader.parentNode) loader.parentNode.removeChild(loader);
+        }, 400);
+      }
+    }
+
+    // Melakukan penggantian {{key}} ke seluruh DOM (teks, atribut src, href, style, title)
+    function applyHydration(dict) {
+      // Pemetaan sinonim
+      dict.cover_banner = dict.banner_photo;
+      dict.hero_image = dict.banner_photo;
+      dict.couple_banner = dict.banner_photo;
+      dict.sampul_photo = dict.cover_photo;
+      dict.welcome_photo = dict.cover_photo;
+
+      var keys = Object.keys(dict);
+
+      // 1. Text node walker
+      var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+      var node;
+      while ((node = walker.nextNode())) {
+        var text = node.nodeValue;
+        if (text && text.indexOf("{{") !== -1) {
+          for (var i = 0; i < keys.length; i++) {
+            var k = keys[i];
+            var re = new RegExp("\\{\\{\\s*" + k + "\\s*\\}\\}", "gi");
+            text = text.replace(re, dict[k]);
+          }
+          node.nodeValue = text;
+        }
+      }
+
+      // 2. Attribute walker (src, href, alt, data-*, style)
+      var allEls = document.body.getElementsByTagName("*");
+      for (var e = 0; e < allEls.length; e++) {
+        var el = allEls[e];
+        var attrs = el.attributes;
+        if (!attrs) continue;
+        for (var a = 0; a < attrs.length; a++) {
+          var aName = attrs[a].name;
+          var aVal = attrs[a].value;
+          if (aVal && aVal.indexOf("{{") !== -1) {
+            for (var j = 0; j < keys.length; j++) {
+              var kj = keys[j];
+              var rej = new RegExp("\\{\\{\\s*" + kj + "\\s*\\}\\}", "gi");
+              aVal = aVal.replace(rej, dict[kj]);
+            }
+            el.setAttribute(aName, aVal);
+            // Refresh image src khusus tag IMG
+            if (aName === "src" && el.tagName === "IMG") {
+              el.src = aVal;
+            }
+          }
+        }
+      }
+
+      // 3. Document Title
+      if (document.title && document.title.indexOf("{{") !== -1) {
+        document.title = "Undangan Pernikahan " + dict.couple_names;
+      }
+
+      // Simpan di window.JanjiSuci.data
+      window.JanjiSuci.data = dict;
+    }
+
+    // Helper Global JanjiSuci untuk author template
+    window.JanjiSuci = {
+      data: DEFAULT_DATASET,
+
+      // Salin teks rekening / alamat ke clipboard
+      copyText: function (textOrElId, successMessage, callback) {
+        var text = textOrElId;
+        var el = document.getElementById(textOrElId);
+        if (el) text = el.textContent || el.innerText;
+        text = (text || "").trim();
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () {
+            if (typeof callback === "function") callback(true, text);
+          }).catch(function () {
+            if (typeof callback === "function") callback(false, text);
+          });
+        } else {
+          var input = document.createElement("input");
+          input.value = text;
+          document.body.appendChild(input);
+          input.select();
+          document.execCommand("copy");
+          document.body.removeChild(input);
+          if (typeof callback === "function") callback(true, text);
+        }
+      },
+
+      // Kirim konfirmasi RSVP ke backend API
+      submitRsvp: function (payload, callbacks) {
+        var cb = callbacks || {};
+        var apiBase = (window.JanjiSuci.data && window.JanjiSuci.data.api_base_url) || "http://localhost:5000/api";
+        var slug = (window.JanjiSuci.data && window.JanjiSuci.data.wedding_slug) || "dimas&sarah";
+
+        var bodyData = {
+          weddingSlug: slug,
+          name: payload.name || "Tamu Terhormat",
+          attendance: payload.attendance || "Hadir",
+          pax: parseInt(payload.pax || payload.guestsCount) || 1,
+          notes: payload.notes || payload.message || ""
+        };
+
+        fetch(apiBase + "/rsvp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(bodyData)
+        })
+          .then(function (res) { return res.json(); })
+          .then(function (json) {
+            if (typeof cb.onSuccess === "function") cb.onSuccess(json, bodyData);
+          })
+          .catch(function (err) {
+            console.warn("JanjiSuci RSVP offline log:", err);
+            // Tetap panggil onSuccess secara optimis jika sedang offline/preview
+            if (typeof cb.onSuccess === "function") cb.onSuccess({ success: true, offline: true }, bodyData);
+          })
+          .finally(function () {
+            if (typeof cb.onComplete === "function") cb.onComplete();
+          });
+      },
+
+      // Ambil daftar ucapan doa restu tamu
+      loadWishes: function (onSuccess, onError) {
+        var apiBase = (window.JanjiSuci.data && window.JanjiSuci.data.api_base_url) || "http://localhost:5000/api";
+        var slug = (window.JanjiSuci.data && window.JanjiSuci.data.wedding_slug) || "dimas&sarah";
+
+        fetch(apiBase + "/wishes/" + encodeURIComponent(slug))
+          .then(function (res) { return res.json(); })
+          .then(function (json) {
+            var list = (json && json.data) ? json.data : [];
+            if (typeof onSuccess === "function") onSuccess(list);
+          })
+          .catch(function (err) {
+            if (typeof onError === "function") onError(err);
+          });
+      },
+
+      // Inisialisasi Timer Hitung Mundur Otomatis
+      initCountdown: function (targetIso, onTick) {
+        var targetStr = targetIso || (window.JanjiSuci.data && window.JanjiSuci.data.countdown_target_iso);
+        var targetTime = new Date(targetStr).getTime();
+        if (isNaN(targetTime)) targetTime = new Date(Date.now() + 90 * 86400000).getTime();
+
+        function tick() {
+          var now = Date.now();
+          var diff = Math.max(0, targetTime - now);
+          var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          var mins = Math.floor((diff % (1000 * 60)) / (1000 * 60));
+          var secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+          if (typeof onTick === "function") {
+            onTick({
+              days: days,
+              hours: hours,
+              mins: mins,
+              secs: secs,
+              daysStr: String(days).padStart(2, "0"),
+              hoursStr: String(hours).padStart(2, "0"),
+              minsStr: String(mins).padStart(2, "0"),
+              secsStr: String(secs).padStart(2, "0"),
+              isEnded: diff <= 0
+            });
+          }
+        }
+
+        tick();
+        return setInterval(tick, 1000);
+      }
+    };
+
+    // 2. CEK APAKAH SUDAH DI-HYDRATE OLEH SERVER NEXT.JS
+    var rawBody = document.body ? document.body.innerHTML : "";
+    var hasTags = /\{\{[a-zA-Z0-9_]+\}\}/.test(rawBody);
+
+    if (!hasTags) {
+      // Sudah dikompilasi oleh server Next.js App Router -> Langsung selesaikan loader
+      dismissLoader();
+      return;
+    }
+
+    // 3. JIKA MASIH BERISI {{tag}} (Pratinjau Desktop file:/// atau Standalone Iframe)
+    var urlParams = new URLSearchParams(window.location.search);
+    var targetSlug = urlParams.get("slug") || "dimas&sarah";
+    var guestParam = urlParams.get("to") || urlParams.get("guest");
+    if (guestParam) DEFAULT_DATASET.guest_name = decodeURIComponent(guestParam);
+
+    // Tentukan Host API Backend
+    var apiHost = "http://localhost:5000/api";
+    if (typeof window.location !== "undefined" && window.location.protocol.indexOf("http") === 0) {
+      if (window.location.port === "5000") {
+        apiHost = window.location.origin + "/api";
+      }
+    }
+
+    // Ambil data live dari backend jika terkoneksi
+    fetch(apiHost + "/wedding/" + encodeURIComponent(targetSlug))
+      .then(function (res) {
+        if (!res.ok) throw new Error("Status " + res.status);
+        return res.json();
+      })
+      .then(function (json) {
+        if (json && json.success && json.data) {
+          var d = json.data;
+          var gNick = (d.groom && d.groom.nickName) || (d.groom && d.groom.fullName ? d.groom.fullName.split(" ")[0] : "Dimas");
+          var bNick = (d.bride && d.bride.nickName) || (d.bride && d.bride.fullName ? d.bride.fullName.split(" ")[0] : "Sarah");
+          var gFull = (d.groom && d.groom.fullName) || gNick;
+          var bFull = (d.bride && d.bride.fullName) || bNick;
+
+          var bcaVal = (d.gift && d.gift.bca) || DEFAULT_DATASET.gift_bca;
+          var mandiriVal = (d.gift && d.gift.mandiri) || DEFAULT_DATASET.gift_mandiri;
+
+          var akadV = (d.events && d.events.akad && d.events.akad.venue) || DEFAULT_DATASET.akad_venue;
+          var akadA = (d.events && d.events.akad && d.events.akad.address) || DEFAULT_DATASET.akad_address;
+          var resepsiV = (d.events && d.events.resepsi && d.events.resepsi.venue) || DEFAULT_DATASET.resepsi_venue;
+          var resepsiA = (d.events && d.events.resepsi && d.events.resepsi.address) || DEFAULT_DATASET.resepsi_address;
+
+          var gList = (d.gallery && d.gallery.length > 0) ? d.gallery : [
+            DEFAULT_DATASET.gallery_photo_1,
+            DEFAULT_DATASET.gallery_photo_2,
+            DEFAULT_DATASET.gallery_photo_3,
+            DEFAULT_DATASET.gallery_photo_4
+          ];
+
+          var fetchedData = {
+            couple_names: gNick + " & " + bNick,
+            couple_full_names: gFull + " & " + bFull,
+            groom_name: gFull,
+            groom_nickname: gNick,
+            groom_parents: (d.groom && d.groom.parents) || DEFAULT_DATASET.groom_parents,
+            groom_instagram: (d.groom && d.groom.instagram) || DEFAULT_DATASET.groom_instagram,
+            groom_photo: (d.groom && d.groom.photoUrl) || DEFAULT_DATASET.groom_photo,
+            bride_name: bFull,
+            bride_nickname: bNick,
+            bride_parents: (d.bride && d.bride.parents) || DEFAULT_DATASET.bride_parents,
+            bride_instagram: (d.bride && d.bride.instagram) || DEFAULT_DATASET.bride_instagram,
+            bride_photo: (d.bride && d.bride.photoUrl) || DEFAULT_DATASET.bride_photo,
+            cover_photo: d.coverPhotoUrl || DEFAULT_DATASET.cover_photo,
+            banner_photo: d.bannerPhotoUrl || DEFAULT_DATASET.banner_photo,
+            quote_text: (d.quote && d.quote.text) || DEFAULT_DATASET.quote_text,
+            quote_source: (d.quote && d.quote.source) || DEFAULT_DATASET.quote_source,
+            akad_date: (d.events && d.events.akad && d.events.akad.date) || DEFAULT_DATASET.akad_date,
+            akad_time: (d.events && d.events.akad && d.events.akad.time) || DEFAULT_DATASET.akad_time,
+            akad_venue: akadV,
+            akad_address: akadA,
+            akad_maps_url: (d.events && d.events.akad && d.events.akad.venue)
+              ? "https://maps.google.com/?q=" + encodeURIComponent(akadV + " " + akadA)
+              : DEFAULT_DATASET.akad_maps_url,
+            resepsi_date: (d.events && d.events.resepsi && d.events.resepsi.date) || DEFAULT_DATASET.resepsi_date,
+            resepsi_time: (d.events && d.events.resepsi && d.events.resepsi.time) || DEFAULT_DATASET.resepsi_time,
+            resepsi_venue: resepsiV,
+            resepsi_address: resepsiA,
+            resepsi_maps_url: (d.events && d.events.resepsi && d.events.resepsi.venue)
+              ? "https://maps.google.com/?q=" + encodeURIComponent(resepsiV + " " + resepsiA)
+              : DEFAULT_DATASET.resepsi_maps_url,
+            guest_name: DEFAULT_DATASET.guest_name,
+            gift_bca: bcaVal,
+            bca_number: bcaVal.split("a.n")[0].trim(),
+            bca_name: bcaVal.includes("a.n") ? bcaVal.split("a.n")[1].trim() : "Sarah Anindita",
+            gift_mandiri: mandiriVal,
+            mandiri_number: mandiriVal.split("a.n")[0].trim(),
+            mandiri_name: mandiriVal.includes("a.n") ? mandiriVal.split("a.n")[1].trim() : "Dimas Prasetyo",
+            rsvp_deadline: (d.rsvp && d.rsvp.deadline) || DEFAULT_DATASET.rsvp_deadline,
+            wedding_slug: d.slug || targetSlug,
+            api_base_url: apiHost,
+            countdown_target_iso: (d.events && d.events.akad && d.events.akad.date) || DEFAULT_DATASET.countdown_target_iso,
+            music_title: (d.music && d.music.title) || DEFAULT_DATASET.music_title,
+            gallery_photo_1: gList[0] || DEFAULT_DATASET.gallery_photo_1,
+            gallery_photo_2: gList[1] || gList[0] || DEFAULT_DATASET.gallery_photo_2,
+            gallery_photo_3: gList[2] || gList[0] || DEFAULT_DATASET.gallery_photo_3,
+            gallery_photo_4: gList[3] || gList[1] || DEFAULT_DATASET.gallery_photo_4,
+            gallery_json: JSON.stringify(gList)
+          };
+
+          applyHydration(fetchedData);
+        } else {
+          applyHydration(DEFAULT_DATASET);
+        }
+      })
+      .catch(function (err) {
+        console.warn("JanjiSuci Hydrator offline fallback mode:", err);
+        applyHydration(DEFAULT_DATASET);
+      })
+      .finally(function () {
+        dismissLoader();
+      });
+  })(window, document);
+</script>
+
