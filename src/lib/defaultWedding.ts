@@ -52,8 +52,28 @@ export const DEFAULT_WEDDING_DATA: WeddingData = {
     enabled: true,
   },
   gift: {
+    accounts: [
+      {
+        id: "acc_1",
+        bank: "BCA",
+        accountNumber: "8830-1928-11",
+        holderName: "Sarah Anindita",
+        accountName: "Sarah Anindita",
+      },
+      {
+        id: "acc_2",
+        bank: "Mandiri",
+        accountNumber: "1370-0012-9901",
+        holderName: "Dimas Prasetyo",
+        accountName: "Dimas Prasetyo",
+      },
+    ],
     bca: "8830-1928-11 a.n Sarah Anindita",
+    bcaNumber: "8830-1928-11",
+    bcaName: "Sarah Anindita",
     mandiri: "1370-0012-9901 a.n Dimas Prasetyo",
+    mandiriNumber: "1370-0012-9901",
+    mandiriName: "Dimas Prasetyo",
   },
   gallery: [
     "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
@@ -63,16 +83,22 @@ export const DEFAULT_WEDDING_DATA: WeddingData = {
   ],
   stories: [
     {
-      year: "2019",
-      title: "Pertama Bertemu",
+      year: "2021",
+      title: "Pandangan Pertama",
       description:
-        "Bertemu tanpa sengaja di studio desain kreatif Jakarta saat mengerjakan proyek kolaborasi bersama.",
+        "Pertemuan tidak disengaja di sebuah simfoni orkestra malam kota, di mana alunan melodi menyatukan pandangan pertama yang tak terlupakan.",
+    },
+    {
+      year: "2023",
+      title: "Menjalin Komitmen",
+      description:
+        "Setelah saling mengenal dan berbagi impian, kami sepakat melangkah bersama dalam ikatan cinta yang penuh kedewasaan dan saling mendukung.",
     },
     {
       year: "2024",
-      title: "Lamaran Romantis",
+      title: "Lamaran di Bawah Bintang",
       description:
-        "Di bawah gemerlap senja Labuan Bajo, Dimas mengucap janji suci untuk melangkah ke jenjang pernikahan.",
+        "Di hadapan panorama alam Labuan Bajo saat senja merona, sebuah cincin tersemat sebagai ikrar suci untuk mengarungi bahtera kehidupan bersama.",
     },
   ],
   rsvp: {

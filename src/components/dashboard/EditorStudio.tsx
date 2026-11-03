@@ -1,13 +1,32 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { WeddingData, StoryItem, HtmlTemplate } from "@/types";
+import { WeddingData, StoryItem, HtmlTemplate, BankAccount } from "@/types";
 import { api } from "@/lib/api";
 import {
   PRESET_HTML_TEMPLATES,
 } from "@/lib/templateEngine";
 import { getWeddingLivePath, getWeddingLiveUrl, formatCoupleSlug } from "@/lib/slug";
 export type { WeddingData };
+
+const POPULAR_BANKS = [
+  "BCA",
+  "Mandiri",
+  "BRI",
+  "BNI",
+  "BSI",
+  "CIMB Niaga",
+  "Permata",
+  "Danamon",
+  "Bank Jago",
+  "SeaBank",
+  "BTN",
+  "DANA",
+  "GoPay",
+  "OVO",
+  "ShopeePay",
+  "Kustom",
+];
 
 interface EditorStudioProps {
   data: WeddingData;
@@ -1437,48 +1456,204 @@ export default function EditorStudio({
 
           {/* Amplop Digital */}
           <div className="bg-surface-container-lowest p-5 rounded-xl shadow-sm flex flex-col gap-4 border border-outline-variant/20">
-            <h3 className="text-base font-bold text-on-surface flex items-center gap-2">
-              <span className="material-symbols-outlined text-[20px] text-primary">wallet</span>
-              <span>Amplop Digital &amp; Kado Online</span>
-            </h3>
-
-            <div className="space-y-3">
+            <div className="flex items-center justify-between">
               <div>
-                <label className="block text-[11px] font-semibold text-on-surface-variant mb-1 uppercase">
-                  Nomor Rekening BCA &amp; Atas Nama
-                </label>
-                <input
-                  type="text"
-                  value={data.gift.bca}
-                  onChange={(e) =>
-                    onChange({
-                      ...data,
-                      gift: { ...data.gift, bca: e.target.value },
-                    })
-                  }
-                  placeholder="Contoh: 8830-1928-11 a.n Sarah Anindita"
-                  className="w-full bg-surface-container-low px-3 py-2 rounded-lg text-sm text-on-surface outline-none border border-transparent focus:border-primary/40"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-on-surface-variant mb-1 uppercase">
-                  Nomor Rekening Mandiri &amp; Atas Nama
-                </label>
-                <input
-                  type="text"
-                  value={data.gift.mandiri}
-                  onChange={(e) =>
-                    onChange({
-                      ...data,
-                      gift: { ...data.gift, mandiri: e.target.value },
-                    })
-                  }
-                  placeholder="Contoh: 1370-0012-9901 a.n Dimas Prasetyo"
-                  className="w-full bg-surface-container-low px-3 py-2 rounded-lg text-sm text-on-surface outline-none border border-transparent focus:border-primary/40"
-                />
+                <h3 className="text-base font-bold text-on-surface flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[20px] text-primary">wallet</span>
+                  <span>Amplop Digital &amp; Rekening Hadiah</span>
+                </h3>
+                <p className="text-xs text-on-surface-variant mt-0.5">
+                  Atur nomor rekening bank atau e-wallet (BCA, Mandiri, BRI, BNI, BSI, DANA, GoPay, dll) untuk kemudahan transfer tamu.
+                </p>
               </div>
             </div>
+
+            {/* Dynamic Accounts List */}
+            {(() => {
+              const currentAccounts: BankAccount[] =
+                data.gift?.accounts && Array.isArray(data.gift.accounts) && data.gift.accounts.length > 0
+                  ? data.gift.accounts
+                  : [
+                      {
+                        id: "acc_1",
+                        bank: "BCA",
+                        accountNumber: data.gift?.bcaNumber || (data.gift?.bca ? data.gift.bca.split("a.n")[0].trim() : "8830-1928-11"),
+                        accountName: data.gift?.bcaName || (data.gift?.bca && data.gift.bca.includes("a.n") ? data.gift.bca.split("a.n")[1].trim() : "Sarah Anindita"),
+                        holderName: data.gift?.bcaName || (data.gift?.bca && data.gift.bca.includes("a.n") ? data.gift.bca.split("a.n")[1].trim() : "Sarah Anindita"),
+                      },
+                      {
+                        id: "acc_2",
+                        bank: "Mandiri",
+                        accountNumber: data.gift?.mandiriNumber || (data.gift?.mandiri ? data.gift.mandiri.split("a.n")[0].trim() : "1370-0012-9901"),
+                        accountName: data.gift?.mandiriName || (data.gift?.mandiri && data.gift.mandiri.includes("a.n") ? data.gift.mandiri.split("a.n")[1].trim() : "Dimas Prasetyo"),
+                        holderName: data.gift?.mandiriName || (data.gift?.mandiri && data.gift.mandiri.includes("a.n") ? data.gift.mandiri.split("a.n")[1].trim() : "Dimas Prasetyo"),
+                      },
+                    ];
+
+              const handleUpdateAccounts = (nextAccounts: BankAccount[]) => {
+                const bca = nextAccounts.find((a) => a.bank.toUpperCase().includes("BCA")) || nextAccounts[0];
+                const mandiri =
+                  nextAccounts.find((a) => a.bank.toUpperCase().includes("MANDIRI")) ||
+                  (nextAccounts.length > 1 ? nextAccounts[1] : undefined);
+
+                const bcaNum = bca ? bca.accountNumber : "";
+                const bcaHolder = bca ? (bca.accountName || bca.holderName) : "";
+                const mandiriNum = mandiri ? mandiri.accountNumber : "";
+                const mandiriHolder = mandiri ? (mandiri.accountName || mandiri.holderName) : "";
+
+                onChange({
+                  ...data,
+                  gift: {
+                    ...data.gift,
+                    accounts: nextAccounts,
+                    bcaNumber: bcaNum,
+                    bcaName: bcaHolder,
+                    bca: bcaHolder ? `${bcaNum} a.n ${bcaHolder}` : bcaNum,
+                    mandiriNumber: mandiriNum,
+                    mandiriName: mandiriHolder,
+                    mandiri: mandiriHolder ? `${mandiriNum} a.n ${mandiriHolder}` : mandiriNum,
+                  },
+                });
+              };
+
+              return (
+                <div className="space-y-4">
+                  {currentAccounts.map((acc, index) => {
+                    const isPredefined = POPULAR_BANKS.slice(0, -1).includes(acc.bank);
+                    return (
+                      <div
+                        key={acc.id || index}
+                        className="p-4 rounded-xl bg-surface-container-low border border-outline-variant/30 space-y-3 relative transition-all hover:border-primary/40"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-primary font-mono bg-primary/10 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                              {acc.bank || `Akun #${index + 1}`}
+                            </span>
+                            <span className="text-xs font-semibold text-on-surface">
+                              Rekening / E-Wallet #{index + 1}
+                            </span>
+                          </div>
+                          {currentAccounts.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = currentAccounts.filter((_, i) => i !== index);
+                                handleUpdateAccounts(next);
+                              }}
+                              className="text-error/70 hover:text-error text-xs flex items-center gap-1 transition-colors px-2 py-1 rounded hover:bg-error/10 cursor-pointer"
+                              title="Hapus rekening ini"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">delete</span>
+                              <span>Hapus</span>
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          {/* Jenis Bank / E-Wallet */}
+                          <div>
+                            <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">
+                              Bank / E-Wallet
+                            </label>
+                            <div className="space-y-1.5">
+                              <select
+                                value={isPredefined ? acc.bank : "Kustom"}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  const next = [...currentAccounts];
+                                  next[index] = {
+                                    ...acc,
+                                    bank: val === "Kustom" ? "" : val,
+                                  };
+                                  handleUpdateAccounts(next);
+                                }}
+                                className="w-full bg-surface-container px-3 py-2 rounded-lg text-sm text-on-surface outline-none border border-outline-variant/30 focus:border-primary/50"
+                              >
+                                {POPULAR_BANKS.map((b) => (
+                                  <option key={b} value={b}>
+                                    {b === "Kustom" ? "— Bank Lainnya (Kustom) —" : b}
+                                  </option>
+                                ))}
+                              </select>
+                              {(!isPredefined || acc.bank === "") && (
+                                <input
+                                  type="text"
+                                  placeholder="Ketik nama bank/dompet (cth: BSI, Jago)"
+                                  value={acc.bank}
+                                  onChange={(e) => {
+                                    const next = [...currentAccounts];
+                                    next[index] = { ...acc, bank: e.target.value };
+                                    handleUpdateAccounts(next);
+                                  }}
+                                  className="w-full bg-surface-container px-3 py-1.5 rounded-lg text-xs text-on-surface outline-none border border-primary/40 focus:border-primary font-medium"
+                                />
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Nomor Rekening */}
+                          <div>
+                            <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">
+                              Nomor Rekening / No. HP
+                            </label>
+                            <input
+                              type="text"
+                              value={acc.accountNumber}
+                              onChange={(e) => {
+                                const next = [...currentAccounts];
+                                next[index] = { ...acc, accountNumber: e.target.value };
+                                handleUpdateAccounts(next);
+                              }}
+                              placeholder="Cth: 8830-1928-11"
+                              className="w-full bg-surface-container px-3 py-2 rounded-lg text-sm font-mono text-on-surface outline-none border border-outline-variant/30 focus:border-primary/50"
+                            />
+                          </div>
+
+                          {/* Atas Nama */}
+                          <div>
+                            <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1">
+                              Atas Nama (Pemilik Rekening)
+                            </label>
+                            <input
+                              type="text"
+                              value={acc.accountName || acc.holderName || ""}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                const next = [...currentAccounts];
+                                next[index] = { ...acc, accountName: val, holderName: val };
+                                handleUpdateAccounts(next);
+                              }}
+                              placeholder="Cth: Sarah Anindita"
+                              className="w-full bg-surface-container px-3 py-2 rounded-lg text-sm text-on-surface outline-none border border-outline-variant/30 focus:border-primary/50"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* Tombol Tambah Rekening */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newAcc: BankAccount = {
+                        id: "acc_" + Date.now(),
+                        bank: "BRI",
+                        accountNumber: "",
+                        accountName: "",
+                        holderName: "",
+                      };
+                      handleUpdateAccounts([...currentAccounts, newAcc]);
+                    }}
+                    className="w-full py-2.5 px-4 rounded-xl border border-dashed border-primary/40 text-primary hover:bg-primary/5 font-semibold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">add_circle</span>
+                    <span>Tambah Rekening Bank / E-Wallet Baru</span>
+                  </button>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Dresscode */}

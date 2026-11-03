@@ -6,7 +6,9 @@ import { Guest } from "./models/Guest.js";
 import { Gift } from "./models/Gift.js";
 import { User } from "./models/User.js";
 import { Template } from "./models/Template.js";
+import { Wedding } from "./models/Wedding.js";
 import { LUXURY_TEMPLATE_HTML } from "./templates/luxuryTemplate.js";
+import { CELESTIAL_TEMPLATE_HTML } from "./templates/celestialTemplate.js";
 
 // Fix Windows / local ISP DNS truncation on mongodb+srv SRV lookups
 try {
@@ -189,6 +191,28 @@ const INITIAL_GIFTS = [
 ];
 
 const INITIAL_TEMPLATES = [
+  {
+    slug: "celestial-starlight",
+    name: "Celestial Starlight Union",
+    category: "Modern",
+    description: "Karya adiluhung bertema malam keabadian bintang (Celestial Starlight) dengan kanvas rasi bintang interaktif, hujan meteor bercahaya, alunan musik orkestra, tipografi Playfair, ornamen cincin astrolabe mewah, dan amplop digital kustom.",
+    previewColor: "#0d1322",
+    thumbnailUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405095/janjisuci/templates/frd4v8jt6cag6suew06e.png",
+    coverPhotoUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405338/janjisuci/templatescovers/pzjqcjomaehz1f72ru4g.jpg",
+    bannerPhotoUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793265674/janjisuci/templatesbanners/mi3wowpithia0uimndbe.jpg",
+    previewAlbum: [
+      "https://res.cloudinary.com/bc8tk53v/image/upload/v1793404963/janjisuci/templates/xujfu3qdryvi527ug0vf.png",
+      "https://res.cloudinary.com/bc8tk53v/image/upload/v1793404969/janjisuci/templates/awn2tlbifguobzqwdvpv.png",
+      "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405073/janjisuci/templates/xsj2e7qsdacl5qbq7v3c.png",
+    ],
+    price: "Rp 169.000",
+    designer: "Atelier JanjiSuci",
+    tier: "gold",
+    tierBadge: "Desain Pilihan",
+    isPreset: true,
+    isActive: true,
+    html: CELESTIAL_TEMPLATE_HTML,
+  },
   {
     slug: "luxury",
     name: "Luxury",
@@ -477,6 +501,96 @@ async function seedData() {
 
     // Seed HTML templates
     await Template.insertMany(INITIAL_TEMPLATES);
+    // Seed or Ensure default Wedding dimas-sarah exists with rich stories & separated bank accounts
+    await Wedding.findOneAndUpdate(
+      { $or: [{ slug: "dimas&sarah" }, { slug: "dimas-sarah" }] },
+      {
+        slug: "dimas-sarah",
+        title: "Pernikahan Dimas & Sarah",
+        themeId: "celestial-starlight",
+        designMode: "custom_html",
+        customHtml: CELESTIAL_TEMPLATE_HTML,
+        coverPhotoUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405338/janjisuci/templatescovers/pzjqcjomaehz1f72ru4g.jpg",
+        bannerPhotoUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793265674/janjisuci/templatesbanners/mi3wowpithia0uimndbe.jpg",
+        groom: {
+          fullName: "Dimas Prasetyo, S.T.",
+          nickName: "Dimas",
+          parents: "Putra pertama dari Bpk. Bambang Wijaya & Ibu Sri Rahayu",
+          instagram: "dimasprasetyo",
+          photoUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuCzUNvfN4JLmIEQ8Rl3ucmVP0-vib8bkuQ3IrTgVw8Qr5sjfCuCXP250Cgz911BcC7k2OJebkbkFG2QdPC2uPmB9JgO20ArGDvpU0gAuSbhYSI7-kXcn2tgNddrrMRwpjYWGzsz64YzuTcetJcaEqJJ6OK2uZbQ6mVajqzRW3u95-6UPI5E7g3WEY75DGTcZ_y5UEu_eA0ZcLAS5JKHy7r9_Lyg0m4Oqoi--PgbPYl8YDo-L0m9KgRLNQ",
+        },
+        bride: {
+          fullName: "Sarah Anindita, M.Ds.",
+          nickName: "Sarah",
+          parents: "Putri kedua dari Bpk. Ir. Hendra Kusuma & Ibu Ratna Dewi",
+          instagram: "sarahanindita",
+          photoUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuDBqrJptRouC3sJfNXLjsofBuvakru1TeBprYoHukqDAMi6numwD_tbCIUj8gAmdv2RmqFwBb_l5JMoEvVo44VGvNdl3sKNhmAfevpxliVOYaJJWD_eKIOO0CiuiYkvBWAHCLhcxazK406U-fFG7DULwuD1nG7PYvz4ukXGopUFGbgkuinU9wNO5xAusEewWYWkgBN7NjgntxgHQ2Bn3UJ17VOD7tjWOJ3NnqU0qcG7XHbVUgy4mfmLmQ",
+        },
+        events: {
+          akad: {
+            date: "Sabtu, 24 Agustus 2026",
+            time: "08.00 - 10.00 WIB",
+            venue: "Masjid Agung Sunda Kelapa",
+            address: "Jl. Taman Sunda Kelapa No.16, Menteng, Jakarta Pusat",
+          },
+          resepsi: {
+            date: "Sabtu, 24 Agustus 2026",
+            time: "18.30 - 21.30 WIB",
+            venue: "The Dharmawangsa Grand Ballroom",
+            address: "Kebayoran Baru, Jakarta Selatan",
+          },
+        },
+        gift: {
+          accounts: [
+            {
+              id: "acc_1",
+              bank: "BCA",
+              accountNumber: "8830-1928-11",
+              holderName: "Sarah Anindita",
+              accountName: "Sarah Anindita",
+            },
+            {
+              id: "acc_2",
+              bank: "Mandiri",
+              accountNumber: "1370-0012-9901",
+              holderName: "Dimas Prasetyo",
+              accountName: "Dimas Prasetyo",
+            },
+          ],
+          bca: "8830-1928-11 a.n Sarah Anindita",
+          bcaNumber: "8830-1928-11",
+          bcaName: "Sarah Anindita",
+          mandiri: "1370-0012-9901 a.n Dimas Prasetyo",
+          mandiriNumber: "1370-0012-9901",
+          mandiriName: "Dimas Prasetyo",
+        },
+        stories: [
+          {
+            year: "2021",
+            title: "Pandangan Pertama",
+            description: "Pertemuan tidak disengaja di sebuah simfoni orkestra malam kota, di mana alunan melodi menyatukan pandangan pertama yang tak terlupakan.",
+          },
+          {
+            year: "2023",
+            title: "Menjalin Komitmen",
+            description: "Setelah saling mengenal dan berbagi impian, kami sepakat melangkah bersama dalam ikatan cinta yang penuh kedewasaan dan saling mendukung.",
+          },
+          {
+            year: "2024",
+            title: "Lamaran di Bawah Bintang",
+            description: "Di hadapan panorama alam Labuan Bajo saat senja merona, sebuah cincin tersemat sebagai ikrar suci untuk mengarungi bahtera kehidupan bersama.",
+          },
+        ],
+        rsvp: {
+          deadline: "2026-08-20",
+          maxGuests: "2",
+          waNotification: true,
+        },
+      },
+      { upsert: true, new: true }
+    );
+    console.log("💍 Data default wedding 'dimas-sarah' dengan 3 babak kisah cinta & rekening terpisah berhasil diperbarui.");
+
     console.log(`🎨 ${INITIAL_TEMPLATES.length} template HTML awal berhasil dimasukkan ke katalog.`);
 
     // Seed or Ensure Admin User exists

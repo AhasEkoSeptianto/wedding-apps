@@ -48,15 +48,27 @@ export default function GiftSection({ onShowToast, weddingData, viewMode }: Gift
   const brideName = weddingData?.bride?.fullName || "Sarah Anindita";
 
   const accounts: BankAccount[] = [];
-  const rawBca = weddingData ? weddingData.gift?.bca?.trim() : "8830-1928-11";
-  const rawMandiri = weddingData ? weddingData.gift?.mandiri?.trim() : "1370-0012-9901";
+  if (weddingData?.gift?.accounts && weddingData.gift.accounts.length > 0) {
+    weddingData.gift.accounts.forEach((acc) => {
+      const holder = acc.holderName || acc.accountName || brideName;
+      accounts.push({
+        bank: acc.bank || "REKENING BANK",
+        accountNumber: acc.accountNumber || "-",
+        holderName: holder.startsWith("a.n") ? holder : `a.n. ${holder}`,
+      });
+    });
+  } else {
+    const rawBca = weddingData ? weddingData.gift?.bca?.trim() : "8830-1928-11";
+    const rawMandiri = weddingData ? weddingData.gift?.mandiri?.trim() : "1370-0012-9901";
 
-  if (rawBca) {
-    accounts.push(parseAccount(rawBca, "BANK CENTRAL ASIA (BCA)", `a.n. ${brideName}`));
+    if (rawBca) {
+      accounts.push(parseAccount(rawBca, "BANK CENTRAL ASIA (BCA)", `a.n. ${brideName}`));
+    }
+    if (rawMandiri) {
+      accounts.push(parseAccount(rawMandiri, "BANK MANDIRI", `a.n. ${groomName}`));
+    }
   }
-  if (rawMandiri) {
-    accounts.push(parseAccount(rawMandiri, "BANK MANDIRI", `a.n. ${groomName}`));
-  }
+
   if (accounts.length === 0) {
     accounts.push(parseAccount("8830-1928-11", "BANK CENTRAL ASIA (BCA)", `a.n. ${brideName}`));
   }

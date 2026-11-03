@@ -28,9 +28,12 @@ export interface GiftItem {
 }
 
 export interface BankAccount {
+  id?: string;
   bank: string;
   accountNumber: string;
   holderName: string;
+  accountName?: string;
+  qrCode?: string;
 }
 
 export interface StoryItem {
@@ -122,8 +125,15 @@ export interface WeddingData {
     enabled: boolean;
   };
   gift: {
-    bca: string;
-    mandiri: string;
+    accounts?: BankAccount[];
+    bca?: string;
+    bcaNumber?: string;
+    bcaName?: string;
+    mandiri?: string;
+    mandiriNumber?: string;
+    mandiriName?: string;
+    address?: string;
+    qrCode?: string;
   };
   gallery?: string[];
   stories?: StoryItem[];

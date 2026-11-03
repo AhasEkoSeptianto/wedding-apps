@@ -1,5 +1,14 @@
 import mongoose, { Schema, Document } from "mongoose";
 
+export interface IBankAccount {
+  id?: string;
+  bank: string;
+  accountNumber: string;
+  holderName: string;
+  accountName?: string;
+  qrCode?: string;
+}
+
 export interface IWedding extends Document {
   slug: string;
   title: string;
@@ -46,8 +55,15 @@ export interface IWedding extends Document {
     enabled: boolean;
   };
   gift: {
-    bca: string;
-    mandiri: string;
+    accounts?: IBankAccount[];
+    bca?: string;
+    bcaNumber?: string;
+    bcaName?: string;
+    mandiri?: string;
+    mandiriNumber?: string;
+    mandiriName?: string;
+    address?: string;
+    qrCode?: string;
   };
   gallery?: string[];
   stories?: Array<{
@@ -136,8 +152,24 @@ const WeddingSchema = new Schema<IWedding>(
       enabled: { type: Boolean, default: true },
     },
     gift: {
+      accounts: [
+        {
+          id: { type: String, default: "" },
+          bank: { type: String, default: "BCA" },
+          accountNumber: { type: String, default: "" },
+          holderName: { type: String, default: "" },
+          accountName: { type: String, default: "" },
+          qrCode: { type: String, default: "" },
+        },
+      ],
       bca: { type: String, default: "" },
+      bcaNumber: { type: String, default: "" },
+      bcaName: { type: String, default: "" },
       mandiri: { type: String, default: "" },
+      mandiriNumber: { type: String, default: "" },
+      mandiriName: { type: String, default: "" },
+      address: { type: String, default: "" },
+      qrCode: { type: String, default: "" },
     },
     gallery: { type: [String], default: [] },
     stories: [

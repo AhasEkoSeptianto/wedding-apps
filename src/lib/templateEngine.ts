@@ -1,5 +1,6 @@
 import { WeddingData } from "@/types";
 import { ROYAL_GOLD_MAJESTY_HTML } from "@/lib/templates/royalGoldMajesty";
+import { CELESTIAL_TEMPLATE_HTML } from "@/lib/templates/celestialTemplate";
 
 export interface PlaceholderInfo {
   tag: string;
@@ -208,44 +209,86 @@ export const AVAILABLE_PLACEHOLDERS: PlaceholderInfo[] = [
   },
   {
     tag: "{{gift_bca}}",
-    label: "Rekening BCA Lengkap",
+    label: "Rekening BCA Lengkap (Fallback)",
     category: "Tamu & Hadiah",
-    description: "Nomor rekening dan nama pemilik bank BCA",
+    description: "Nomor rekening dan nama pemilik bank BCA atau rekening pertama",
     example: "8830-1928-11 a.n Sarah Anindita",
   },
   {
     tag: "{{bca_number}}",
-    label: "Nomor Rekening BCA (Hanya Angka)",
+    label: "Nomor Rekening Akun 1 / BCA",
     category: "Tamu & Hadiah",
     description: "Nomor rekening bank BCA saja tanpa nama pemilik",
     example: "8830-1928-11",
   },
   {
     tag: "{{bca_name}}",
-    label: "Nama Pemilik Rekening BCA",
+    label: "Nama Pemilik Rekening Akun 1 / BCA",
     category: "Tamu & Hadiah",
     description: "Nama pemilik rekening bank BCA",
     example: "Sarah Anindita",
   },
   {
     tag: "{{gift_mandiri}}",
-    label: "Rekening Mandiri Lengkap",
+    label: "Rekening Mandiri Lengkap (Fallback)",
     category: "Tamu & Hadiah",
-    description: "Nomor rekening dan nama pemilik bank Mandiri",
+    description: "Nomor rekening dan nama pemilik bank Mandiri atau rekening kedua",
     example: "1370-0012-9901 a.n Dimas Prasetyo",
   },
   {
     tag: "{{mandiri_number}}",
-    label: "Nomor Rekening Mandiri (Hanya Angka)",
+    label: "Nomor Rekening Akun 2 / Mandiri",
     category: "Tamu & Hadiah",
     description: "Nomor rekening bank Mandiri saja tanpa nama pemilik",
     example: "1370-0012-9901",
   },
   {
     tag: "{{mandiri_name}}",
-    label: "Nama Pemilik Rekening Mandiri",
+    label: "Nama Pemilik Rekening Akun 2 / Mandiri",
     category: "Tamu & Hadiah",
     description: "Nama pemilik rekening bank Mandiri",
+    example: "Dimas Prasetyo",
+  },
+  {
+    tag: "{{bank_1_name}}",
+    label: "Nama Bank Rekening 1",
+    category: "Tamu & Hadiah",
+    description: "Nama bank / e-wallet akun pertama (cth: BCA, BRI, BNI, Mandiri)",
+    example: "BCA",
+  },
+  {
+    tag: "{{bank_1_number}}",
+    label: "Nomor Rekening 1",
+    category: "Tamu & Hadiah",
+    description: "Nomor rekening akun pertama",
+    example: "8830-1928-11",
+  },
+  {
+    tag: "{{bank_1_holder}}",
+    label: "Atas Nama Rekening 1",
+    category: "Tamu & Hadiah",
+    description: "Nama pemilik rekening akun pertama",
+    example: "Sarah Anindita",
+  },
+  {
+    tag: "{{bank_2_name}}",
+    label: "Nama Bank Rekening 2",
+    category: "Tamu & Hadiah",
+    description: "Nama bank / e-wallet akun kedua (cth: Mandiri, BSI, GoPay)",
+    example: "Mandiri",
+  },
+  {
+    tag: "{{bank_2_number}}",
+    label: "Nomor Rekening 2",
+    category: "Tamu & Hadiah",
+    description: "Nomor rekening akun kedua",
+    example: "1370-0012-9901",
+  },
+  {
+    tag: "{{bank_2_holder}}",
+    label: "Atas Nama Rekening 2",
+    category: "Tamu & Hadiah",
+    description: "Nama pemilik rekening akun kedua",
     example: "Dimas Prasetyo",
   },
   {
@@ -433,24 +476,47 @@ export function generateStoriesHtml(stories?: Array<{ year: string; title: strin
 }
 
 // Generate copyable bank accounts widget
-export function generateBankAccountsHtml(gift?: { bca: string; mandiri: string }): string {
-  const bca = gift?.bca || "8830-1928-11 a.n Sarah Anindita";
-  const mandiri = gift?.mandiri || "1370-0012-9901 a.n Dimas Prasetyo";
+export function generateBankAccountsHtml(gift?: WeddingData["gift"]): string {
+  const accounts: Array<{ bank: string; accountNumber: string; holderName: string }> = [];
+
+  if (gift?.accounts && Array.isArray(gift.accounts) && gift.accounts.length > 0) {
+    gift.accounts.forEach((acc) => {
+      if (acc.accountNumber || acc.bank) {
+        accounts.push({
+          bank: acc.bank || "Rekening Bank",
+          accountNumber: acc.accountNumber || "-",
+          holderName: acc.holderName || acc.accountName || "Penerima Hadiah",
+        });
+      }
+    });
+  }
+
+  // Fallback to bca / mandiri if accounts is empty
+  if (accounts.length === 0) {
+    const bca = gift?.bca || "8830-1928-11 a.n Sarah Anindita";
+    const mandiri = gift?.mandiri || "1370-0012-9901 a.n Dimas Prasetyo";
+    const bcaNum = gift?.bcaNumber || bca.split("a.n")[0].trim();
+    const bcaHolder = gift?.bcaName || (bca.includes("a.n") ? bca.split("a.n")[1].trim() : "Sarah Anindita");
+    const mandiriNum = gift?.mandiriNumber || mandiri.split("a.n")[0].trim();
+    const mandiriHolder = gift?.mandiriName || (mandiri.includes("a.n") ? mandiri.split("a.n")[1].trim() : "Dimas Prasetyo");
+
+    accounts.push({ bank: "Bank BCA", accountNumber: bcaNum, holderName: bcaHolder });
+    accounts.push({ bank: "Bank Mandiri", accountNumber: mandiriNum, holderName: mandiriHolder });
+  }
 
   return `
     <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:16px;">
+      ${accounts
+        .map(
+          (acc) => `
       <div style="flex:1; min-width:260px; max-width:340px; background:#fff; padding:22px; border-radius:18px; border:1px solid #ebdcc5; text-align:center; box-shadow:0 6px 20px rgba(0,0,0,0.04);">
-        <div style="font-size:11px; font-weight:700; letter-spacing:1px; color:#b8860b; text-transform:uppercase; margin-bottom:6px;">Bank BCA</div>
-        <div style="font-family:monospace; font-size:19px; font-weight:700; color:#222; margin-bottom:6px;">${escapeHtml(bca.split("a.n")[0].trim())}</div>
-        <div style="font-size:12px; color:#666; margin-bottom:14px;">${escapeHtml(bca.includes("a.n") ? "a.n " + bca.split("a.n")[1].trim() : "a.n Sarah Anindita")}</div>
-        <button onclick="navigator.clipboard.writeText('${escapeHtml(bca.split("a.n")[0].trim())}'); alert('Nomor rekening BCA berhasil disalin!');" style="background:#f7edd9; color:#9c7118; border:1px solid #dfc79b; padding:7px 18px; border-radius:30px; font-size:12px; font-weight:600; cursor:pointer;">Salin Rekening</button>
-      </div>
-      <div style="flex:1; min-width:260px; max-width:340px; background:#fff; padding:22px; border-radius:18px; border:1px solid #ebdcc5; text-align:center; box-shadow:0 6px 20px rgba(0,0,0,0.04);">
-        <div style="font-size:11px; font-weight:700; letter-spacing:1px; color:#b8860b; text-transform:uppercase; margin-bottom:6px;">Bank Mandiri</div>
-        <div style="font-family:monospace; font-size:19px; font-weight:700; color:#222; margin-bottom:6px;">${escapeHtml(mandiri.split("a.n")[0].trim())}</div>
-        <div style="font-size:12px; color:#666; margin-bottom:14px;">${escapeHtml(mandiri.includes("a.n") ? "a.n " + mandiri.split("a.n")[1].trim() : "a.n Dimas Prasetyo")}</div>
-        <button onclick="navigator.clipboard.writeText('${escapeHtml(mandiri.split("a.n")[0].trim())}'); alert('Nomor rekening Mandiri berhasil disalin!');" style="background:#f7edd9; color:#9c7118; border:1px solid #dfc79b; padding:7px 18px; border-radius:30px; font-size:12px; font-weight:600; cursor:pointer;">Salin Rekening</button>
-      </div>
+        <div style="font-size:11px; font-weight:700; letter-spacing:1px; color:#b8860b; text-transform:uppercase; margin-bottom:6px;">${escapeHtml(acc.bank)}</div>
+        <div style="font-family:monospace; font-size:19px; font-weight:700; color:#222; margin-bottom:6px;">${escapeHtml(acc.accountNumber)}</div>
+        <div style="font-size:12px; color:#666; margin-bottom:14px;">a.n. ${escapeHtml(acc.holderName)}</div>
+        <button onclick="navigator.clipboard.writeText('${escapeHtml(acc.accountNumber)}'); alert('Nomor rekening ${escapeHtml(acc.bank)} berhasil disalin!');" style="background:#f7edd9; color:#9c7118; border:1px solid #dfc79b; padding:7px 18px; border-radius:30px; font-size:12px; font-weight:600; cursor:pointer;">Salin Rekening</button>
+      </div>`
+        )
+        .join("")}
     </div>
   `.trim();
 }
@@ -598,6 +664,32 @@ export function renderHtmlTemplate(
   const coverPhoto = data.coverPhotoUrl || defaultCover;
   const bannerPhoto = data.bannerPhotoUrl || defaultBanner;
 
+  // Dynamic user bank & e-wallet accounts
+  const rawAccounts: Array<{ bank: string; accountNumber: string; holderName: string }> =
+    data.gift?.accounts && Array.isArray(data.gift.accounts) && data.gift.accounts.length > 0
+      ? data.gift.accounts.map((acc, idx) => ({
+          bank: acc.bank || `Bank ${idx + 1}`,
+          accountNumber: acc.accountNumber || "",
+          holderName: acc.holderName || acc.accountName || "Sarah Anindita",
+        }))
+      : [
+          {
+            bank: "BCA",
+            accountNumber: data.gift?.bcaNumber || (data.gift?.bca ? data.gift.bca.split("a.n")[0].trim() : "8830-1928-11"),
+            holderName: data.gift?.bcaName || (data.gift?.bca && data.gift.bca.includes("a.n") ? data.gift.bca.split("a.n")[1].trim() : "Sarah Anindita"),
+          },
+          {
+            bank: "Mandiri",
+            accountNumber: data.gift?.mandiriNumber || (data.gift?.mandiri ? data.gift.mandiri.split("a.n")[0].trim() : "1370-0012-9901"),
+            holderName: data.gift?.mandiriName || (data.gift?.mandiri && data.gift.mandiri.includes("a.n") ? data.gift.mandiri.split("a.n")[1].trim() : "Dimas Prasetyo"),
+          },
+        ];
+
+  const bcaAcc = rawAccounts.find((a) => a.bank.toUpperCase().includes("BCA")) || rawAccounts[0];
+  const mandiriAcc =
+    rawAccounts.find((a) => a.bank.toUpperCase().includes("MANDIRI")) ||
+    (rawAccounts.length > 1 ? rawAccounts[1] : undefined);
+
   const replacements: Record<string, string> = {
     "{{couple_names}}": coupleNames,
     "{{couple_full_names}}": coupleFullNames,
@@ -637,16 +729,23 @@ export function renderHtmlTemplate(
     "{{resepsi_address}}": data.events.resepsi.address || "Kebayoran Baru, Jakarta Selatan",
     "{{resepsi_maps_url}}": resepsiMaps,
     "{{guest_name}}": guest,
-    "{{gift_bca}}": data.gift.bca || "8830-1928-11 a.n Sarah Anindita",
-    "{{gift_mandiri}}": data.gift.mandiri || "1370-0012-9901 a.n Dimas Prasetyo",
-    "{{bca_number}}": (data.gift.bca || "8830-1928-11 a.n Sarah Anindita").split("a.n")[0].trim(),
-    "{{bca_name}}": (data.gift.bca || "").includes("a.n")
-      ? data.gift.bca.split("a.n")[1].trim()
-      : "Sarah Anindita",
-    "{{mandiri_number}}": (data.gift.mandiri || "1370-0012-9901 a.n Dimas Prasetyo").split("a.n")[0].trim(),
-    "{{mandiri_name}}": (data.gift.mandiri || "").includes("a.n")
-      ? data.gift.mandiri.split("a.n")[1].trim()
-      : "Dimas Prasetyo",
+    "{{gift_bca}}": bcaAcc ? `${bcaAcc.accountNumber} a.n ${bcaAcc.holderName}` : "8830-1928-11 a.n Sarah Anindita",
+    "{{gift_mandiri}}": mandiriAcc ? `${mandiriAcc.accountNumber} a.n ${mandiriAcc.holderName}` : "1370-0012-9901 a.n Dimas Prasetyo",
+    "{{bca_number}}": bcaAcc?.accountNumber || "8830-1928-11",
+    "{{bca_name}}": bcaAcc?.holderName || "Sarah Anindita",
+    "{{mandiri_number}}": mandiriAcc?.accountNumber || "1370-0012-9901",
+    "{{mandiri_name}}": mandiriAcc?.holderName || "Dimas Prasetyo",
+    // Generic Dynamic Accounts Tags (Account 1, 2, 3...)
+    "{{bank_1_name}}": rawAccounts[0]?.bank || "Bank BCA",
+    "{{bank_1_number}}": rawAccounts[0]?.accountNumber || "8830-1928-11",
+    "{{bank_1_holder}}": rawAccounts[0]?.holderName || "Sarah Anindita",
+    "{{bank_2_name}}": rawAccounts[1]?.bank || "Bank Mandiri",
+    "{{bank_2_number}}": rawAccounts[1]?.accountNumber || "1370-0012-9901",
+    "{{bank_2_holder}}": rawAccounts[1]?.holderName || "Dimas Prasetyo",
+    "{{bank_3_name}}": rawAccounts[2]?.bank || "",
+    "{{bank_3_number}}": rawAccounts[2]?.accountNumber || "",
+    "{{bank_3_holder}}": rawAccounts[2]?.holderName || "",
+    "{{gift_accounts_json}}": JSON.stringify(rawAccounts),
     "{{rsvp_deadline}}": data.rsvp.deadline || "20 Agustus 2026",
     "{{wedding_slug}}": data.slug || "dimas&sarah",
     "{{api_base_url}}": process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
@@ -666,6 +765,7 @@ export function renderHtmlTemplate(
     "{{stories_timeline}}": generateStoriesHtml(data.stories),
     "{{countdown_widget}}": generateCountdownHtml(data.events.akad.date),
     "{{bank_accounts_widget}}": generateBankAccountsHtml(data.gift),
+    "{{bank_accounts_grid}}": generateBankAccountsHtml(data.gift),
   };
 
   let output = templateHtml;
@@ -711,6 +811,17 @@ export interface PresetHtmlTemplate {
 }
 
 export const PRESET_HTML_TEMPLATES: PresetHtmlTemplate[] = [
+  {
+    id: "celestial-starlight",
+    name: "Celestial Starlight",
+    category: "Luxury",
+    description: "Template eksklusif bernuansa malam berbintang kosmik (Deep Space & Shimmering Gold) dengan partikel rasi bintang interaktif HTML5 Canvas, audio visualizer elegan, galeri foto modern, countdown timer, alur kisah cinta (Love Story), dan amplop digital terstruktur.",
+    previewColor: "#0d1322",
+    thumbnailUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405095/janjisuci/templates/frd4v8jt6cag6suew06e.png",
+    coverPhotoUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+    bannerPhotoUrl: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1600&q=80",
+    html: CELESTIAL_TEMPLATE_HTML,
+  },
   {
     id: "luxury",
     name: "Luxury",

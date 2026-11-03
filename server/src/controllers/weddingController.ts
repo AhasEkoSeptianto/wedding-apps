@@ -57,20 +57,45 @@ const INITIAL_WEDDING_DATA = {
     enabled: true,
   },
   gift: {
+    accounts: [
+      {
+        id: "acc_1",
+        bank: "BCA",
+        accountNumber: "8830-1928-11",
+        accountName: "Sarah Anindita",
+        holderName: "Sarah Anindita",
+      },
+      {
+        id: "acc_2",
+        bank: "Mandiri",
+        accountNumber: "1370-0012-9901",
+        accountName: "Dimas Prasetyo",
+        holderName: "Dimas Prasetyo",
+      },
+    ],
     bca: "8830-1928-11 a.n Sarah Anindita",
+    bcaNumber: "8830-1928-11",
+    bcaName: "Sarah Anindita",
     mandiri: "1370-0012-9901 a.n Dimas Prasetyo",
+    mandiriNumber: "1370-0012-9901",
+    mandiriName: "Dimas Prasetyo",
   },
   gallery: [],
   stories: [
     {
-      year: "2019",
-      title: "Pertama Bertemu",
-      description: "Bertemu tanpa sengaja di studio desain kreatif Jakarta saat mengerjakan proyek kolaborasi bersama.",
+      year: "2021",
+      title: "Pandangan Pertama",
+      description: "Pertemuan tidak disengaja di sebuah simfoni orkestra malam kota, di mana alunan melodi menyatukan pandangan pertama yang tak terlupakan.",
+    },
+    {
+      year: "2023",
+      title: "Menjalin Komitmen",
+      description: "Setelah saling mengenal dan berbagi impian, kami sepakat melangkah bersama dalam ikatan cinta yang penuh kedewasaan dan saling mendukung.",
     },
     {
       year: "2024",
-      title: "Lamaran Romantis",
-      description: "Di bawah gemerlap senja Labuan Bajo, mengucap janji suci untuk melangkah ke jenjang pernikahan.",
+      title: "Lamaran di Bawah Bintang",
+      description: "Di hadapan panorama alam Labuan Bajo saat senja merona, sebuah cincin tersemat sebagai ikrar suci untuk mengarungi bahtera kehidupan bersama.",
     },
   ],
   rsvp: {
@@ -125,9 +150,70 @@ export async function getWedding(req: Request, res: Response, next: NextFunction
       return;
     }
 
+    // Convert to plain object to ensure separated gift fields & accounts exist
+    const weddingObj = (wedding && typeof wedding.toObject === "function") ? wedding.toObject() : { ...wedding };
+    let gift = weddingObj.gift || {};
+    let accounts: any[] = Array.isArray(gift.accounts) ? [...gift.accounts] : [];
+
+    // Auto-generate accounts if not present
+    if (accounts.length === 0) {
+      if (gift.bcaNumber || gift.bca) {
+        const num = gift.bcaNumber || (gift.bca ? gift.bca.split("a.n")[0].trim() : "");
+        const holder = gift.bcaName || (gift.bca && gift.bca.includes("a.n") ? gift.bca.split("a.n")[1].trim() : "Sarah Anindita");
+        accounts.push({
+          id: "acc_1",
+          bank: "BCA",
+          accountNumber: num,
+          accountName: holder,
+          holderName: holder,
+        });
+      }
+      if (gift.mandiriNumber || gift.mandiri) {
+        const num = gift.mandiriNumber || (gift.mandiri ? gift.mandiri.split("a.n")[0].trim() : "");
+        const holder = gift.mandiriName || (gift.mandiri && gift.mandiri.includes("a.n") ? gift.mandiri.split("a.n")[1].trim() : "Dimas Prasetyo");
+        accounts.push({
+          id: "acc_2",
+          bank: "Mandiri",
+          accountNumber: num,
+          accountName: holder,
+          holderName: holder,
+        });
+      }
+    }
+
+    // Normalize accounts
+    accounts = accounts.map((acc: any, idx: number) => ({
+      id: acc.id || `acc_${idx + 1}`,
+      bank: acc.bank || "BCA",
+      accountNumber: acc.accountNumber || "",
+      accountName: acc.accountName || acc.holderName || "",
+      holderName: acc.holderName || acc.accountName || "",
+      qrCode: acc.qrCode || "",
+    }));
+
+    // Find best match for legacy BCA and Mandiri
+    const bcaAcc = accounts.find((a: any) => String(a.bank).toUpperCase().includes("BCA")) || accounts[0];
+    const mandiriAcc = accounts.find((a: any) => String(a.bank).toUpperCase().includes("MANDIRI")) || (accounts.length > 1 ? accounts[1] : undefined);
+
+    const bcaNum = bcaAcc ? bcaAcc.accountNumber : (gift.bcaNumber || "");
+    const bcaHolder = bcaAcc ? (bcaAcc.accountName || bcaAcc.holderName) : (gift.bcaName || "");
+    const mandiriNum = mandiriAcc ? mandiriAcc.accountNumber : (gift.mandiriNumber || "");
+    const mandiriHolder = mandiriAcc ? (mandiriAcc.accountName || mandiriAcc.holderName) : (gift.mandiriName || "");
+
+    weddingObj.gift = {
+      ...gift,
+      accounts,
+      bca: bcaHolder ? `${bcaNum} a.n ${bcaHolder}` : bcaNum,
+      bcaNumber: bcaNum,
+      bcaName: bcaHolder,
+      mandiri: mandiriHolder ? `${mandiriNum} a.n ${mandiriHolder}` : mandiriNum,
+      mandiriNumber: mandiriNum,
+      mandiriName: mandiriHolder,
+    };
+
     res.json({
       success: true,
-      data: wedding,
+      data: weddingObj,
     });
   } catch (error) {
     next(error);
@@ -140,7 +226,64 @@ export async function upsertWedding(req: Request, res: Response, next: NextFunct
     const rawSlug = req.params.slug || DEFAULT_SLUG;
     const slug = decodeURIComponent(rawSlug).trim();
     const altSlug = slug.includes("&") ? slug.replace(/&/g, "-") : slug.replace(/-/g, "&");
-    const updateData = req.body;
+    const updateData = { ...req.body };
+
+    // Auto-sync dynamic accounts & structured gift fields
+    if (updateData.gift) {
+      const g = { ...updateData.gift };
+      let accounts: any[] = Array.isArray(g.accounts) ? [...g.accounts] : [];
+
+      if (accounts.length > 0) {
+        accounts = accounts.map((acc: any, idx: number) => ({
+          id: acc.id || `acc_${idx + 1}`,
+          bank: (acc.bank || "BCA").trim(),
+          accountNumber: (acc.accountNumber || "").trim(),
+          accountName: (acc.accountName || acc.holderName || "").trim(),
+          holderName: (acc.holderName || acc.accountName || "").trim(),
+          qrCode: acc.qrCode || "",
+        }));
+
+        const bcaAcc = accounts.find((a: any) => String(a.bank).toUpperCase().includes("BCA")) || accounts[0];
+        const mandiriAcc = accounts.find((a: any) => String(a.bank).toUpperCase().includes("MANDIRI")) || (accounts.length > 1 ? accounts[1] : undefined);
+
+        if (bcaAcc) {
+          g.bcaNumber = bcaAcc.accountNumber;
+          g.bcaName = bcaAcc.accountName || bcaAcc.holderName;
+          g.bca = g.bcaName ? `${g.bcaNumber} a.n ${g.bcaName}` : g.bcaNumber;
+        }
+        if (mandiriAcc) {
+          g.mandiriNumber = mandiriAcc.accountNumber;
+          g.mandiriName = mandiriAcc.accountName || mandiriAcc.holderName;
+          g.mandiri = g.mandiriName ? `${g.mandiriNumber} a.n ${g.mandiriName}` : g.mandiriNumber;
+        }
+        g.accounts = accounts;
+      } else if (g.bcaNumber !== undefined || g.bcaName !== undefined || g.mandiriNumber !== undefined || g.mandiriName !== undefined) {
+        // Build accounts from separate fields
+        accounts = [];
+        if (g.bcaNumber || g.bcaName) {
+          accounts.push({
+            id: "acc_1",
+            bank: "BCA",
+            accountNumber: (g.bcaNumber || "").trim(),
+            accountName: (g.bcaName || "").trim(),
+            holderName: (g.bcaName || "").trim(),
+          });
+        }
+        if (g.mandiriNumber || g.mandiriName) {
+          accounts.push({
+            id: "acc_2",
+            bank: "Mandiri",
+            accountNumber: (g.mandiriNumber || "").trim(),
+            accountName: (g.mandiriName || "").trim(),
+            holderName: (g.mandiriName || "").trim(),
+          });
+        }
+        g.accounts = accounts;
+        g.bca = g.bcaName ? `${g.bcaNumber} a.n ${g.bcaName}` : (g.bcaNumber || "");
+        g.mandiri = g.mandiriName ? `${g.mandiriNumber} a.n ${g.mandiriName}` : (g.mandiriNumber || "");
+      }
+      updateData.gift = g;
+    }
 
     const targetSlug = updateData.slug ? decodeURIComponent(String(updateData.slug)).trim() : slug;
 

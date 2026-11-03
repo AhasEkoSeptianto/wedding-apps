@@ -896,36 +896,42 @@ export default function AmplopDanUcapanPage() {
                   </Link>
                 </div>
 
-                <div className="space-y-4">
-                  {/* BCA */}
-                  <div className="p-4 rounded-xl bg-surface border border-outline-variant/20 space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
-                      BANK CENTRAL ASIA (BCA)
-                    </span>
-                    <p className="font-mono font-bold text-lg text-on-surface">
-                      {weddingData.gift?.bca?.split("a.n")[0]?.trim() || "8830-1928-11"}
-                    </p>
-                    <p className="text-xs text-on-surface-variant">
-                      {weddingData.gift?.bca?.includes("a.n")
-                        ? "a.n " + weddingData.gift.bca.split("a.n")[1].trim()
-                        : `a.n ${weddingData.bride.fullName || "Sarah Anindita"}`}
-                    </p>
-                  </div>
+                <div className="space-y-3">
+                  {(() => {
+                    const accs =
+                      weddingData.gift?.accounts && weddingData.gift.accounts.length > 0
+                        ? weddingData.gift.accounts
+                        : [
+                            {
+                              bank: "BANK CENTRAL ASIA (BCA)",
+                              accountNumber: weddingData.gift?.bca?.split("a.n")[0]?.trim() || "8830-1928-11",
+                              holderName: weddingData.gift?.bca?.includes("a.n")
+                                ? weddingData.gift.bca.split("a.n")[1].trim()
+                                : weddingData.bride.fullName || "Sarah Anindita",
+                            },
+                            {
+                              bank: "BANK MANDIRI",
+                              accountNumber: weddingData.gift?.mandiri?.split("a.n")[0]?.trim() || "1370-0012-9901",
+                              holderName: weddingData.gift?.mandiri?.includes("a.n")
+                                ? weddingData.gift.mandiri.split("a.n")[1].trim()
+                                : weddingData.groom.fullName || "Dimas Prasetyo",
+                            },
+                          ];
 
-                  {/* Mandiri */}
-                  <div className="p-4 rounded-xl bg-surface border border-outline-variant/20 space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
-                      BANK MANDIRI
-                    </span>
-                    <p className="font-mono font-bold text-lg text-on-surface">
-                      {weddingData.gift?.mandiri?.split("a.n")[0]?.trim() || "1370-0012-9901"}
-                    </p>
-                    <p className="text-xs text-on-surface-variant">
-                      {weddingData.gift?.mandiri?.includes("a.n")
-                        ? "a.n " + weddingData.gift.mandiri.split("a.n")[1].trim()
-                        : `a.n ${weddingData.groom.fullName || "Dimas Prasetyo"}`}
-                    </p>
-                  </div>
+                    return accs.map((acc, i) => (
+                      <div key={i} className="p-4 rounded-xl bg-surface border border-outline-variant/20 space-y-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                          {acc.bank}
+                        </span>
+                        <p className="font-mono font-bold text-lg text-on-surface">
+                          {acc.accountNumber}
+                        </p>
+                        <p className="text-xs text-on-surface-variant">
+                          a.n. {acc.holderName || acc.accountName || "Penerima"}
+                        </p>
+                      </div>
+                    ));
+                  })()}
                 </div>
               </div>
 
@@ -1022,8 +1028,18 @@ export default function AmplopDanUcapanPage() {
                     onChange={(e) => setManualForm({ ...manualForm, bankTarget: e.target.value })}
                     className="w-full px-3 py-2.5 rounded-xl border border-outline-variant/30 text-xs text-on-surface bg-surface focus:outline-none focus:border-primary"
                   >
-                    <option value="BCA">BCA</option>
-                    <option value="Mandiri">Mandiri</option>
+                    {weddingData.gift?.accounts && weddingData.gift.accounts.length > 0 ? (
+                      weddingData.gift.accounts.map((a, idx) => (
+                        <option key={idx} value={a.bank}>
+                          {a.bank} ({a.accountNumber})
+                        </option>
+                      ))
+                    ) : (
+                      <>
+                        <option value="BCA">BCA</option>
+                        <option value="Mandiri">Mandiri</option>
+                      </>
+                    )}
                     <option value="QRIS">QRIS</option>
                     <option value="Tunai">Amplop Tunai</option>
                   </select>
