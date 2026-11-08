@@ -192,30 +192,8 @@ const INITIAL_GIFTS = [
 
 const INITIAL_TEMPLATES = [
   {
-    slug: "celestial-starlight",
-    name: "Celestial Starlight Union",
-    category: "Modern",
-    description: "Karya adiluhung bertema malam keabadian bintang (Celestial Starlight) dengan kanvas rasi bintang interaktif, hujan meteor bercahaya, alunan musik orkestra, tipografi Playfair, ornamen cincin astrolabe mewah, dan amplop digital kustom.",
-    previewColor: "#0d1322",
-    thumbnailUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405095/janjisuci/templates/frd4v8jt6cag6suew06e.png",
-    coverPhotoUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405338/janjisuci/templatescovers/pzjqcjomaehz1f72ru4g.jpg",
-    bannerPhotoUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793265674/janjisuci/templatesbanners/mi3wowpithia0uimndbe.jpg",
-    previewAlbum: [
-      "https://res.cloudinary.com/bc8tk53v/image/upload/v1793404963/janjisuci/templates/xujfu3qdryvi527ug0vf.png",
-      "https://res.cloudinary.com/bc8tk53v/image/upload/v1793404969/janjisuci/templates/awn2tlbifguobzqwdvpv.png",
-      "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405073/janjisuci/templates/xsj2e7qsdacl5qbq7v3c.png",
-    ],
-    price: "Rp 169.000",
-    designer: "Atelier JanjiSuci",
-    tier: "gold",
-    tierBadge: "Desain Pilihan",
-    isPreset: true,
-    isActive: true,
-    html: CELESTIAL_TEMPLATE_HTML,
-  },
-  {
-    slug: "luxury",
-    name: "Luxury",
+    slug: "royal-gold-majesty",
+    name: "The Royal Gold Majesty",
     category: "Luxury",
     description: "Template aristokrat klasik bernuansa emas mewah (Royal Gold Majesty) dengan ornamen kartu modern, tipografi anggun Playfair Display & Cinzel, galeri foto terpusat yang responsif, countdown timer interaktif, formulir RSVP & doa terhubung real-time, serta kartu amplop digital.",
     previewColor: "#c5a059",
@@ -236,11 +214,11 @@ const INITIAL_TEMPLATES = [
     html: LUXURY_TEMPLATE_HTML,
   },
   {
-    slug: "royal-gold-majesty",
-    name: "The Royal Gold Majesty",
-    category: "Luxury",
-    description: "Template aristokrat klasik bernuansa emas mewah dengan ornamen kartu modern, tipografi anggun, dan integrasi RSVP.",
-    previewColor: "#c5a059",
+    slug: "celestial-starlight",
+    name: "Celestial Starlight Union",
+    category: "Modern",
+    description: "Karya adiluhung bertema malam keabadian bintang (Celestial Starlight) dengan kanvas rasi bintang interaktif, hujan meteor bercahaya, alunan musik orkestra, tipografi Playfair, ornamen cincin astrolabe mewah, dan amplop digital kustom.",
+    previewColor: "#0d1322",
     thumbnailUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405095/janjisuci/templates/frd4v8jt6cag6suew06e.png",
     coverPhotoUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405338/janjisuci/templatescovers/pzjqcjomaehz1f72ru4g.jpg",
     bannerPhotoUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793265674/janjisuci/templatesbanners/mi3wowpithia0uimndbe.jpg",
@@ -249,222 +227,13 @@ const INITIAL_TEMPLATES = [
       "https://res.cloudinary.com/bc8tk53v/image/upload/v1793404969/janjisuci/templates/awn2tlbifguobzqwdvpv.png",
       "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405073/janjisuci/templates/xsj2e7qsdacl5qbq7v3c.png",
     ],
-    price: "Rp 149.000",
+    price: "Rp 169.000",
     designer: "Atelier JanjiSuci",
     tier: "gold",
     tierBadge: "Desain Pilihan",
     isPreset: true,
     isActive: true,
-    html: LUXURY_TEMPLATE_HTML,
-  },
-  {
-    slug: "botanical-sage-romance",
-    name: "Botanical Sage Romance",
-    category: "Floral",
-    description: "Template bernuansa dedaunan hijau sage yang segar, elegan, dan estetik dengan sentuhan watercolor.",
-    previewColor: "#3d6b52",
-    thumbnailUrl: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=600&q=80",
-    previewAlbum: [
-      "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1509927083803-4bd519298ac4?auto=format&fit=crop&w=1200&q=80",
-    ],
-    price: "Rp 149.000",
-    designer: "Narra Studio",
-    tier: "gold",
-    tierBadge: "Terlaris",
-    isPreset: true,
-    isActive: true,
-    html: `<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wedding of {{couple_names}}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f4f7f4; color: #1e2a22; line-height: 1.6; }
-    .container { max-width: 650px; margin: 0 auto; padding: 20px; }
-    .hero { text-align: center; padding: 70px 20px; background: #ffffff; border-radius: 30px; border: 1px solid #dce5dc; box-shadow: 0 10px 30px rgba(61,107,82,0.06); margin-bottom: 24px; }
-    .hero-tag { font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: #3d6b52; font-weight: 600; }
-    .hero-h1 { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 700; color: #1e2a22; margin: 12px 0; }
-    .section-card { background: #ffffff; border-radius: 24px; padding: 30px 24px; border: 1px solid #dce5dc; margin-bottom: 24px; text-align: center; }
-    .section-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: #1e2a22; margin-bottom: 12px; }
-    .btn-green { display: inline-block; background: #3d6b52; color: #fff; padding: 10px 24px; border-radius: 30px; text-decoration: none; font-size: 13px; font-weight: 600; margin-top: 14px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="hero">
-      <span class="hero-tag">The Wedding Celebration</span>
-      <h1 class="hero-h1">{{couple_names}}</h1>
-      <p style="color: #607267; font-size: 15px;">Kami mengundang Anda pada hari istimewa kami</p>
-      <div style="background:#f4f7f4; border:1px solid #dce5dc; border-radius:16px; padding:12px 20px; display:inline-block; margin:20px 0;">
-        <span style="font-size:11px; text-transform:uppercase; color:#607267; letter-spacing:1px; display:block;">Untuk Tamu Kami:</span>
-        <strong style="font-size:18px; color:#1e2a22;">{{guest_name}}</strong>
-      </div>
-      {{countdown_widget}}
-    </div>
-
-    <div class="section-card">
-      <blockquote style="font-family:'Playfair Display', serif; font-size:17px; font-style:italic; color:#3d6b52; margin-bottom:10px;">"{{quote_text}}"</blockquote>
-      <span style="font-size:12px; font-weight:600; color:#607267;">{{quote_source}}</span>
-    </div>
-
-    <div class="section-card">
-      <h2 class="section-title">Kedua Mempelai</h2>
-      <div style="display:flex; flex-wrap:wrap; gap:16px; justify-content:center; margin-top:20px;">
-        <div style="flex:1; min-width:240px; background:#f9fbf9; padding:20px; border-radius:18px; border:1px solid #e1ebe1;">
-          <img src="{{groom_photo}}" style="width:110px; height:110px; border-radius:50%; object-fit:cover; margin-bottom:10px; border:3px solid #3d6b52;" />
-          <h3 style="font-family:'Playfair Display', serif; font-size:18px; font-weight:700;">{{groom_name}}</h3>
-          <p style="font-size:12px; color:#607267; margin-top:4px;">{{groom_parents}}</p>
-        </div>
-        <div style="flex:1; min-width:240px; background:#f9fbf9; padding:20px; border-radius:18px; border:1px solid #e1ebe1;">
-          <img src="{{bride_photo}}" style="width:110px; height:110px; border-radius:50%; object-fit:cover; margin-bottom:10px; border:3px solid #3d6b52;" />
-          <h3 style="font-family:'Playfair Display', serif; font-size:18px; font-weight:700;">{{bride_name}}</h3>
-          <p style="font-size:12px; color:#607267; margin-top:4px;">{{bride_parents}}</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="section-card">
-      <h2 class="section-title">Waktu &amp; Tempat</h2>
-      <div style="background:#f4f7f4; padding:20px; border-radius:16px; margin-bottom:14px;">
-        <h4 style="font-size:17px; font-weight:700; color:#3d6b52;">Akad Nikah: {{akad_date}}</h4>
-        <p style="font-size:13px; color:#4a5f52; margin:4px 0;">Pukul: {{akad_time}}</p>
-        <p style="font-size:14px; font-weight:600;">{{akad_venue}}</p>
-        <p style="font-size:12px; color:#607267;">{{akad_address}}</p>
-        <a href="{{akad_maps_url}}" target="_blank" class="btn-green">Google Maps</a>
-      </div>
-      <div style="background:#f4f7f4; padding:20px; border-radius:16px;">
-        <h4 style="font-size:17px; font-weight:700; color:#3d6b52;">Resepsi: {{resepsi_date}}</h4>
-        <p style="font-size:13px; color:#4a5f52; margin:4px 0;">Pukul: {{resepsi_time}}</p>
-        <p style="font-size:14px; font-weight:600;">{{resepsi_venue}}</p>
-        <p style="font-size:12px; color:#607267;">{{resepsi_address}}</p>
-        <a href="{{resepsi_maps_url}}" target="_blank" class="btn-green">Google Maps</a>
-      </div>
-    </div>
-
-    <div class="section-card">
-      <h2 class="section-title">Galeri Kebahagiaan</h2>
-      {{gallery_grid}}
-    </div>
-
-    <div class="section-card">
-      <h2 class="section-title">Tanda Kasih (Wedding Gift)</h2>
-      {{bank_accounts_widget}}
-    </div>
-
-    <footer style="text-align:center; padding:30px 10px; font-size:12px; color:#8fa382;">
-      {{couple_names}} • Salam Hangat &amp; Terima Kasih
-    </footer>
-  </div>
-</body>
-</html>`,
-  },
-  {
-    slug: "vogue-noir-editorial",
-    name: "Vogue Noir Editorial",
-    category: "Modern",
-    description: "Template monokrom modern bergaya editorial majalah mode dunia dengan tipografi tegas dan elegan.",
-    previewColor: "#18181b",
-    thumbnailUrl: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=600&q=80",
-    previewAlbum: [
-      "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&w=1200&q=80",
-    ],
-    price: "Gratis",
-    designer: "Studio Linimasa",
-    tier: "free",
-    tierBadge: "Gratis",
-    isPreset: true,
-    isActive: true,
-    html: `<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{couple_names}} | Editorial Wedding</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', sans-serif; background-color: #0c0d0e; color: #ededed; line-height: 1.7; }
-    .container { max-width: 660px; margin: 0 auto; padding: 24px 20px; }
-    .font-title { font-family: 'Cinzel', serif; letter-spacing: 2px; }
-    .hero { text-align: center; padding: 80px 20px; border: 1px solid #282a2d; border-radius: 20px; background: #131518; margin-bottom: 24px; }
-    .hero-h1 { font-size: 38px; color: #fff; margin: 16px 0; font-weight: 700; }
-    .card { background: #131518; border: 1px solid #282a2d; border-radius: 20px; padding: 34px 24px; margin-bottom: 24px; text-align: center; }
-    .btn-noir { display: inline-block; background: #ffffff; color: #000000; padding: 10px 26px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 14px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="hero">
-      <span style="font-size:11px; text-transform:uppercase; letter-spacing:4px; color:#888;">The Union of</span>
-      <h1 class="hero-h1 font-title">{{couple_names}}</h1>
-      <p style="color:#aaa; font-size:13px; letter-spacing:2px; text-transform:uppercase;">Save The Date: {{akad_date}}</p>
-      <div style="margin:24px 0; border:1px solid #333; padding:12px 20px; display:inline-block; border-radius:8px;">
-        <span style="font-size:10px; color:#777; text-transform:uppercase; display:block; letter-spacing:2px;">Special Invitation For:</span>
-        <strong style="font-size:16px; color:#fff;">{{guest_name}}</strong>
-      </div>
-      {{countdown_widget}}
-    </div>
-
-    <div class="card">
-      <p style="font-style:italic; font-size:15px; color:#ccc; max-width:480px; margin:0 auto 12px;">"{{quote_text}}"</p>
-      <span style="font-size:11px; color:#888; letter-spacing:1px; text-transform:uppercase;">{{quote_source}}</span>
-    </div>
-
-    <div class="card">
-      <h2 class="font-title" style="font-size:22px; margin-bottom:20px;">The Couple</h2>
-      <div style="display:flex; flex-direction:column; gap:20px;">
-        <div style="border-bottom:1px solid #282a2d; padding-bottom:16px;">
-          <h3 style="font-size:18px; color:#fff;">{{groom_name}}</h3>
-          <p style="font-size:12px; color:#888;">{{groom_parents}}</p>
-        </div>
-        <div>
-          <h3 style="font-size:18px; color:#fff;">{{bride_name}}</h3>
-          <p style="font-size:12px; color:#888;">{{bride_parents}}</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2 class="font-title" style="font-size:22px; margin-bottom:16px;">Celebration Schedule</h2>
-      <div style="margin-bottom:20px; padding:16px; background:#181a1f; border-radius:10px;">
-        <h4 style="color:#fff; font-size:16px;">AKAD NIKAH</h4>
-        <p style="color:#aaa; font-size:13px;">{{akad_date}} • {{akad_time}}</p>
-        <p style="color:#fff; font-size:14px; font-weight:600; margin-top:6px;">{{akad_venue}}</p>
-        <p style="color:#777; font-size:12px;">{{akad_address}}</p>
-        <a href="{{akad_maps_url}}" target="_blank" class="btn-noir">View Map</a>
-      </div>
-      <div style="padding:16px; background:#181a1f; border-radius:10px;">
-        <h4 style="color:#fff; font-size:16px;">RESEPSI</h4>
-        <p style="color:#aaa; font-size:13px;">{{resepsi_date}} • {{resepsi_time}}</p>
-        <p style="color:#fff; font-size:14px; font-weight:600; margin-top:6px;">{{resepsi_venue}}</p>
-        <p style="color:#777; font-size:12px;">{{resepsi_address}}</p>
-        <a href="{{resepsi_maps_url}}" target="_blank" class="btn-noir">View Map</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2 class="font-title" style="font-size:22px; margin-bottom:16px;">Visual Gallery</h2>
-      {{gallery_grid}}
-    </div>
-
-    <div class="card">
-      <h2 class="font-title" style="font-size:22px; margin-bottom:12px;">Digital Registry</h2>
-      {{bank_accounts_widget}}
-    </div>
-
-    <footer style="text-align:center; padding:30px 10px; font-size:11px; color:#555; letter-spacing:2px; text-transform:uppercase;">
-      {{couple_names}} • Created with JanjiSuci
-    </footer>
-  </div>
-</body>
-</html>`,
+    html: CELESTIAL_TEMPLATE_HTML,
   },
 ];
 
@@ -589,7 +358,94 @@ async function seedData() {
       },
       { upsert: true, new: true }
     );
-    console.log("💍 Data default wedding 'dimas-sarah' dengan 3 babak kisah cinta & rekening terpisah berhasil diperbarui.");
+    await Wedding.findOneAndUpdate(
+      { slug: "dimas&sarah" },
+      {
+        slug: "dimas&sarah",
+        title: "Pernikahan Dimas & Sarah",
+        themeId: "celestial-starlight",
+        designMode: "custom_html",
+        customHtml: CELESTIAL_TEMPLATE_HTML,
+        coverPhotoUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793405338/janjisuci/templatescovers/pzjqcjomaehz1f72ru4g.jpg",
+        bannerPhotoUrl: "https://res.cloudinary.com/bc8tk53v/image/upload/v1793265674/janjisuci/templatesbanners/mi3wowpithia0uimndbe.jpg",
+        groom: {
+          fullName: "Dimas Prasetyo, S.T.",
+          nickName: "Dimas",
+          parents: "Putra pertama dari Bpk. Bambang Wijaya & Ibu Sri Rahayu",
+          instagram: "dimasprasetyo",
+          photoUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuCzUNvfN4JLmIEQ8Rl3ucmVP0-vib8bkuQ3IrTgVw8Qr5sjfCuCXP250Cgz911BcC7k2OJebkbkFG2QdPC2uPmB9JgO20ArGDvpU0gAuSbhYSI7-kXcn2tgNddrrMRwpjYWGzsz64YzuTcetJcaEqJJ6OK2uZbQ6mVajqzRW3u95-6UPI5E7g3WEY75DGTcZ_y5UEu_eA0ZcLAS5JKHy7r9_Lyg0m4Oqoi--PgbPYl8YDo-L0m9KgRLNQ",
+        },
+        bride: {
+          fullName: "Sarah Anindita, M.Ds.",
+          nickName: "Sarah",
+          parents: "Putri kedua dari Bpk. Ir. Hendra Kusuma & Ibu Ratna Dewi",
+          instagram: "sarahanindita",
+          photoUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuDBqrJptRouC3sJfNXLjsofBuvakru1TeBprYoHukqDAMi6numwD_tbCIUj8gAmdv2RmqFwBb_l5JMoEvVo44VGvNdl3sKNhmAfevpxliVOYaJJWD_eKIOO0CiuiYkvBWAHCLhcxazK406U-fFG7DULwuD1nG7PYvz4ukXGopUFGbgkuinU9wNO5xAusEewWYWkgBN7NjgntxgHQ2Bn3UJ17VOD7tjWOJ3NnqU0qcG7XHbVUgy4mfmLmQ",
+        },
+        events: {
+          akad: {
+            date: "Sabtu, 24 Agustus 2026",
+            time: "08.00 - 10.00 WIB",
+            venue: "Masjid Agung Sunda Kelapa",
+            address: "Jl. Taman Sunda Kelapa No.16, Menteng, Jakarta Pusat",
+          },
+          resepsi: {
+            date: "Sabtu, 24 Agustus 2026",
+            time: "18.30 - 21.30 WIB",
+            venue: "The Dharmawangsa Grand Ballroom",
+            address: "Kebayoran Baru, Jakarta Selatan",
+          },
+        },
+        gift: {
+          accounts: [
+            {
+              id: "acc_1",
+              bank: "BCA",
+              accountNumber: "8830-1928-11",
+              holderName: "Sarah Anindita",
+              accountName: "Sarah Anindita",
+            },
+            {
+              id: "acc_2",
+              bank: "Mandiri",
+              accountNumber: "1370-0012-9901",
+              holderName: "Dimas Prasetyo",
+              accountName: "Dimas Prasetyo",
+            },
+          ],
+          bca: "8830-1928-11 a.n Sarah Anindita",
+          bcaNumber: "8830-1928-11",
+          bcaName: "Sarah Anindita",
+          mandiri: "1370-0012-9901 a.n Dimas Prasetyo",
+          mandiriNumber: "1370-0012-9901",
+          mandiriName: "Dimas Prasetyo",
+        },
+        stories: [
+          {
+            year: "2021",
+            title: "Pandangan Pertama",
+            description: "Pertemuan tidak disengaja di sebuah simfoni orkestra malam kota, di mana alunan melodi menyatukan pandangan pertama yang tak terlupakan.",
+          },
+          {
+            year: "2023",
+            title: "Menjalin Komitmen",
+            description: "Setelah saling mengenal dan berbagi impian, kami sepakat melangkah bersama dalam ikatan cinta yang penuh kedewasaan dan saling mendukung.",
+          },
+          {
+            year: "2024",
+            title: "Lamaran di Bawah Bintang",
+            description: "Di hadapan panorama alam Labuan Bajo saat senja merona, sebuah cincin tersemat sebagai ikrar suci untuk mengarungi bahtera kehidupan bersama.",
+          },
+        ],
+        rsvp: {
+          deadline: "2026-08-20",
+          maxGuests: "2",
+          waNotification: true,
+        },
+      },
+      { upsert: true, new: true }
+    );
+    console.log("💍 Data default wedding 'dimas-sarah' dan 'dimas&sarah' dengan 3 babak kisah cinta & rekening terpisah berhasil diperbarui.");
 
     console.log(`🎨 ${INITIAL_TEMPLATES.length} template HTML awal berhasil dimasukkan ke katalog.`);
 

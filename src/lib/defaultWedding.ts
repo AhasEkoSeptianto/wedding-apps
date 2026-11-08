@@ -4,7 +4,7 @@ import { PRESET_HTML_TEMPLATES } from "@/lib/templateEngine";
 export const DEFAULT_WEDDING_DATA: WeddingData = {
   title: "Pernikahan Dimas & Sarah",
   slug: "dimas&sarah",
-  themeId: "luxury",
+  themeId: "royal-gold-majesty",
   designMode: "custom_html",
   customHtml: PRESET_HTML_TEMPLATES[0].html,
   coverPhotoUrl:
