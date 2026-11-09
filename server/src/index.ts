@@ -61,6 +61,18 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/wishes", wishRoutes);
 app.use("/api/guests", guestRoutes);
+
+// Public Wedding & Template read access (allow any origin without CORS restriction)
+app.use("/api/wedding", (req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, PUT, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 app.use("/api/wedding", weddingRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/gifts", giftRoutes);

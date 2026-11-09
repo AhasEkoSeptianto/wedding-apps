@@ -791,6 +791,22 @@ export function renderHtmlTemplate(
     }
   }
 
+  // Sanitize leftover literal example tags in comments/scripts (e.g. {{tag}}, {{key}}) to prevent false hasTags trigger
+  output = output.replace(/<!--[\s\S]*?-->/g, (comment) => {
+    return comment.replace(/\{\{[a-zA-Z0-9_]+\}\}/g, "[placeholder]");
+  });
+  output = output.replace(/(\/\/[^\n]*)\{\{[a-zA-Z0-9_]+\}\}/g, "$1[placeholder]");
+
+  // Inject server-compiled flag so embedded hydrator script does not trigger offline fallback in iframe Live View
+  const serverFlagScript = `<script>window.__JANJISUCI_SERVER_COMPILED__ = true; window.__JANJISUCI_PRE_RENDERED__ = true;</script>`;
+  if (output.includes("<head>")) {
+    output = output.replace("<head>", `<head>\n  ${serverFlagScript}`);
+  } else if (output.includes("<html")) {
+    output = output.replace(/<html[^>]*>/, `$&<head>${serverFlagScript}</head>`);
+  } else {
+    output = `${serverFlagScript}\n${output}`;
+  }
+
   return output;
 }
 

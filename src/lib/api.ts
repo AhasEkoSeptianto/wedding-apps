@@ -1,6 +1,6 @@
 import { WeddingData, HtmlTemplate } from "@/types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://wedding-apps-1.onrender.com/api";
 
 export interface WishPayload {
   slug?: string;
