@@ -108,6 +108,11 @@ const INITIAL_WEDDING_DATA = {
 // GET /api/wedding/:slug
 export async function getWedding(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    // Disable HTTP cache to ensure clients always receive the freshest data from DB
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+
     const rawSlug = req.params.slug || DEFAULT_SLUG;
     const slug = decodeURIComponent(rawSlug).trim();
     const altSlug = slug.includes("&") ? slug.replace(/&/g, "-") : slug.replace(/-/g, "&");
@@ -223,6 +228,10 @@ export async function getWedding(req: Request, res: Response, next: NextFunction
 // PUT /api/wedding/:slug
 export async function upsertWedding(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+
     const rawSlug = req.params.slug || DEFAULT_SLUG;
     const slug = decodeURIComponent(rawSlug).trim();
     const altSlug = slug.includes("&") ? slug.replace(/&/g, "-") : slug.replace(/-/g, "&");
